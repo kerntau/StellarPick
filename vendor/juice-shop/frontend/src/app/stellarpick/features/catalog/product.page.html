@@ -1,0 +1,633 @@
+<div class="sp-container product-page">
+  @if (loading() && !product()) {
+    @if (showSkeleton()) {
+      <div class="loading-wrap" aria-hidden="true">
+        <app-skeleton variant="line" width="240px" />
+        <app-skeleton variant="detail" />
+      </div>
+    } @else {
+      <div class="loading-hold" aria-hidden="true"></div>
+    }
+  } @else if (notFound()) {
+    <section class="missing" aria-labelledby="missing-title">
+      <img src="/assets/sp/img/not-found.svg" alt="" width="240" height="187" loading="lazy" />
+      <h1 id="missing-title">商品走丢了</h1>
+      <p class="sp-secondary">这件商品可能已经下架，去看看其他精选好物，或搜索你想要的商品。</p>
+      <div class="missing-actions">
+        <a class="sp-btn sp-btn--primary" routerLink="/category/all">浏览全部商品</a>
+        <a class="sp-btn sp-btn--secondary" routerLink="/search">搜索其他商品</a>
+      </div>
+    </section>
+  } @else if (error()) {
+    <app-error-state [message]="error() ?? ''" [requestId]="requestId()" (retry)="loadProduct()" />
+  } @else if (product(); as p) {
+    <app-breadcrumb [items]="crumbs()" />
+
+    <div class="detail">
+      <section class="gallery" aria-label="商品图片">
+        <div class="stage">
+          <div class="stage-badges">
+            <span class="flag flag--member">会员价 9 折</span>
+            @if (p.stock > 0) {
+              <span class="flag flag--ship">满 99 包邮</span>
+            }
+            @if (p.sales > 1500) {
+              <span class="flag flag--hot">本周热卖</span>
+            }
+          </div>
+          <img class="stage-img" [class.is-product]="activeImage() < 2" [src]="currentImage()" [alt]="p.title + ' ' + (galleryLabels[activeImage()] || '商品图')" width="800" height="800" (error)="onImageError($event)" />
+          @if (gallery().length > 1) {
+            <span class="img-count sp-num">{{ activeImage() + 1 }} / {{ gallery().length }}</span>
+          }
+          <span class="stage-tag">{{ galleryLabels[activeImage()] || '商品图' }}</span>
+        </div>
+
+        @if (gallery().length > 1) {
+          <div class="thumbs" role="group" aria-label="商品图片缩略图">
+            @for (image of gallery(); track image; let index = $index) {
+              <button
+                class="thumb"
+                type="button"
+                [class.on]="index === activeImage()"
+                [attr.aria-pressed]="index === activeImage()"
+                [attr.aria-label]="'查看第 ' + (index + 1) + ' 张：' + (galleryLabels[index] || '商品图')"
+                (click)="activeImage.set(index)">
+                <img [src]="image" alt="" width="800" height="800" loading="lazy" (error)="onImageError($event)" />
+                <span class="thumb-label">{{ galleryLabels[index] || '商品图' }}</span>
+              </button>
+            }
+          </div>
+        }
+        <p class="stage-note">图片由星澜摄影棚拍摄，不同屏幕显示可能存在轻微色差。</p>
+      </section>
+
+      <section class="info">
+        <p class="kicker"><span>{{ categoryName() }}</span> · 星澜自营 · 上海仓发货</p>
+        <h1 class="title">{{ p.title }}</h1>
+        <p class="subtitle">{{ p.subtitle }}</p>
+
+        <div class="meta">
+          <app-rating-stars [value]="p.rating" [size]="16" />
+          <strong class="sp-num">{{ p.rating.toFixed(1) }}</strong>
+          <button class="meta-link" type="button" (click)="showReviews()">{{ reviewTotal() }} 条评价</button>
+          <span class="meta-dot" aria-hidden="true">·</span>
+          <span class="sp-muted">已售 {{ p.sales }} 件</span>
+          <span class="meta-dot" aria-hidden="true">·</span>
+          <span class="sp-muted">好评率 {{ goodRate() }}%</span>
+          @if (p.stock > 0) {
+            <span class="sp-badge sp-badge--success">现货</span>
+          } @else {
+            <span class="sp-badge sp-badge--danger">暂时缺货</span>
+          }
+        </div>
+
+        <div class="price-panel">
+          <div class="price-main">
+            <span class="price sp-num">{{ p.price | spMoney }}</span>
+            <span class="member-chip">会员价 <strong class="sp-num">{{ memberPrice() | spMoney }}</strong></span>
+          </div>
+          <div class="price-sub">
+            <span class="list-price">日常价 <s class="sp-num">{{ listPrice() | spMoney }}</s></span>
+            <span class="save sp-num">立省 {{ listSaving() | spMoney }}</span>
+          </div>
+          <div class="promo-row">
+            <span class="promo"><app-icon name="percent" [size]="13" /> 会员日 满 300 减 40</span>
+            <span class="promo"><app-icon name="credit-card" [size]="13" /> {{ installment() | spMoney }} × 3 期免息</span>
+            <span class="promo"><app-icon name="truck" [size]="13" /> 满 99 元包邮</span>
+          </div>
+        </div>
+
+        <dl class="facts">
+          <div>
+            <dt>配送</dt>
+            <dd>
+              <span class="delivery-tag">{{ delivery().label }}</span>
+              {{ delivery().text }}
+              <span class="fact-note">上海仓发出 · 顺丰 / 京东配送</span>
+            </dd>
+          </div>
+          <div>
+            <dt>服务</dt>
+            <dd>7 天无理由退换 · 正品保障 · 极速退款</dd>
+          </div>
+          <div>
+            <dt>库存</dt>
+            <dd>@if (p.stock > 0) { 现货 {{ p.stock }} 件 } @else { 补货中，可先收藏 }</dd>
+          </div>
+        </dl>
+
+        <div class="variant">
+          @if (specs().length > 0) {
+            <div class="variant-row">
+              <span class="variant-label" id="spec-label">规格</span>
+              <ul class="spec-tags" aria-labelledby="spec-label">
+                @for (spec of specs(); track spec.name) {
+                  <li class="spec-tag"><span>{{ spec.name }}</span> {{ spec.value }}</li>
+                }
+              </ul>
+            </div>
+          }
+          <div class="variant-row">
+            <span class="variant-label" id="color-label">颜色</span>
+            <div class="chips" role="group" aria-labelledby="color-label">
+              @for (color of colors(); track color.name; let index = $index) {
+                <button
+                  class="chip"
+                  type="button"
+                  [class.on]="selectedColor() === index"
+                  [attr.aria-pressed]="selectedColor() === index"
+                  (click)="selectColor(index)">
+                  <span class="swatch" [style.background]="color.hex" aria-hidden="true"></span>{{ color.name }}
+                </button>
+              }
+            </div>
+          </div>
+          <div class="variant-row">
+            <span class="variant-label" id="pack-label">包装</span>
+            <div class="chips" role="group" aria-labelledby="pack-label">
+              @for (pack of packs; track pack.name; let index = $index) {
+                <button
+                  class="chip"
+                  type="button"
+                  [class.on]="selectedPack() === index"
+                  [attr.aria-pressed]="selectedPack() === index"
+                  (click)="selectPack(index)">
+                  {{ pack.name }}<span class="chip-note">{{ pack.note }}</span>
+                </button>
+              }
+            </div>
+          </div>
+          <p class="variant-selected">已选：<strong>{{ selectedLabel() }}</strong><span class="variant-note">礼盒装不额外收费</span></p>
+        </div>
+
+        <div class="stock-alert">
+          <div class="stock-alert-head">
+            <span>会员日限量 · 仅剩 {{ promoLeft() }} 件</span>
+            <span class="sp-num">{{ soldPercent() }}% 已抢</span>
+          </div>
+          <div
+            class="stock-bar"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuenow]="soldPercent()"
+            [attr.aria-label]="'会员日库存已售 ' + soldPercent() + '%'">
+            <i [style.width.%]="soldPercent()"></i>
+          </div>
+        </div>
+
+        <div class="buy">
+          <div class="qty">
+            <span class="sp-label" id="qty-label">数量</span>
+            <app-quantity-stepper [value]="qty()" [min]="1" [max]="maxQty()" (valueChange)="qty.set($event)" />
+            <span class="sp-hint">每单限购 {{ maxQty() }} 件</span>
+            <span class="subtotal">小计 <strong class="sp-num">{{ subtotal() | spMoney }}</strong></span>
+          </div>
+
+          <div class="actions">
+            <button
+              class="sp-btn sp-btn--primary sp-btn--lg action-add"
+              type="button"
+              [disabled]="p.stock === 0 || adding()"
+              (click)="addToCart()">
+              <app-icon name="cart" [size]="18" />
+              {{ p.stock === 0 ? '暂时缺货' : (adding() ? '加入中…' : '加入购物车') }}
+            </button>
+            <button
+              class="sp-btn sp-btn--accent sp-btn--lg action-buy"
+              type="button"
+              [disabled]="p.stock === 0 || adding()"
+              (click)="buyNow()">立即购买</button>
+            <button
+              class="sp-btn sp-btn--secondary sp-btn--lg action-fav"
+              type="button"
+              [attr.aria-pressed]="saved()"
+              (click)="favorite()">
+              <app-icon name="heart" [size]="18" />
+              {{ saved() ? '已收藏' : '收藏' }}
+            </button>
+          </div>
+          <p class="buy-note sp-hint">支持 7 天无理由退换，满 99 元包邮，48 小时内发出。会员下单自动累积积分。</p>
+        </div>
+
+        <ul class="promises">
+          <li><app-icon name="shield" [size]="15" /> 正品保障</li>
+          <li><app-icon name="truck" [size]="15" /> 48 小时内发货</li>
+          <li><app-icon name="refresh" [size]="15" /> 7 天无理由退换</li>
+          <li><app-icon name="headset" [size]="15" /> 客服 9:00–21:00 在线</li>
+        </ul>
+
+        <button class="review-teaser" type="button" (click)="showReviews()">
+          <span class="teaser-score sp-num">{{ reviewAvg().toFixed(1) }}</span>
+          <span class="teaser-body">
+            <app-rating-stars [value]="reviewAvg()" [size]="13" />
+            <span class="sp-text-12 sp-muted">
+              @if (reviewTotal() > 0) { 好评率 {{ goodRate() }}% · {{ reviewTotal() }} 条评价 } @else { 还没有评价，来写第一条 }
+            </span>
+          </span>
+          <span class="teaser-avatars" aria-hidden="true">
+            @for (review of reviews().slice(0, 3); track review.id) {
+              <img [src]="review.avatar || '/assets/sp/img/avatar-default.svg'" alt="" width="26" height="26" loading="lazy" />
+            }
+          </span>
+          <span class="teaser-link">查看评价</span>
+        </button>
+      </section>
+    </div>
+
+    <section class="tabs-section" id="product-tabs">
+      <div class="sp-tabbar" role="tablist" aria-label="商品信息">
+        <button
+          type="button"
+          role="tab"
+          id="tab-detail"
+          aria-controls="panel-detail"
+          [attr.aria-selected]="activeTab() === 'detail'"
+          [attr.tabindex]="activeTab() === 'detail' ? 0 : -1"
+          (click)="setTab('detail')"
+          (keydown)="onTabKey($event, 'detail')">商品详情</button>
+        <button
+          type="button"
+          role="tab"
+          id="tab-specs"
+          aria-controls="panel-specs"
+          [attr.aria-selected]="activeTab() === 'specs'"
+          [attr.tabindex]="activeTab() === 'specs' ? 0 : -1"
+          (click)="setTab('specs')"
+          (keydown)="onTabKey($event, 'specs')">规格参数</button>
+        <button
+          type="button"
+          role="tab"
+          id="tab-reviews"
+          aria-controls="reviews"
+          [attr.aria-selected]="activeTab() === 'reviews'"
+          [attr.tabindex]="activeTab() === 'reviews' ? 0 : -1"
+          (click)="setTab('reviews')"
+          (keydown)="onTabKey($event, 'reviews')">评价（{{ reviewTotal() }}）</button>
+      </div>
+
+      @switch (activeTab()) {
+        @case ('detail') {
+          <div class="panel" role="tabpanel" id="panel-detail" aria-labelledby="tab-detail" tabindex="0">
+            <div class="editorial">
+              <p class="sp-eyebrow">编辑选品</p>
+              <p class="editorial-lead">{{ editorial() }}</p>
+            </div>
+
+            <ul class="highlights">
+              @for (item of highlights(); track item.title) {
+                <li>
+                  <span class="hl-icon"><app-icon [name]="item.icon" [size]="18" /></span>
+                  <strong>{{ item.title }}</strong>
+                  <p>{{ item.text }}</p>
+                </li>
+              }
+            </ul>
+
+            <div class="description">
+              @for (paragraph of descriptionParagraphs(); track $index) {
+                <p>{{ paragraph }}</p>
+              }
+            </div>
+
+            @if (detailImages().length > 0) {
+              <div class="detail-shots">
+                @for (image of detailImages(); track image; let index = $index) {
+                  <figure [class.wide]="index === 0">
+                    <img [src]="image" [alt]="p.title + (index === 0 ? ' 生活场景实拍' : ' 材质细节特写')" width="800" height="800" loading="lazy" (error)="onImageError($event)" />
+                    <figcaption>{{ index === 0 ? '生活场景实拍 · 星澜摄影棚' : '材质与工艺细节' }}</figcaption>
+                  </figure>
+                }
+              </div>
+            }
+
+            <div class="detail-notes">
+              <h2>购买须知</h2>
+              <ul>
+                <li>下单后 48 小时内从上海仓发出，节假日顺延。</li>
+                <li>支持 7 天无理由退换，商品需保持完好、配件齐全。</li>
+                <li>如需发票，请在结算页填写抬头与税号，电子发票 24 小时内开出。</li>
+                <li>大促期间物流可能延迟 1–2 天，可在订单详情页查看实时轨迹。</li>
+              </ul>
+            </div>
+          </div>
+        }
+
+        @case ('specs') {
+          <div class="panel" role="tabpanel" id="panel-specs" aria-labelledby="tab-specs" tabindex="0">
+            <div class="specs-wrap">
+              <table class="sp-table specs-table">
+                <caption>规格参数</caption>
+                <tbody>
+                  <tr>
+                    <th scope="row">商品名称</th>
+                    <td>{{ p.title }}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">所属类目</th>
+                    <td>{{ categoryName() }}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">商品编号</th>
+                    <td class="sp-num">SP-{{ p.id }}</td>
+                  </tr>
+                  @for (spec of specs(); track spec.name) {
+                    <tr>
+                      <th scope="row">{{ spec.name }}</th>
+                      <td>{{ spec.value }}</td>
+                    </tr>
+                  }
+                  <tr>
+                    <th scope="row">发货地</th>
+                    <td>上海仓（上海市闵行区）</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">质保</th>
+                    <td>12 个月非人为损坏换新</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="package-card">
+                <h2>包装清单</h2>
+                <ul>
+                  <li>{{ p.title }} × 1</li>
+                  <li>使用说明卡 × 1</li>
+                  <li>防尘收纳袋 × 1</li>
+                  <li>会员日限定贺卡 × 1</li>
+                </ul>
+                @if (specs().length === 0) {
+                  <p class="sp-secondary sp-mt-3">这件商品暂时没有填写更多规格参数。</p>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        @case ('reviews') {
+          <div class="panel reviews" role="tabpanel" id="reviews" aria-labelledby="tab-reviews" tabindex="0">
+            <div class="reviews-summary">
+              <div class="review-score">
+                <strong class="score sp-num">{{ reviewAvg().toFixed(1) }}</strong>
+                <div>
+                  <app-rating-stars [value]="reviewAvg()" [size]="16" />
+                  <p class="sp-secondary">共 {{ reviewTotal() }} 条评价 · 好评率 {{ goodRate() }}%</p>
+                </div>
+              </div>
+
+              <ul class="distribution" aria-label="评分分布">
+                @for (stat of reviewStats(); track stat.stars) {
+                  <li>
+                    <span class="dist-label">{{ stat.stars }} 星</span>
+                    <span class="dist-bar" aria-hidden="true"><i [style.width.%]="stat.pct"></i></span>
+                    <span class="dist-count sp-num">{{ stat.count }}</span>
+                  </li>
+                }
+              </ul>
+
+              @if (canReview()) {
+                <button class="sp-btn sp-btn--secondary sp-btn--sm write-btn" type="button" (click)="focusReviewForm()">
+                  <app-icon name="edit" [size]="16" /> 写评价
+                </button>
+              }
+            </div>
+
+            @if (photoReviews().length > 0) {
+              <div class="photo-strip">
+                <div class="photo-strip-head">
+                  <h2>买家晒图</h2>
+                  <span class="sp-text-12 sp-muted">{{ photoReviews().length }} 张实拍</span>
+                </div>
+                <ul>
+                  @for (review of photoReviews(); track review.id) {
+                    <li>
+                      <figure>
+                        <img [src]="review.photo" [alt]="reviewName(review.userName) + ' 的买家晒图'" width="800" height="800" loading="lazy" />
+                        <figcaption>{{ reviewName(review.userName) }} · {{ review.dateLabel }}</figcaption>
+                      </figure>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            @if (reviewError()) {
+              <app-error-state [message]="reviewError() ?? ''" [requestId]="reviewRequestId()" (retry)="loadReviews(reviewPage())" />
+            } @else if (reviewLoading() && reviews().length === 0) {
+              <div class="review-skeletons">
+                @for (row of skeletonRows; track row) {
+                  <app-skeleton variant="line" />
+                }
+              </div>
+            } @else if (reviews().length === 0) {
+              <app-empty-state
+                title="还没有评价"
+                description="购买后可以在这里分享你的使用感受，帮助其他人做决定。"
+                image="orders" />
+            } @else {
+              <ul class="review-list">
+                @for (review of reviews(); track review.id) {
+                  <li class="review">
+                    <img class="avatar" [src]="review.avatar || '/assets/sp/img/avatar-default.svg'" alt="" width="44" height="44" loading="lazy" />
+                    <div class="review-body">
+                      <div class="review-meta">
+                        <strong>{{ reviewName(review.userName) }}</strong>
+                        <span class="review-verified"><app-icon name="check" [size]="11" /> 已购</span>
+                        <app-rating-stars [value]="review.rating" [size]="12" />
+                        <span class="sp-muted sp-text-12">{{ review.dateLabel }}</span>
+                      </div>
+                      <p class="review-spec">规格：{{ review.specLabel }}</p>
+                      <div class="review-text" [innerHTML]="review.safeBody"></div>
+                      @if (review.photo) {
+                        <figure class="review-photo">
+                          <img [src]="review.photo" [alt]="reviewName(review.userName) + ' 的买家晒图'" width="800" height="800" loading="lazy" />
+                        </figure>
+                      }
+                      <div class="review-foot">
+                        <button
+                          class="helpful"
+                          type="button"
+                          [class.on]="helpful().has(review.id)"
+                          [attr.aria-pressed]="helpful().has(review.id)"
+                          (click)="toggleHelpful(review)">
+                          <app-icon name="check" [size]="13" /> 有用 {{ helpfulCount(review) }}
+                        </button>
+                        <span class="sp-text-12 sp-muted">来自上海</span>
+                      </div>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (reviewTotal() > reviewSize()) {
+              <app-pagination
+                [page]="reviewPage()"
+                [size]="reviewSize()"
+                [total]="reviewTotal()"
+                (pageChange)="onReviewPage($event)"
+                (sizeChange)="onReviewSize($event)" />
+            }
+
+            @if (canReview()) {
+              <form class="review-form sp-card sp-card--pad" id="review-form" (submit)="submitReview($event)">
+                <h2>写评价</h2>
+                <div class="sp-field">
+                  <span class="sp-label">评分</span>
+                  <app-rating-stars [value]="formRating()" [editable]="true" [size]="22" (rated)="formRating.set($event)" />
+                </div>
+                <div class="sp-field">
+                  <label class="sp-label" for="review-body">评价内容 <span class="sp-req">*</span></label>
+                  <textarea
+                    id="review-body"
+                    class="sp-textarea"
+                    rows="4"
+                    [value]="formBody()"
+                    (input)="onBodyInput($event)"
+                    [attr.aria-invalid]="bodyError() ? 'true' : null"
+                    [attr.aria-describedby]="bodyError() ? 'review-body-error' : null"
+                    placeholder="说说使用感受，帮助其他人做决定"></textarea>
+                  @if (bodyError()) {
+                    <p class="sp-error" id="review-body-error">{{ bodyError() }}</p>
+                  }
+                  @if (submitError()) {
+                    <p class="sp-error" role="alert">{{ submitError() }}</p>
+                  }
+                </div>
+                <button class="sp-btn sp-btn--primary" type="submit" [disabled]="submitting()">
+                  {{ submitting() ? '提交中…' : '提交评价' }}
+                </button>
+              </form>
+            } @else if (!auth.isLoggedIn()) {
+              <div class="review-cta sp-card sp-card--pad">
+                <div>
+                  <h2>登录后可以发表评价</h2>
+                  <p class="sp-secondary">使用会员账号登录，分享你的真实使用感受。</p>
+                </div>
+                <button class="sp-btn sp-btn--secondary" type="button" (click)="goWriteReview()">登录后写评价</button>
+              </div>
+            } @else {
+              <p class="review-note sp-secondary">当前账号角色不支持发表评价，会员账号可以在这里分享使用感受。</p>
+            }
+          </div>
+        }
+      }
+    </section>
+
+    <section class="qa" aria-labelledby="qa-title">
+      <div class="sp-section-head">
+        <div>
+          <p class="sp-eyebrow">问答</p>
+          <h2 id="qa-title">问大家</h2>
+        </div>
+        <span class="sp-text-12 sp-muted">来自已购用户的真实提问</span>
+      </div>
+      <ul class="qa-list">
+        @for (item of questions(); track item.q) {
+          <li>
+            <p class="q"><span class="q-mark" aria-hidden="true">问</span>{{ item.q }}<span class="q-count">{{ item.count }} 人同问</span></p>
+            <p class="a"><span class="a-mark" aria-hidden="true">答</span>{{ item.a }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+
+    @if (bundle().length > 0) {
+      <section class="bundle" aria-labelledby="bundle-title">
+        <div class="sp-section-head">
+          <div>
+            <p class="sp-eyebrow">搭配购</p>
+            <h2 id="bundle-title">买这件的人也在买</h2>
+          </div>
+          <span class="sp-text-12 sp-muted">一起下单，满 300 再减 40</span>
+        </div>
+        <div class="bundle-card">
+          <ul class="bundle-list">
+            @for (item of bundle(); track item.id) {
+              <li class="bundle-item" [class.on]="bundleSelected().has(item.id)">
+                <label class="bundle-check-wrap">
+                  <input
+                    class="bundle-check"
+                    type="checkbox"
+                    [checked]="bundleSelected().has(item.id)"
+                    (change)="toggleBundle(item.id)"
+                    [attr.aria-label]="'选择搭配：' + item.title" />
+                </label>
+                <a class="bundle-media" [routerLink]="['/product', item.id]" tabindex="-1" aria-hidden="true">
+                  <img [src]="item.image" alt="" width="96" height="96" loading="lazy" />
+                </a>
+                <div class="bundle-info">
+                  <a class="bundle-title" [routerLink]="['/product', item.id]">{{ item.title }}</a>
+                  <p class="sp-text-12 sp-muted">{{ item.subtitle }}</p>
+                  <p class="bundle-price sp-num">{{ item.price | spMoney }}<span class="bundle-member">会员 {{ memberPriceOf(item) | spMoney }}</span></p>
+                </div>
+              </li>
+            }
+          </ul>
+          <div class="bundle-foot">
+            <div class="bundle-sum">
+              <span class="sp-text-12 sp-muted">已选 {{ bundleItems().length }} / {{ bundle().length }} 件</span>
+              <strong class="sp-num">{{ bundleTotal() | spMoney }}</strong>
+              @if (bundleSaving() > 0) {
+                <span class="bundle-save sp-text-12">会员共省 {{ bundleSaving() | spMoney }}</span>
+              }
+            </div>
+            <div class="bundle-actions">
+              <button class="sp-btn sp-btn--secondary" type="button" (click)="toggleAllBundle()">
+                {{ bundleItems().length === bundle().length ? '取消全选' : '全选' }}
+              </button>
+              <button class="sp-btn sp-btn--primary" type="button" [disabled]="bundleItems().length === 0 || adding()" (click)="addBundle()">
+                加入购物车
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (relatedLoading() || related().length > 0) {
+      <section class="related" aria-labelledby="related-title">
+        <div class="sp-section-head">
+          <div>
+            <p class="sp-eyebrow">同类好物</p>
+            <h2 id="related-title">相关推荐</h2>
+          </div>
+          <a class="sp-link" [routerLink]="['/category', categorySlug() || 'all']">查看同类商品</a>
+        </div>
+        @if (relatedLoading()) {
+          <div class="sp-grid-products" aria-hidden="true">
+            @for (item of skeletonCards; track item) {
+              <app-skeleton variant="card" />
+            }
+          </div>
+        } @else {
+          <div class="sp-grid-products">
+            @for (item of related(); track item.id) {
+              <app-product-card [product]="item" />
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+</div>
+
+@if (product(); as p) {
+  @if (!footerVisible()) {
+    <div class="buybar" role="region" aria-label="购买操作">
+      <div class="buybar-price">
+        <span class="price sp-num">{{ p.price | spMoney }}</span>
+        <span class="sp-text-12 sp-muted">会员价 {{ memberPrice() | spMoney }} · {{ delivery().label }}</span>
+      </div>
+      <button class="buybar-fav" type="button" [attr.aria-pressed]="saved()" [attr.aria-label]="saved() ? '取消收藏' : '收藏'" (click)="favorite()">
+        <app-icon name="heart" [size]="20" />
+      </button>
+      <button class="sp-btn sp-btn--primary" type="button" [disabled]="p.stock === 0 || adding()" (click)="addToCart()">
+        加入购物车
+      </button>
+      <button class="sp-btn sp-btn--accent" type="button" [disabled]="p.stock === 0 || adding()" (click)="buyNow()">
+        立即购买
+      </button>
+    </div>
+  }
+}

@@ -1,0 +1,234 @@
+.search-page {
+  padding-bottom: 24px;
+}
+
+/* ---------- result header ---------- */
+.search-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 10px 0 18px;
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.head-main {
+  min-width: 0;
+}
+
+.headline {
+  margin-top: 6px;
+  font-size: 27px;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+  overflow-wrap: anywhere;
+}
+
+/* V03 payloads render verbatim; keep them from blowing up the header. */
+.headline img {
+  max-height: 28px;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.headline-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--sp-text-secondary);
+}
+
+.head-stats {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 10px 0 2px;
+}
+
+.head-stats > div {
+  padding: 0 18px;
+  border-left: 1px solid var(--sp-border);
+  text-align: right;
+}
+
+.head-stats > div:first-child {
+  border-left: 0;
+}
+
+.head-stats dt {
+  font-size: 11px;
+  color: var(--sp-text-muted);
+  letter-spacing: .04em;
+}
+
+.head-stats dd {
+  margin: 2px 0 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--sp-primary);
+}
+
+/* ---------- search form ---------- */
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 720px;
+  margin-top: 16px;
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 46px;
+  padding: 0 12px;
+  background: var(--sp-surface);
+  border: 1px solid var(--sp-border-strong);
+  border-radius: 4px;
+  color: var(--sp-text-muted);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.search-field:focus-within {
+  border-color: var(--sp-primary);
+  box-shadow: 0 0 0 3px rgba(11, 37, 69, .1);
+}
+
+.search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: var(--sp-text);
+}
+
+.search-input::placeholder {
+  color: var(--sp-text-muted);
+}
+
+.clear-input {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -8px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--sp-text-muted);
+}
+
+.clear-input:hover {
+  background: var(--sp-paper-deep);
+  color: var(--sp-text);
+}
+
+.search-form .sp-btn {
+  flex: 0 0 auto;
+  min-height: 46px;
+  padding: 0 26px;
+}
+
+/* ---------- hot keywords ---------- */
+.hot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0 20px;
+  font-size: 12px;
+  color: var(--sp-text-muted);
+}
+
+.hot-label {
+  white-space: nowrap;
+}
+
+.hot-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-pill);
+  background: var(--sp-surface);
+  color: var(--sp-text-secondary);
+  font-size: 12px;
+}
+
+.hot-chip:hover {
+  border-color: var(--sp-primary);
+  color: var(--sp-primary);
+}
+
+app-search-filter-bar {
+  display: block;
+  margin-bottom: 18px;
+}
+
+app-catalog-results {
+  display: block;
+}
+
+@media (max-width: 1023px) {
+  .head-stats {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .headline {
+    font-size: 20px;
+  }
+
+  .search-head {
+    padding: 6px 0 14px;
+  }
+
+  .search-form {
+    margin-top: 12px;
+  }
+
+  .search-form .sp-btn {
+    padding: 0 16px;
+  }
+
+  .hot-row {
+    margin: 12px 0 16px;
+  }
+
+  .hot-chip {
+    min-height: 44px;
+  }
+}
+
+/* The global `a:link { color: inherit }` outranks .sp-btn--primary, so anchor
+   buttons rendered in this page need an explicit colour. */
+a.sp-btn--primary:link,
+a.sp-btn--primary:visited {
+  color: #fff;
+}
+
+a.sp-btn--secondary:link,
+a.sp-btn--secondary:visited {
+  color: var(--sp-primary);
+}
+
+a.hot-chip:link,
+a.hot-chip:visited {
+  color: var(--sp-text-secondary);
+}
+
+a.hot-chip:hover {
+  color: var(--sp-primary);
+}

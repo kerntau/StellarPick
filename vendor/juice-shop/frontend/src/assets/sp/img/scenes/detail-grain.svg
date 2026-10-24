@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="烘焙谷物与木纹材质细节">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#D9BE95"/><stop offset=".45" stop-color="#BC9865"/><stop offset="1" stop-color="#8B6437"/></linearGradient>
+    <radialGradient id="glow" cx="28%" cy="18%" r="62%"><stop offset="0" stop-color="#FFF3D9" stop-opacity=".85"/><stop offset="1" stop-color="#FFF3D9" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="74%"><stop offset=".4" stop-color="#2B1C0C" stop-opacity="0"/><stop offset="1" stop-color="#2B1C0C" stop-opacity=".34"/></radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="16"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#base)"/>
+  <g stroke="#6F4C26" fill="none" opacity=".45">
+    <path d="M-20 130c170 46 270-34 430 8s250 22 410-18" stroke-width="4"/>
+    <path d="M-20 182c170 46 270-34 430 8s250 22 410-18" stroke-width="1.6"/>
+    <path d="M-20 246c190 50 290-30 450 12s230 20 390-22" stroke-width="3"/>
+    <path d="M-20 326c160 40 270-28 410 10s270 18 430-24" stroke-width="1.4"/>
+    <path d="M-20 432c190 46 290-32 450 12s230 20 390-22" stroke-width="4"/>
+    <path d="M-20 506c160 40 270-28 410 10s270 18 430-24" stroke-width="1.6"/>
+    <path d="M-20 606c190 46 290-32 450 12s230 20 390-22" stroke-width="3"/>
+    <path d="M-20 692c160 40 270-28 410 10s270 18 430-24" stroke-width="1.4"/>
+  </g>
+  <g fill="#5C3B1C" opacity=".72">
+    <ellipse cx="222" cy="382" rx="44" ry="27" transform="rotate(-18 222 382)"/>
+    <ellipse cx="424" cy="472" rx="38" ry="23" transform="rotate(12 424 472)"/>
+    <ellipse cx="562" cy="330" rx="30" ry="19" transform="rotate(-8 562 330)"/>
+    <ellipse cx="330" cy="592" rx="34" ry="21" transform="rotate(20 330 592)"/>
+  </g>
+  <g fill="#E9D3AF" opacity=".8">
+    <path d="M196 376c14-12 34-10 44 2-12 10-32 10-44-2z"/>
+    <path d="M404 466c12-10 30-8 38 2-10 8-28 8-38-2z"/>
+    <path d="M548 324c10-8 24-6 30 2-8 6-22 6-30-2z"/>
+    <path d="M314 586c10-8 26-6 32 2-8 6-24 6-32-2z"/>
+  </g>
+  <ellipse cx="250" cy="220" rx="230" ry="150" fill="url(#glow)" filter="url(#soft)"/>
+  <rect width="800" height="800" fill="url(#vig)"/>
+</svg>

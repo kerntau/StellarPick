@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="哑光聚碳酸酯箱壳材质细节">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4A5846"/><stop offset=".45" stop-color="#394634"/><stop offset="1" stop-color="#222B1F"/></linearGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".42" stop-color="#fff" stop-opacity=".16"/><stop offset=".58" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="rib" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset=".5" stop-color="#000" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity=".06"/></linearGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%"><stop offset=".42" stop-color="#10170D" stop-opacity="0"/><stop offset="1" stop-color="#10170D" stop-opacity=".45"/></radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="26"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#base)"/>
+  <g>
+    <rect x="60" y="0" width="34" height="800" fill="url(#rib)"/>
+    <rect x="150" y="0" width="34" height="800" fill="url(#rib)"/>
+    <rect x="240" y="0" width="34" height="800" fill="url(#rib)"/>
+    <rect x="330" y="0" width="34" height="800" fill="url(#rib)"/>
+    <rect x="420" y="0" width="34" height="800" fill="url(#rib)"/>
+    <rect x="510" y="0" width="34" height="800" fill="url(#rib)"/>
+    <rect x="600" y="0" width="34" height="800" fill="url(#rib)"/>
+    <rect x="690" y="0" width="34" height="800" fill="url(#rib)"/>
+  </g>
+  <rect width="800" height="800" fill="url(#sweep)"/>
+  <ellipse cx="230" cy="200" rx="210" ry="150" fill="#E9F0E4" opacity=".16" filter="url(#soft)"/>
+  <path d="M0 560c180-24 320 18 480-8s200-20 320 2" stroke="#0F150C" stroke-width="3" opacity=".35" fill="none"/>
+  <path d="M0 574c180-24 320 18 480-8s200-20 320 2" stroke="#C9D4C2" stroke-width="2" opacity=".22" fill="none"/>
+  <rect width="800" height="800" fill="url(#vig)"/>
+</svg>

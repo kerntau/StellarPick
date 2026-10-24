@@ -1,0 +1,147 @@
+<div class="catalog" id="catalog-results">
+  <div class="toolbar">
+    <button
+      class="filter-btn"
+      type="button"
+      [attr.aria-expanded]="drawerOpen()"
+      aria-controls="filter-drawer"
+      (click)="drawerOpen.set(true)">
+      <app-icon name="sliders" [size]="16" />
+      <span>筛选</span>
+      @if (activeCount() > 0) {
+        <span class="sp-badge sp-badge--accent sp-num">{{ activeCount() }}</span>
+      }
+    </button>
+
+    <app-sort-bar [sort]="query().sort" [total]="total()" (sortChange)="apply({ sort: $event, page: 1 })" />
+  </div>
+
+  <div class="layout" [class.no-sidebar]="!showSidebar()">
+    @if (showSidebar()) {
+      <aside class="sidebar" aria-label="筛选条件">
+        <app-filter-panel
+          [categories]="categories()"
+          [query]="query()"
+          [category]="effectiveCategory()"
+          [showCategory]="showCategoryFilter()"
+          (patch)="apply($event)"
+          (cleared)="clearFilters()" />
+      </aside>
+    }
+
+    <section class="results" [attr.aria-busy]="loading()">
+      <p class="sp-sr-only" aria-live="polite">
+        @if (loading()) { 正在加载商品 } @else { 共 {{ total() }} 件商品 }
+      </p>
+
+      <app-active-filters
+        [query]="query()"
+        [categoryName]="activeCategoryName()"
+        (remove)="removeFilter($event)"
+        (clear)="clearFilters()" />
+
+      @if (error()) {
+        <app-error-state [message]="error() ?? ''" [requestId]="requestId()" (retry)="retry()" />
+      } @else if (!loading() && total() === 0) {
+        @if (isSearch()) {
+          <div class="empty-search">
+            <img src="/assets/sp/img/empty-search.svg" alt="" width="240" height="187" loading="lazy" />
+            <h2>没找到「{{ keyword() }}」相关商品</h2>
+            <p class="sp-secondary">
+              换个关键词试试，或看看本周热卖；也可以放宽价格和分类筛选。
+            </p>
+            <div class="empty-actions">
+              @if (activeCount() > 0) {
+                <button class="sp-btn sp-btn--secondary" type="button" (click)="clearFilters()">
+                  清除 {{ activeCount() }} 个筛选
+                </button>
+              }
+              <a class="sp-btn sp-btn--primary" [routerLink]="['/category', 'all']" [queryParams]="{ sort: 'sales' }">
+                看看本周热卖
+              </a>
+            </div>
+            @if (relatedSearches().length > 0) {
+              <div class="empty-related">
+                <p class="sp-text-12 sp-muted">试试这些搜索</p>
+                <div class="rs-chips">
+                  @for (term of relatedSearches(); track term) {
+                    <a class="rs-chip" [routerLink]="['/search']" [queryParams]="{ q: term }">{{ term }}</a>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else if (activeCount() > 0) {
+          <app-empty-state
+            [title]="emptyTitle()"
+            [description]="emptyDescription()"
+            image="search"
+            actionLabel="清除筛选"
+            (action)="clearFilters()" />
+        } @else {
+          <app-empty-state
+            [title]="emptyTitle()"
+            [description]="emptyDescription()"
+            image="search"
+            actionLabel="查看全部商品"
+            actionLink="/category/all" />
+        }
+      } @else if (pageEmpty()) {
+        <app-empty-state
+          title="这一页没有商品"
+          description="筛选结果没有这么多页，回到第一页继续看吧。"
+          image="search"
+          actionLabel="回到第一页"
+          (action)="apply({ page: 1 })" />
+      } @else {
+        <app-product-grid
+          [products]="products()"
+          [loading]="loading()"
+          [showSkeleton]="showSkeleton()"
+          [skeletonCount]="skeletonCount()"
+          [variant]="variant()"
+          (retry)="retry()" />
+      }
+
+      @if (total() > query().size && !pageEmpty()) {
+        <app-pagination
+          [page]="query().page"
+          [size]="query().size"
+          [total]="total()"
+          (pageChange)="apply({ page: $event })"
+          (sizeChange)="apply({ size: $event, page: 1 })" />
+      }
+
+      @if (total() > 0 && relatedSearches().length > 0) {
+        <section class="related-searches" aria-labelledby="related-search-title">
+          <h2 id="related-search-title">相关搜索</h2>
+          <div class="rs-chips">
+            @for (term of relatedSearches(); track term) {
+              <a class="rs-chip" [routerLink]="['/search']" [queryParams]="{ q: term }">{{ term }}</a>
+            }
+          </div>
+        </section>
+      }
+    </section>
+  </div>
+</div>
+
+<app-modal [open]="drawerOpen()" variant="right" title="筛选" (closed)="drawerOpen.set(false)">
+  <div id="filter-drawer">
+    <app-filter-panel
+      [categories]="categories()"
+      [query]="query()"
+      [category]="effectiveCategory()"
+      [showCategory]="showCategoryFilter()"
+      [showHeader]="false"
+      (patch)="apply($event)"
+      (cleared)="clearFilters()" />
+
+    <div class="drawer-foot">
+      <button class="sp-btn sp-btn--secondary" type="button" (click)="clearFilters()">清除筛选</button>
+      <button class="sp-btn sp-btn--primary" type="button" (click)="drawerOpen.set(false)">
+        查看 {{ total() }} 件商品
+      </button>
+    </div>
+  </div>
+</app-modal>

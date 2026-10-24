@@ -1,0 +1,74 @@
+<div class="sp-container category-page">
+  <app-breadcrumb [items]="crumbs()" />
+
+  @if (notFound()) {
+    <h1 class="sp-sr-only">分类不存在</h1>
+    <app-empty-state
+      title="分类不存在"
+      description="这个分类可能已经调整，去看看全部商品吧。"
+      image="search"
+      actionLabel="浏览全部商品"
+      actionLink="/category/all" />
+  } @else {
+    <header class="banner">
+      <div class="banner-copy">
+        <p class="sp-kicker">分类 · {{ slug() === 'all' ? 'ALL' : slug().toUpperCase() }}</p>
+        <h1 class="banner-title">{{ name() }}</h1>
+        <p class="banner-desc">{{ description() }}</p>
+        <div class="banner-meta">
+          @if (count() !== null) {
+            <span class="meta-item"><strong class="sp-num">{{ count() }}</strong> 件商品</span>
+          }
+          <span class="meta-item">满 99 元包邮</span>
+          <span class="meta-item">7 天无理由</span>
+          @if (filtersActive() && resultTotal() !== null) {
+            <span class="sp-badge sp-badge--info">筛选后 {{ resultTotal() }} 件</span>
+          }
+        </div>
+      </div>
+
+      <div class="banner-art" aria-hidden="true">
+        @if (!imageFailed().has('banner-' + slug())) {
+          <img [src]="bannerImage()" alt="" width="640" height="480" loading="eager" (error)="onImageError('banner-' + slug())" />
+        } @else {
+          <span class="banner-fallback">
+            <span class="bf-char">{{ name().slice(0, 2) }}</span>
+            <span class="bf-en">{{ slug() === 'all' ? 'ALL' : slug().toUpperCase() }}</span>
+          </span>
+        }
+      </div>
+    </header>
+
+    <nav class="cat-nav" aria-label="分类导航">
+      @for (item of navCategories(); track item.slug) {
+        <a
+          class="cat-tile"
+          [routerLink]="['/category', item.slug]"
+          [class.on]="item.slug === slug()"
+          [attr.aria-current]="item.slug === slug() ? 'page' : null">
+          <span class="tile-media">
+            @if (!imageFailed().has('tile-' + item.slug)) {
+              <img [src]="tileImage(item.slug)" alt="" width="120" height="90" loading="lazy"
+                   (error)="onImageError('tile-' + item.slug)" />
+            } @else {
+              <span class="tile-fallback" aria-hidden="true">{{ item.name.slice(0, 1) }}</span>
+            }
+          </span>
+          <span class="tile-body">
+            <span class="tile-name">{{ item.name }}</span>
+            <span class="tile-count sp-num">{{ item.count }} 件</span>
+          </span>
+        </a>
+      }
+    </nav>
+
+    <app-catalog-results
+      [context]="context()"
+      [query]="query()"
+      [showCategoryFilter]="slug() === 'all'"
+      emptyTitle="这个分类下暂时没有符合条件的商品"
+      emptyDescription="试试放宽价格，或清除筛选看看全部商品。"
+      (queryChange)="onQueryChange($event)"
+      (stateChange)="onStateChange($event)" />
+  }
+</div>

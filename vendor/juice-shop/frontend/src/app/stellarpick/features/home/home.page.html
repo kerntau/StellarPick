@@ -1,0 +1,473 @@
+<!-- Hero -->
+<section
+  class="hero sp-on-dark"
+  role="region"
+  aria-roledescription="轮播"
+  aria-label="星澜优选精选活动"
+  (mouseenter)="pause()"
+  (mouseleave)="resume()"
+  (focusin)="pause()"
+  (focusout)="resume()"
+  (keydown)="onHeroKeydown($event)">
+  <h1 class="sp-sr-only">星澜优选 · 把日常，选得更好</h1>
+
+  <div class="stage">
+    @for (item of slides; track item.id; let index = $index) {
+      <article
+        class="slide"
+        [class.on]="index === slide()"
+        [attr.aria-hidden]="index !== slide()"
+        [attr.inert]="index !== slide() ? '' : null"
+        [attr.aria-label]="(index + 1) + ' / ' + slides.length">
+        <img
+          class="bg"
+          [src]="item.image"
+          [alt]="item.alt"
+          width="1600"
+          height="720"
+          [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+          [attr.fetchpriority]="index === 0 ? 'high' : null" />
+        <div class="scrim" aria-hidden="true"></div>
+
+        <div class="sp-container copy-wrap">
+          <div class="copy">
+            <p class="kicker">{{ item.eyebrow }}<span class="kicker-rule" aria-hidden="true"></span>{{ item.note }}</p>
+            <h2 class="hero-title">{{ item.title }}</h2>
+            <p class="hero-sub">{{ item.subtitle }}</p>
+
+            <div class="hero-actions">
+              <a class="sp-btn sp-btn--accent sp-btn--lg" [routerLink]="item.link">
+                {{ item.cta }} <app-icon name="arrow-right" [size]="16" />
+              </a>
+              <a class="hero-secondary" routerLink="/category/all">浏览全部商品</a>
+            </div>
+
+            <form class="hero-search" role="search" (submit)="submitHeroSearch($event)">
+              <label class="sp-sr-only" [attr.for]="'hero-search-' + index">搜索商品</label>
+              <app-icon name="search" [size]="18" />
+              <input
+                [id]="'hero-search-' + index"
+                type="search"
+                name="q"
+                autocomplete="off"
+                placeholder="搜索保温杯、四件套、充电器…"
+                [value]="heroQuery()"
+                (input)="onHeroInput($event)" />
+              <button class="sp-btn sp-btn--primary sp-btn--sm" type="submit">搜索</button>
+            </form>
+
+            <div class="hero-hot">
+              <span class="hot-label">热门</span>
+              @for (keyword of hotKeywords; track keyword) {
+                <button class="hot" type="button" (click)="searchKeyword(keyword)">{{ keyword }}</button>
+              }
+            </div>
+          </div>
+
+          @if (heroPick(); as pick) {
+            <aside class="hero-pick" aria-label="本周编辑推荐">
+              <p class="pick-label">本周编辑推荐</p>
+              <a class="pick-body" [routerLink]="['/product', pick.id]">
+                <img [src]="pick.image" [alt]="pick.title" width="64" height="64" loading="lazy" />
+                <span class="pick-text">
+                  <span class="pick-name">{{ pick.title }}</span>
+                  <span class="pick-price sp-num">{{ pick.price | spMoney }}</span>
+                </span>
+              </a>
+              <p class="pick-meta">销量 {{ pick.sales }} · 评分 {{ pick.rating.toFixed(1) }}</p>
+            </aside>
+          }
+        </div>
+      </article>
+    }
+
+    <div class="sp-container controls">
+      <div class="dots" role="group" aria-label="选择活动">
+        @for (item of slides; track item.id; let index = $index) {
+          <button
+            class="dot"
+            type="button"
+            [attr.aria-current]="index === slide() ? 'true' : null"
+            [attr.aria-label]="'查看第 ' + (index + 1) + ' 张：' + item.title"
+            (click)="goTo(index)"></button>
+        }
+      </div>
+
+      <p class="counter sp-num" aria-hidden="true">{{ slide() + 1 }} / {{ slides.length }}</p>
+
+      <button
+        class="ctrl"
+        type="button"
+        (click)="toggleAutoplay()">
+        {{ autoplay() ? '暂停轮播' : '播放轮播' }}
+      </button>
+
+      <div class="arrows">
+        <button class="arrow" type="button" aria-label="上一张" (click)="prev()">
+          <app-icon name="chevron-left" [size]="18" />
+        </button>
+        <button class="arrow" type="button" aria-label="下一张" (click)="next()">
+          <app-icon name="chevron-right" [size]="18" />
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <span
+    class="progress"
+    aria-hidden="true"
+    [class.paused]="paused() || !autoplay()"
+    [class.idle]="!autoplay()"
+    [style.animation-name]="cycle() % 2 === 0 ? 'sp-progress-a' : 'sp-progress-b'"></span>
+</section>
+
+<!-- Service promises -->
+<section class="promises" aria-labelledby="promise-title">
+  <div class="sp-container">
+    <h2 id="promise-title" class="sp-sr-only">服务承诺</h2>
+    <ul class="promise-grid">
+      @for (item of promises; track item.title) {
+        <li>
+          <span class="p-icon"><app-icon [name]="item.icon" [size]="20" /></span>
+          <span class="p-text">
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.desc }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="sp-section categories" aria-labelledby="category-title">
+  <div class="sp-container">
+    <div class="sp-section-head">
+      <div>
+        <p class="sp-kicker">按类目逛</p>
+        <h2 id="category-title">找到你需要的那一件</h2>
+        <p>厨房到出行，六大类目覆盖日常所需，每类只留几件真正耐用的。</p>
+      </div>
+      <a class="sp-link-arrow" routerLink="/category/all">全部 {{ catalogTotal() ?? '' }} 件商品 <app-icon name="arrow-right" [size]="14" /></a>
+    </div>
+
+    <ul class="cat-grid">
+      @for (item of categoryTiles(); track item.slug) {
+        <li>
+          <a class="cat" [routerLink]="['/category', item.slug]">
+            <span class="cat-media">
+              @if (!imageFailed().has(item.slug)) {
+                <img [src]="item.image" [alt]="item.name + '类目精选'" width="400" height="300" loading="lazy"
+                     (error)="onImageError(item.slug)" />
+              } @else if (item.sample) {
+                <span class="cat-sample">
+                  <img [src]="item.sample.image" [alt]="item.name + '代表商品：' + item.sample.title" width="400" height="300" loading="lazy" />
+                  <span class="cf-label" aria-hidden="true">{{ item.name }}</span>
+                </span>
+              } @else {
+                <span class="cat-fallback" aria-hidden="true">
+                  <span class="cf-char">{{ item.name }}</span>
+                  <span class="cf-en">{{ item.en }}</span>
+                </span>
+              }
+            </span>
+            <span class="cat-text">
+              <span class="cat-name-row">
+                <span class="cat-name">{{ item.name }}</span>
+                @if (item.count !== null) {
+                  <span class="cat-count sp-num">{{ item.count }} 件</span>
+                }
+              </span>
+              <span class="cat-en">{{ item.en }}</span>
+              <span class="cat-desc">{{ item.desc }}</span>
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- New arrivals rail -->
+<section class="sp-section arrivals" aria-labelledby="arrivals-title">
+  <div class="sp-container">
+    <div class="sp-section-head">
+      <div>
+        <p class="sp-kicker">本周上新</p>
+        <h2 id="arrivals-title">刚刚上架的那几件</h2>
+        <p>每周四更新，先小批量上架，卖完再补。</p>
+      </div>
+      <a class="sp-link-arrow" [routerLink]="['/category', 'all']" [queryParams]="{ sort: 'newest' }">
+        查看全部新品 <app-icon name="arrow-right" [size]="14" />
+      </a>
+    </div>
+
+    @if (featuredError()) {
+      <app-error-state [message]="featuredError() ?? ''" [requestId]="featuredRequestId()" (retry)="loadFeatured()" />
+    } @else if (newestLoading() && railProducts().length === 0) {
+      <div class="rail" aria-hidden="true">
+        @for (item of railSkeletons; track item) {
+          <div class="rail-item"><app-skeleton variant="card" /></div>
+        }
+      </div>
+    } @else if (railProducts().length > 0) {
+      <div class="rail" role="group" aria-label="本周上新商品，可横向滚动" tabindex="0">
+        @for (product of railProducts(); track product.id; let index = $index) {
+          <div class="rail-item">
+            <span class="rail-badge">NEW</span>
+            <app-product-card [product]="product" [priority]="index < 4" />
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Editorial picks: asymmetric grid -->
+<section class="sp-section editorial" aria-labelledby="editorial-title">
+  <div class="sp-container">
+    <div class="sp-section-head">
+      <div>
+        <p class="sp-kicker">编辑精选</p>
+        <h2 id="editorial-title">选品团队这周留下的四件</h2>
+        <p>不是销量榜，是我们自己在用的东西。</p>
+      </div>
+      <span class="editorial-sign">主编 · 林一</span>
+    </div>
+
+    @if (editorLead(); as lead) {
+      <div class="editorial-grid">
+        <article class="lead-card">
+          <a class="lead-media" [routerLink]="['/product', lead.id]">
+            <img [src]="lead.image" [alt]="lead.title" width="800" height="600" loading="lazy" />
+            <span class="lead-tag">编辑手记 · 01</span>
+          </a>
+          <div class="lead-body">
+            <h3 class="lead-title">{{ lead.title }}</h3>
+            <p class="lead-note">{{ lead.subtitle }} 选品团队实测 30 天：材质、尺寸与手感都留下来了，才放进这一栏。</p>
+            @if (leadSpecs().length > 0) {
+              <ul class="lead-specs">
+                @for (spec of leadSpecs().slice(0, 3); track spec.name) {
+                  <li><span>{{ spec.name }}</span>{{ spec.value }}</li>
+                }
+              </ul>
+            }
+            <div class="lead-foot">
+              <span class="price sp-num">{{ lead.price | spMoney }}</span>
+              <app-rating-stars [value]="lead.rating" [size]="13" />
+              <span class="sp-meta">{{ lead.rating.toFixed(1) }} · 已售 {{ lead.sales }}</span>
+              <a class="sp-link-arrow" [routerLink]="['/product', lead.id]">看详情 <app-icon name="arrow-right" [size]="13" /></a>
+            </div>
+          </div>
+        </article>
+
+        <ul class="pick-list">
+          @for (item of editorRest(); track item.id; let index = $index) {
+            <li>
+              <a class="pick-row" [routerLink]="['/product', item.id]">
+                <span class="row-index sp-num">0{{ index + 2 }}</span>
+                <img [src]="item.image" [alt]="item.title" width="88" height="88" loading="lazy" />
+                <span class="row-body">
+                  <span class="row-title">{{ item.title }}</span>
+                  <span class="row-note">{{ item.subtitle }}</span>
+                  <span class="row-foot">
+                    <span class="price sp-num">{{ item.price | spMoney }}</span>
+                    <span class="sp-meta">{{ item.rating.toFixed(1) }} 分</span>
+                  </span>
+                </span>
+                <app-icon class="row-arrow" name="arrow-right" [size]="16" />
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    } @else if (featuredSkeleton()) {
+      <div class="editorial-grid" aria-hidden="true">
+        <div class="lead-card"><div class="sp-skeleton sk-lead"></div></div>
+        <div class="pick-list">
+          @for (item of railSkeletons; track item) {
+            <div class="sp-skeleton sk-row"></div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Shop the scene -->
+<section class="sp-section scenes" aria-labelledby="scenes-title">
+  <div class="sp-container">
+    <div class="sp-section-head">
+      <div>
+        <p class="sp-kicker">场景购</p>
+        <h2 id="scenes-title">按生活的场景来挑</h2>
+        <p>先想清楚在哪里用，再决定买哪一件。</p>
+      </div>
+    </div>
+
+    <ul class="scene-grid">
+      @for (item of sceneCards(); track item.slug) {
+        <li>
+          <a class="scene" [routerLink]="item.link">
+            <span class="scene-media">
+              @if (!imageFailed().has('scene-' + item.slug)) {
+                <img [src]="item.image" [alt]="item.label + '场景'" width="800" height="600" loading="lazy"
+                     (error)="onImageError('scene-' + item.slug)" />
+              } @else {
+                <span class="scene-fallback" aria-hidden="true"></span>
+              }
+            </span>
+            <span class="scene-copy">
+              <span class="scene-label">{{ item.label }}</span>
+              <span class="scene-title">{{ item.title }}</span>
+              <span class="scene-desc">{{ item.copy }}</span>
+              <span class="scene-link">
+                @if (item.count !== null) { {{ item.count }} 件好物 } @else { 进入类目 }
+                <app-icon name="arrow-right" [size]="13" />
+              </span>
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Member band -->
+<section class="member-band sp-on-dark" id="member" aria-labelledby="member-title">
+  <div class="sp-container member-inner">
+    <div class="member-copy">
+      <p class="sp-kicker">会员权益</p>
+      <h2 id="member-title">把会员日，过成日常</h2>
+      <p>加入星澜会员，全年包邮、专享折扣与积分回馈，还有专属客服随时响应。</p>
+      <div class="tier">
+        <div class="tier-head">
+          <span>当前等级 · 银卡</span>
+          <span class="sp-num">再消费 ¥420 升金卡</span>
+        </div>
+        <div class="tier-bar" role="img" aria-label="会员等级进度：银卡 68%，再消费 420 元升金卡">
+          <span class="tier-fill" aria-hidden="true"></span>
+        </div>
+      </div>
+      <a class="sp-btn sp-btn--accent sp-btn--lg" routerLink="/register">
+        注册领 20 元新人券 <app-icon name="arrow-right" [size]="16" />
+      </a>
+      <p class="member-note">已有账号？<a routerLink="/login">直接登录</a></p>
+    </div>
+
+    <ul class="benefits">
+      @for (item of benefits; track item.title) {
+        <li>
+          <span class="b-icon"><app-icon [name]="item.icon" [size]="20" /></span>
+          <div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.desc }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section class="sp-section reviews" aria-labelledby="reviews-title">
+  <div class="sp-container">
+    <div class="sp-section-head">
+      <div>
+        <p class="sp-kicker">真实评价</p>
+        <h2 id="reviews-title">买过的人怎么说</h2>
+        <p>只展示已确认收货的评价，差评也保留。</p>
+      </div>
+      <span class="review-score">
+        <strong class="sp-num">4.8</strong>
+        <span>平均评分 · 2,846 条评价</span>
+      </span>
+    </div>
+
+    <ul class="review-grid">
+      @for (entry of reviewCards(); track entry.quote.id) {
+        <li class="review">
+          <div class="review-head">
+            <img class="review-avatar" [src]="entry.quote.avatar" [alt]="entry.quote.name + '的头像'" width="40" height="40" loading="lazy" />
+            <div class="review-who">
+              <strong>{{ entry.quote.name }}</strong>
+              <span class="sp-meta">{{ entry.quote.variant }}</span>
+            </div>
+            <span class="review-date sp-meta">{{ entry.quote.date }}</span>
+          </div>
+          <div class="review-stars">
+            <app-rating-stars [value]="entry.quote.rating" [size]="13" />
+            <span class="sp-meta sp-num">{{ entry.quote.rating.toFixed(1) }}</span>
+            <span class="sp-badge sp-badge--sage">已确认收货</span>
+          </div>
+          <p class="review-body">{{ entry.quote.body }}</p>
+          <a class="review-product" [routerLink]="['/product', entry.product.id]">
+            <img [src]="entry.product.image" [alt]="entry.product.title" width="44" height="44" loading="lazy" />
+            <span class="rp-title">{{ entry.product.title }}</span>
+            <span class="rp-price sp-num">{{ entry.product.price | spMoney }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Brand story -->
+<section class="sp-section story" id="story" aria-labelledby="story-title">
+  <div class="sp-container story-grid">
+    <div class="story-art">
+      @if (!imageFailed().has('story')) {
+        <img src="/assets/sp/img/story.svg" alt="星澜优选选品团队的样品档案与记录本" width="800" height="600" loading="lazy"
+             (error)="onImageError('story')" />
+      } @else {
+        <img src="/assets/sp/img/scenes/pantry.svg" alt="星澜优选样品间的储物架" width="800" height="600" loading="lazy" />
+      }
+      <span class="story-caption">选品档案 · 2026 秋季</span>
+    </div>
+    <div class="story-copy">
+      <p class="sp-kicker">品牌故事</p>
+      <h2 id="story-title">把每一件日常，选到刚刚好</h2>
+      <p>星澜优选从一间社区小店起步。我们发现，真正被反复使用的，往往不是最便宜或最花哨的那一件，而是材质、尺寸和手感都刚刚好的那一件。</p>
+      <p>选品团队每月只上架少量新品：先去产地看原料，再在真实厨房、卧室和通勤路上试用至少两周。可溯源的供应链、不过度包装的物流，是我们对“值得长期使用”的理解。</p>
+      <ul class="story-stats">
+        <li><strong class="sp-num">6</strong><span>大品类</span></li>
+        <li><strong class="sp-num">30</strong><span>天实测周期</span></li>
+        <li><strong class="sp-num">7</strong><span>天无理由退换</span></li>
+      </ul>
+      <p class="story-sign">星澜优选选品团队 · 写于上海</p>
+      <a class="sp-link-arrow" routerLink="/about">了解更多品牌故事 <app-icon name="arrow-right" [size]="14" /></a>
+    </div>
+  </div>
+</section>
+
+<!-- Service + subscribe -->
+<section class="service-band" aria-labelledby="service-title">
+  <div class="sp-container service-inner">
+    <div class="service-copy">
+      <p class="sp-kicker">客服与订阅</p>
+      <h2 id="service-title">有问题，随时找得到人</h2>
+      <ul class="service-list">
+        @for (item of services; track item.title) {
+          <li>
+            <span class="s-icon"><app-icon [name]="item.icon" [size]="18" /></span>
+            <span class="s-text">
+              <strong>{{ item.title }}</strong>
+              <span>{{ item.desc }}</span>
+            </span>
+            <a class="sp-link-arrow" [routerLink]="item.link">{{ item.action }}</a>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <aside class="letter-card" aria-labelledby="letter-title">
+      <p class="letter-kicker">选品信 · 每周四</p>
+      <h3 id="letter-title">一周只发一封，写我们真正在用的东西</h3>
+      <p>新品试用记录、补货提醒与会员日清单，不推销、不群发。</p>
+      <button class="sp-btn sp-btn--primary" type="button" (click)="scrollToNewsletter()">
+        订阅选品信 <app-icon name="arrow-right" [size]="15" />
+      </button>
+      <p class="letter-note">已有 8,200+ 位读者 · 随时可退订</p>
+    </aside>
+  </div>
+</section>

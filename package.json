@@ -1,0 +1,18 @@
+{
+  "name": "stellarpick-range",
+  "version": "2.0.0",
+  "private": true,
+  "description": "星澜优选 · OWASP Juice Shop 二开靶场（127.0.0.1:8081）",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -File ./start.ps1",
+    "reset": "powershell -ExecutionPolicy Bypass -File ./reset.ps1",
+    "build": "npm --prefix vendor/juice-shop run build:server",
+    "build:frontend": "npm --prefix vendor/juice-shop/frontend exec -- ng build --configuration production",
+    "verify": "node tools/e2e/verify-v.mjs && node tools/e2e/verify-negative.mjs && node tools/e2e/smoke.mjs",
+    "audit": "node tools/e2e/audit.mjs",
+    "audit:strict-a11y": "node tools/e2e/audit.mjs --strict-a11y"
+  },
+  "engines": {
+    "node": ">=22.22.3"
+  }
+}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="拉丝不锈钢材质细节">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B9B5AD"/><stop offset=".3" stop-color="#918D85"/><stop offset=".55" stop-color="#D8D4CB"/><stop offset=".8" stop-color="#8B877F"/><stop offset="1" stop-color="#ABA79F"/></linearGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".38" stop-color="#fff" stop-opacity=".7"/><stop offset=".5" stop-color="#fff" stop-opacity=".15"/><stop offset=".64" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <pattern id="brush" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 1.5h5" stroke="#4A463F" stroke-width=".8" opacity=".38"/><path d="M0 4h5" stroke="#FFFFFF" stroke-width=".7" opacity=".4"/></pattern>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%"><stop offset=".42" stop-color="#221F1A" stop-opacity="0"/><stop offset="1" stop-color="#221F1A" stop-opacity=".34"/></radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="28"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#base)"/>
+  <rect width="800" height="800" fill="url(#brush)"/>
+  <rect width="800" height="800" fill="url(#sweep)"/>
+  <path d="M0 300c160-22 300 16 460-6s220-26 340-4" stroke="#4A463F" stroke-width="2" fill="none" opacity=".4"/>
+  <path d="M0 318c160-22 300 16 460-6s220-26 340-4" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".55"/>
+  <path d="M0 640c180-18 320 14 480-8s200-22 320-2" stroke="#4A463F" stroke-width="2" fill="none" opacity=".3"/>
+  <ellipse cx="250" cy="210" rx="190" ry="110" fill="#fff" opacity=".45" filter="url(#soft)"/>
+  <ellipse cx="600" cy="620" rx="150" ry="90" fill="#2E2A24" opacity=".25" filter="url(#soft)"/>
+  <rect width="800" height="800" fill="url(#vig)"/>
+</svg>

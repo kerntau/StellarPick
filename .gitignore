@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+vendor/juice-shop/node_modules/
+vendor/juice-shop/frontend/node_modules/
+tools/e2e/node_modules/
+
+# runtime data
+vendor/juice-shop/data/juiceshop.sqlite*
+vendor/juice-shop/uploads/*
+logs/
+*.log
+
+# builds
+vendor/juice-shop/build/
+vendor/juice-shop/frontend/dist/
+
+# portable node runtime (shipped separately in the delivery zip)
+tools/node22/
+
+# test artifacts
+tools/e2e/shots/
+flow-report.json
+dist/

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="釉面陶瓷材质细节">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2=".25" y2="1"><stop offset="0" stop-color="#E8E0D2"/><stop offset=".35" stop-color="#CFC3AE"/><stop offset=".7" stop-color="#E3D8C5"/><stop offset="1" stop-color="#A9997F"/></linearGradient>
+    <radialGradient id="spec" cx="32%" cy="24%" r="40%"><stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/><stop offset=".5" stop-color="#FFFFFF" stop-opacity=".45"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="spec2" cx="78%" cy="74%" r="26%"><stop offset="0" stop-color="#FFFDF6" stop-opacity=".65"/><stop offset="1" stop-color="#FFFDF6" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="74%"><stop offset=".4" stop-color="#3B2A16" stop-opacity="0"/><stop offset="1" stop-color="#3B2A16" stop-opacity=".3"/></radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#base)"/>
+  <g stroke="#8F7C5E" stroke-width="1" opacity=".5" fill="none">
+    <path d="M110 210c64-34 128 22 192-6s116-26 178 6"/>
+    <path d="M80 310c74-26 138 28 212 0s126-22 190 10"/>
+    <path d="M130 420c64-22 116 26 180 2s138-20 200 12"/>
+    <path d="M50 530c84-28 148 24 232-2s158-18 232 14"/>
+    <path d="M100 620c70-20 130 22 200 0s150-16 210 12"/>
+  </g>
+  <ellipse cx="270" cy="290" rx="210" ry="170" fill="url(#spec)" filter="url(#soft)"/>
+  <ellipse cx="620" cy="600" rx="160" ry="130" fill="url(#spec2)" filter="url(#soft)"/>
+  <path d="M0 760c220-40 340 10 480-16s220-26 320-8" stroke="#8F7C5E" stroke-width="3" opacity=".28" fill="none"/>
+  <rect width="800" height="800" fill="url(#vig)"/>
+</svg>

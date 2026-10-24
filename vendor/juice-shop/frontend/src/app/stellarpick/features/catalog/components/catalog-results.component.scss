@@ -1,0 +1,224 @@
+.catalog {
+  margin-top: 8px;
+  scroll-margin-top: calc(var(--sp-header-h) + 8px);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.toolbar app-sort-bar {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.filter-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-md);
+  background: var(--sp-surface);
+  color: var(--sp-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.filter-btn:hover {
+  border-color: var(--sp-primary);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.sidebar {
+  position: sticky;
+  top: calc(var(--sp-header-h) + 16px);
+}
+
+.layout.no-sidebar {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.results {
+  min-width: 0;
+  min-height: 320px;
+}
+
+/* ---- related searches ---- */
+.related-searches {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--sp-border);
+}
+
+.related-searches h2 {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.rs-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rs-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-pill);
+  background: var(--sp-surface);
+  color: var(--sp-text-secondary);
+  font-size: 12px;
+}
+
+.rs-chip:hover {
+  border-color: var(--sp-primary);
+  color: var(--sp-primary);
+}
+
+.empty-related {
+  margin-top: 18px;
+}
+
+.empty-related .rs-chips {
+  justify-content: center;
+  margin-top: 6px;
+}
+
+/* ---- search no-result state ---- */
+.empty-search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 48px 16px 56px;
+  text-align: center;
+  background: var(--sp-surface);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-md);
+}
+
+.empty-search img {
+  width: 240px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.empty-search h2 {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.empty-search p {
+  max-width: 460px;
+}
+
+.empty-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.drawer-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 12px;
+  margin: 20px -24px -24px;
+  padding: 16px 24px calc(16px + env(safe-area-inset-bottom));
+  background: var(--sp-surface);
+  border-top: 1px solid var(--sp-border);
+}
+
+.drawer-foot .sp-btn {
+  flex: 1;
+}
+
+@media (max-width: 1023px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .filter-btn {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 767px) {
+  .toolbar {
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .filter-btn {
+    min-height: 44px;
+  }
+
+  .toolbar app-sort-bar {
+    display: flex;
+    align-items: center;
+  }
+
+  .empty-search {
+    padding: 32px 16px 40px;
+  }
+
+  .empty-search img {
+    width: 180px;
+  }
+
+  .empty-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .empty-actions .sp-btn {
+    width: 100%;
+  }
+
+  .rs-chip {
+    min-height: 44px;
+  }
+}
+
+/* The global `a:link { color: inherit }` outranks .sp-btn--primary, so anchor
+   buttons rendered in this page need an explicit colour. */
+a.sp-btn--primary:link,
+a.sp-btn--primary:visited {
+  color: #fff;
+}
+
+a.sp-btn--secondary:link,
+a.sp-btn--secondary:visited {
+  color: var(--sp-primary);
+}
+
+a.hot-chip:link,
+a.hot-chip:visited {
+  color: var(--sp-text-secondary);
+}
+
+a.hot-chip:hover {
+  color: var(--sp-primary);
+}

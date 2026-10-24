@@ -1,0 +1,87 @@
+<div class="filters">
+  @if (showHeader()) {
+    <div class="filter-head">
+      <h2>筛选</h2>
+      <button class="clear" type="button" (click)="clear()">清除全部</button>
+    </div>
+  }
+
+  @if (showCategory()) {
+    <fieldset class="group">
+      <legend>分类</legend>
+      <label class="opt" [attr.for]="groupName + '-cat-all'">
+        <input
+          [id]="groupName + '-cat-all'"
+          type="radio"
+          [name]="groupName + '-cat'"
+          [checked]="!category()"
+          (change)="pickCategory(undefined)" />
+        <span>全部分类</span>
+      </label>
+      @for (item of categories(); track item.slug) {
+        @if (item.slug !== 'all') {
+          <label class="opt" [attr.for]="groupName + '-cat-' + item.slug">
+            <input
+              [id]="groupName + '-cat-' + item.slug"
+              type="radio"
+              [name]="groupName + '-cat'"
+              [checked]="category() === item.slug"
+              (change)="pickCategory(item.slug)" />
+            <span class="name">{{ item.name }}</span>
+            @if (item.count > 0) {
+              <span class="count sp-num">{{ item.count }}</span>
+            }
+          </label>
+        }
+      }
+    </fieldset>
+  }
+
+  <fieldset class="group">
+    <legend>价格区间</legend>
+    <label class="opt" [attr.for]="groupName + '-price-all'">
+      <input
+        [id]="groupName + '-price-all'"
+        type="radio"
+        [name]="groupName + '-price'"
+        [checked]="query().minPrice === undefined && query().maxPrice === undefined"
+        (change)="pickPrice(null)" />
+      <span>全部价格</span>
+    </label>
+    @for (range of ranges; track range.key) {
+      <label class="opt" [attr.for]="groupName + '-price-' + range.key">
+        <input
+          [id]="groupName + '-price-' + range.key"
+          type="radio"
+          [name]="groupName + '-price'"
+          [checked]="isPriceRange(range)"
+          (change)="pickPrice(range)" />
+        <span>{{ range.label }}</span>
+      </label>
+    }
+  </fieldset>
+
+  <fieldset class="group">
+    <legend>评分</legend>
+    <label class="opt" [attr.for]="groupName + '-rating'">
+      <input
+        [id]="groupName + '-rating'"
+        type="checkbox"
+        [checked]="isRatingChecked()"
+        (change)="toggleRating($event)" />
+      <span>4.5 分及以上</span>
+    </label>
+  </fieldset>
+
+  <fieldset class="group">
+    <legend>库存</legend>
+    <label class="opt" [attr.for]="groupName + '-stock'">
+      <input
+        [id]="groupName + '-stock'"
+        type="checkbox"
+        [checked]="query().inStock === true"
+        (change)="toggleStock($event)" />
+      <span>仅看有货</span>
+    </label>
+  </fieldset>
+</div>

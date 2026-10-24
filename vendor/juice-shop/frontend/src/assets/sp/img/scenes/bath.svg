@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="浴室台盆场景，镜子与毛巾在晨光里">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2=".2" y2="1"><stop offset="0" stop-color="#F5EFE5"/><stop offset="1" stop-color="#DFD3C0"/></linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EFE7D9"/><stop offset=".5" stop-color="#DED2BE"/><stop offset="1" stop-color="#C6B69E"/></linearGradient>
+    <linearGradient id="mirror" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EAF0F2"/><stop offset=".45" stop-color="#D6E0E4"/><stop offset="1" stop-color="#BFCDD3"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBF8F1" stop-opacity=".95"/><stop offset="1" stop-color="#D6C6AC" stop-opacity=".85"/></linearGradient>
+    <radialGradient id="glow" cx="24%" cy="12%" r="66%"><stop offset="0" stop-color="#FFF8EC" stop-opacity=".9"/><stop offset="1" stop-color="#FFF8EC" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig" cx="50%" cy="46%" r="72%"><stop offset=".48" stop-color="#3B2A16" stop-opacity="0"/><stop offset="1" stop-color="#3B2A16" stop-opacity=".24"/></radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="13"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#wall)"/>
+  <g stroke="#D8CAB5" stroke-width="1.2" opacity=".5"><path d="M0 120h800M0 220h800M0 320h800"/><path d="M200 120v200M400 120v200M600 120v200"/></g>
+  <rect x="230" y="110" width="340" height="250" rx="14" fill="#C9B79C"/>
+  <rect x="242" y="122" width="316" height="226" rx="8" fill="url(#mirror)"/>
+  <path d="M270 330c40-70 80-30 120-96 20-32 40-10 40 20v68H270z" fill="#fff" opacity=".35"/>
+  <rect width="800" height="800" fill="url(#glow)"/>
+  <ellipse cx="400" cy="560" rx="260" ry="28" fill="#513A1E" opacity=".22" filter="url(#soft)"/>
+  <rect x="150" y="470" width="500" height="34" rx="8" fill="url(#stone)"/>
+  <rect x="150" y="504" width="500" height="120" fill="#B9A687"/>
+  <rect x="150" y="504" width="500" height="8" fill="#8F7C5E" opacity=".4"/>
+  <ellipse cx="400" cy="486" rx="120" ry="22" fill="#F6F1E6"/>
+  <ellipse cx="400" cy="486" rx="96" ry="15" fill="#DCE3E3"/>
+  <path d="M400 430c0-20 14-34 34-34" stroke="#B9B4AC" stroke-width="10" fill="none"/>
+  <path d="M434 396c16 0 26 12 26 26" stroke="#B9B4AC" stroke-width="8" fill="none"/>
+  <rect x="214" y="404" width="30" height="66" rx="8" fill="url(#glass)"/>
+  <rect x="222" y="392" width="14" height="14" rx="4" fill="#8C7355"/>
+  <rect x="254" y="416" width="26" height="54" rx="7" fill="#D9C9B2"/>
+  <rect x="260" y="404" width="14" height="14" rx="4" fill="#5C6B5A"/>
+  <rect x="520" y="420" width="46" height="50" rx="10" fill="#EFE4D2"/>
+  <path d="M528 420h30" stroke="#DCCDB8" stroke-width="4"/>
+  <path d="M536 470c0 10 6 16 14 16" stroke="#C9B79C" stroke-width="4" fill="none"/>
+  <rect x="584" y="430" width="66" height="40" rx="6" fill="#E8DCC8"/>
+  <path d="M584 444h66M584 458h66" stroke="#D2C0A6" stroke-width="2"/>
+  <rect x="596" y="414" width="42" height="16" rx="6" fill="#EFE4D2"/>
+  <path d="M700 470c-10-30 0-64 22-82" stroke="#5C6B5A" stroke-width="5" fill="none"/>
+  <path d="M722 388c-18 4-28 20-30 38 18-2 28-20 30-38z" fill="#5C6B5A"/>
+  <path d="M722 388c16 10 24 28 20 44-18-4-24-24-20-44z" fill="#74836F"/>
+  <path d="M690 470h54l-8 40h-38z" fill="#C9B79C"/>
+  <rect width="800" height="800" fill="url(#vig)"/>
+</svg>

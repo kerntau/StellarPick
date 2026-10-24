@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="棉麻织物材质细节">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#F1E8D9"/><stop offset=".5" stop-color="#DCCDB8"/><stop offset="1" stop-color="#B9A588"/></linearGradient>
+    <pattern id="weave" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 4h8" stroke="#8E7A5D" stroke-width="1.1" opacity=".5"/><path d="M4 0v8" stroke="#FFF8EC" stroke-width="1.1" opacity=".55"/></pattern>
+    <pattern id="weave2" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0v14" stroke="#A08B6D" stroke-width="1" opacity=".28"/></pattern>
+    <linearGradient id="fold" x1="0" y1="0" x2="1" y2=".6"><stop offset="0" stop-color="#6F5A3C" stop-opacity="0"/><stop offset=".42" stop-color="#6F5A3C" stop-opacity=".3"/><stop offset=".62" stop-color="#FFF6E6" stop-opacity=".35"/><stop offset="1" stop-color="#6F5A3C" stop-opacity="0"/></linearGradient>
+    <radialGradient id="light" cx="30%" cy="20%" r="62%"><stop offset="0" stop-color="#FFFAF0" stop-opacity=".9"/><stop offset="1" stop-color="#FFFAF0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="74%"><stop offset=".42" stop-color="#3B2A16" stop-opacity="0"/><stop offset="1" stop-color="#3B2A16" stop-opacity=".3"/></radialGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#base)"/>
+  <rect width="800" height="800" fill="url(#weave)"/>
+  <rect width="800" height="800" fill="url(#weave2)"/>
+  <path d="M-40 520c180-90 320 50 480-30s260-50 400 10v320H-40z" fill="url(#fold)"/>
+  <path d="M-40 90c200 70 300-50 460 20s260 30 380-20v150c-140 70-260 0-400 50S120 310-40 250z" fill="url(#fold)" opacity=".75"/>
+  <path d="M0 700c220-40 340 20 480-10s220-30 320-10" stroke="#8E7A5D" stroke-width="2" opacity=".25" fill="none"/>
+  <rect width="800" height="800" fill="url(#light)"/>
+  <rect width="800" height="800" fill="url(#vig)"/>
+</svg>

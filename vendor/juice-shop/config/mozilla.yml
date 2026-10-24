@@ -1,0 +1,160 @@
+application:
+  domain: mozilla-ctf.op
+  name: 'Mozilla CTF'
+  logo: 'https://github.com/mozilla/ctf-austin/raw/master/app/public/images/MozillaCTF.png'
+  favicon: 'https://github.com/mozilla/ctf-austin/raw/master/app/public/favicon_v2.ico'
+  theme: deeporange-indigo
+  showGitHubLinks: true
+  localBackupEnabled: false
+  altcoinName: Mozquito
+  privacyContactEmail: 'donotreply@mozilla-ctf.op'
+  customMetricsPrefix: mozctf
+  chatBot:
+    name: 'Foxy'
+    avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Firefox_logo%2C_2019.svg/500px-Firefox_logo%2C_2019.svg.png'
+  social:
+    blueSkyUrl: 'https://bsky.app/profile/mozilla.org'
+    mastodonUrl: 'https://mastodon.social/@mozillaofficial'
+    twitterUrl: 'https://twitter.com/mozilla'
+    facebookUrl: 'https://www.facebook.com/mozilla'
+    slackUrl: null
+    redditUrl: 'https://www.reddit.com/r/firefox'
+    pressKitUrl: 'https://blog.mozilla.org/press/'
+    nftUrl: null
+    questionnaireUrl: null
+  recyclePage:
+    topProductImage: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Moz_Keychain_Dino1.png'
+    bottomProductImage: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Fx_StickerPack1.png'
+  welcomeBanner:
+    showOnFirstStart: false
+  cookieConsent:
+    message: 'This website uses a myriad of 3rd-party cookies for your convenience and tracking pleasure.'
+    dismissText: 'Never mind!'
+    linkText: 'How can I turn this off?'
+    linkUrl: 'https://support.mozilla.org/en-US/kb/disable-third-party-cookies'
+  securityTxt:
+    contact: 'mailto:donotreply@mozilla-ctf.op'
+    encryption: ~
+challenges:
+  showHints: false
+  codingChallengesEnabled: never
+  xssBonusPayload: '<iframe width="560" height="315" src="https://www.youtube.com/embed/0u9g0LhRkGk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+hackingInstructor:
+  isEnabled: false
+products:
+  -
+    name: 'Mozilla flower t-shirt'
+    price: 32.00
+    description: 'A shirt you''ll reach for. A message you''ll feel good about. Pairs a playful, pixelated flower with the idea that the internet needs care to grow well.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Mozilla_02_WebProducts-MR26-21_ec0fbb20-50e9-49ef-806a-a3e2bcb9f52a.png'
+    reviews:
+      - { text: 'One of my favorites!', author: admin }
+  -
+    name: 'Mozilla Dino t-shirt'
+    price: 30.00
+    description: 'Puts Mozilla''s bold, pixelated Dino front and center in support of an open, safe internet built for people, not profit.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Mozilla_02_WebProducts-MR26-19.png'
+  -
+    name: 'Mozilla bumper sticker'
+    price: 2.00
+    description: 'Not subtle. That''s the point. 11 x 3 inches, waterproof.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Moz_Stickers_Bumper1.png'
+    reviews:
+      - { text: 'Slapped it right over the Ferengi "no refunds" decal.', author: jim }
+  -
+    name: 'Give a fox sweatshirt'
+    price: 45.00
+    description: 'A small symbol of caring about the internet. Kit the fox rides along on the sleeve. Soft, relaxed, made by AS Colour.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Fx_Crew_GAF1_1.png'
+  -
+    name: 'Mozilla build keychain'
+    price: 5.00
+    description: 'A small reminder, right where you need it: we''re here to build a better internet. Iron and soft enamel.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Moz_Keychain_Build1.png'
+  -
+    name: 'Mozilla heart keychain'
+    price: 5.00
+    description: 'Care is part of the build. A pixelated heart to clip to your keys, your bag, or wherever it fits.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Moz_Keychain_Heart1.png'
+  -
+    name: 'Firefox mechanical keyboard'
+    price: 198.00
+    description: 'Clean, clicky and finished in Firefox colors. Kit sits on the ESC key for when you need to get out of whatever you didn''t mean to open.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Fx_Keyboard1.png'
+    reviews:
+      - { text: 'Clicky enough to drown out red alert klaxons.', author: jim }
+  -
+    name: 'Mozilla sticker pack'
+    price: 12.00
+    description: 'Bold, pixel-inspired designs carrying a shared belief: the internet should be open, accessible, and built for people, not profits.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Moz_StickerPack1.png'
+  -
+    name: 'Firefox sticker pack'
+    price: 12.00
+    description: 'Pack of 8 vinyl stickers featuring Kit the fox in all their many moods. Peel, stick, repeat.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Fx_StickerPack1.png'
+    reviews:
+      - { text: 'Put one on my chassis. Still the shiniest thing about me.', author: bender }
+  -
+    name: 'Mozilla Dino keychain'
+    price: 5.00
+    description: 'Mozilla''s mascot, a friendly Dino born from our flag symbol, championing our mission with a nod to our T-rex roots.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Moz_Keychain_Dino1.png'
+  -
+    name: 'Firefox x Fellow Zen Kit water bottle'
+    price: 50.00
+    description: 'Leak-proof 20oz stainless steel bottle with a True Taste ceramic interior, made by Fellow''s Carter Carry.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Fx_Waterbottle_Zen1.png'
+  -
+    name: 'Kit socks'
+    price: 20.00
+    description: 'Bright and bold, these socks bring a little main-character energy to your ankles. Soft, breathable, made in the USA.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Fx_Socks_Kit1.png'
+    reviews:
+      - { text: 'Even a bending unit appreciates good ankle support.', author: bender }
+  -
+    name: '5-panel Kit hat'
+    price: 42.00
+    description: 'Clean, simple, and easy to wear on repeat — this one keeps things low-key, with just enough Kit to make it fiery.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Fx_Hat_5Panel_Kit1_1.png'
+  -
+    name: 'Give a fox hat'
+    price: 30.00
+    description: 'A simple hat with a not-so-subtle point of view, made in a facility that follows sustainable manufacturing practices.'
+    image: 'https://cdn.shopify.com/s/files/1/0714/5956/9752/files/Fx_Hat_Dad_GAF1_1.png'
+  -
+    name: 'OWASP Zed Attack Proxy (ZAP)'
+    description: 'ZAP is one of the world’s most popular free security tools and can help you automatically find security vulnerabilities while you are developing and testing your applications.'
+    price: 0.01
+    image: zap.png
+    urlForProductTamperingChallenge: 'https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project'
+  -
+    name: 'Mozilla Store Super-Surprise-Box (2026 Edition)'
+    description: 'Contains a random selection of stickers, keychains, and a Firefox sticker pack for an unbeatable price!'
+    price: 29.99
+    image: undefined.jpg
+    useForChristmasSpecialChallenge: true
+  -
+    name: 'Mozilla Flag Emblem (3D-printed)'
+    description: 'This rare item was designed and handcrafted in Sweden. This is why it is so incredibly expensive despite its complete lack of purpose.'
+    price: 99.99
+    image: 3d_keychain.jpg
+    fileForRetrieveBlueprintChallenge: JuiceShop.stl
+    exifForBlueprintChallenge:
+      - OpenSCAD
+  -
+    name: 'Refurbished Mozilla Store Gift Card'
+    description: 'A gently-used digital gift card someone forgot to redeem. <br/><span style="color:red;">This item has been made unavailable because of lack of safety standards.</span>'
+    price: 16.99
+    image: undefined.jpg
+    keywordsForPastebinDataLeakChallenge:
+      - hueteroneel
+      - eurogium edule
+  -
+    name: 'Global OWASP WASPY Award 2017 Nomination'
+    description: 'Your chance to nominate up to three quiet pillars of the OWASP community ends 2017-06-30! <a href="https://www.owasp.org/index.php/WASPY_Awards_2017">Nominate now!</a>'
+    price: 0.03
+    image: waspy.png
+    deletedDate: '2017-07-01'
+ctf:
+  showFlagsInNotifications: true

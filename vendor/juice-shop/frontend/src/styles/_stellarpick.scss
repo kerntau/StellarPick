@@ -1,0 +1,663 @@
+/* StellarPick global design system (ported) */
+/* StellarPick design tokens — single source of truth (任务书 §5.1) */
+:root {
+  --sp-primary: #0B2545;
+  --sp-primary-soft: #13314F;
+  --sp-primary-deep: #071A33;
+  --sp-accent: #E8A33D;
+  --sp-accent-strong: #F2B95C;
+  --sp-accent-text: #8A5A00;
+  /* Warm paper canvas + ink, for an editorial retail feel. */
+  --sp-bg: #F7F4EF;
+  --sp-paper: #F7F4EF;
+  --sp-paper-deep: #EFE9DF;
+  --sp-surface: #FFFFFF;
+  --sp-text: #171512;
+  --sp-ink: #171512;
+  --sp-text-secondary: #5F5A52;
+  /* 4.9:1 on --sp-bg (#F7F4EF) and 5.3:1 on white — AA for small text. */
+  --sp-text-muted: #6E675D;
+  --sp-border: #E7E0D5;
+  --sp-line-warm: #E7E0D5;
+  --sp-border-strong: #CFC6B8;
+  --sp-sage: #5C6B5A;
+  --sp-terracotta: #B4653F;
+  --sp-success: #1F7A5C;
+  --sp-success-soft: #E7F4EF;
+  /* AA on --sp-warning-soft (#FDF3E3): 5.1:1 */
+  --sp-warning: #96590C;
+  --sp-warning-soft: #FDF3E3;
+  --sp-danger: #C0392B;
+  --sp-danger-soft: #FBEAE8;
+  --sp-info: #2D6CDF;
+  /* Info text sitting on --sp-info-soft must clear AA (5.5:1). */
+  --sp-info-strong: #1F5BC4;
+  --sp-info-soft: #EAF1FD;
+
+  --sp-font-sans: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sp-font-num: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+  --sp-serif: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+
+  --sp-text-12: 12px;
+  --sp-text-13: 13px;
+  --sp-text-14: 14px;
+  --sp-text-16: 16px;
+  --sp-text-18: 18px;
+  --sp-text-20: 20px;
+  --sp-text-24: 24px;
+  --sp-text-32: 32px;
+  --sp-text-40: 40px;
+
+  --sp-lh-body: 1.6;
+  --sp-lh-title: 1.25;
+  --sp-lh-control: 1.4;
+
+  --sp-space-1: 4px;
+  --sp-space-2: 8px;
+  --sp-space-3: 12px;
+  --sp-space-4: 16px;
+  --sp-space-6: 24px;
+  --sp-space-8: 32px;
+  --sp-space-12: 48px;
+  --sp-space-16: 64px;
+
+  --sp-radius-sm: 4px;
+  --sp-radius-md: 8px;
+  --sp-radius-lg: 12px;
+  --sp-radius-pill: 999px;
+
+  --sp-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --sp-shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --sp-shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.12);
+
+  --sp-container: 1200px;
+  --sp-container-wide: 1280px;
+  /* Three-tier chrome: utility 28 + main 60 + category strip 40. */
+  --sp-header-utility: 28px;
+  --sp-header-main: 60px;
+  --sp-header-strip: 40px;
+  --sp-header-h: calc(var(--sp-header-utility) + var(--sp-header-main) + var(--sp-header-strip));
+  --sp-focus: #2D6CDF;
+  --sp-focus-dark: #F2B95C;
+
+  /* ArtDirection v2 — paper, studio and editorial layers */
+  --sp-image-bg: #EFE7DA;
+  --sp-terracotta-ink: #8F4523;
+  --sp-terracotta-soft: #F8E8DE;
+  --sp-sage-soft: #E8ECE4;
+  --sp-shadow-card: 0 1px 2px rgba(23, 21, 18, 0.05), 0 10px 24px -20px rgba(23, 21, 18, 0.5);
+  --sp-shadow-lift: 0 2px 4px rgba(23, 21, 18, 0.06), 0 22px 44px -28px rgba(23, 21, 18, 0.55);
+  --sp-serif-display: clamp(30px, 3.4vw, 46px);
+  --sp-serif-h2: clamp(23px, 2.1vw, 30px);
+}
+
+/* Base + primitives shared by every page */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background-color: var(--sp-bg);
+  /* Faint paper grain: the tile carries its own <=3% opacity, so the page
+     keeps a flat warm canvas with a little tooth. Missing asset = flat paper. */
+  background-image: url('/assets/sp/img/texture-paper.svg');
+  background-size: 320px 320px;
+  background-repeat: repeat;
+  color: var(--sp-text);
+  font-family: var(--sp-font-sans);
+  font-size: var(--sp-text-14);
+  line-height: var(--sp-lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5 {
+  margin: 0;
+  font-weight: 700;
+  line-height: var(--sp-lh-title);
+  color: var(--sp-text);
+  letter-spacing: -0.01em;
+}
+h1 { font-size: var(--sp-text-32); }
+h2 { font-size: var(--sp-text-24); }
+h3 { font-size: var(--sp-text-18); }
+h4 { font-size: var(--sp-text-16); }
+h1, h2 { text-wrap: balance; }
+
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--sp-accent-text); }
+img { max-width: 100%; display: block; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+table { border-collapse: collapse; width: 100%; }
+
+:focus-visible {
+  outline: 2px solid var(--sp-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.sp-on-dark :focus-visible { outline-color: var(--sp-focus-dark); }
+
+/* The Juice Shop theme ships `a { outline: none }` inside the body theme class
+   (0,1,1), which outranks the rule above and left links without any keyboard
+   focus indicator. These selectors restore it and also cover text fields whose
+   component styles reset the outline. */
+/* Component styles such as `.hero-search input` reset the outline with a
+   scoped selector, so the focus ring has to be declared !important: it is the
+   one declaration that must never lose the cascade. */
+html body.blue-lightblue-theme a:focus-visible,
+html body.blue-lightblue-theme button:focus-visible,
+html body.blue-lightblue-theme input:focus-visible,
+html body.blue-lightblue-theme select:focus-visible,
+html body.blue-lightblue-theme textarea:focus-visible,
+html body.blue-lightblue-theme summary:focus-visible,
+html body.blue-lightblue-theme [tabindex]:focus-visible {
+  outline: 2px solid var(--sp-focus) !important;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+html body.blue-lightblue-theme .sp-on-dark a:focus-visible,
+html body.blue-lightblue-theme .sp-on-dark button:focus-visible,
+html body.blue-lightblue-theme .sp-on-dark [tabindex]:focus-visible {
+  outline-color: var(--sp-focus-dark) !important;
+}
+
+.sp-num { font-family: var(--sp-font-num); font-variant-numeric: tabular-nums; }
+.sp-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.sp-skip-link {
+  position: absolute; left: 16px; top: -60px; z-index: 200;
+  background: var(--sp-surface); color: var(--sp-primary);
+  padding: 10px 16px; border-radius: var(--sp-radius-md); box-shadow: var(--sp-shadow-md);
+  font-weight: 600; transition: top .15s ease;
+}
+.sp-skip-link:focus { top: 12px; }
+
+/* layout primitives */
+.sp-container {
+  width: 100%;
+  max-width: var(--sp-container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.sp-section { padding: 44px 0; }
+.sp-section--tight { padding: 28px 0; }
+.sp-section-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 20px; margin-bottom: 22px;
+}
+.sp-section-head h2 { font-size: var(--sp-serif-h2); font-family: var(--sp-serif); font-weight: 600; letter-spacing: .01em; }
+.sp-section-head p { color: var(--sp-text-secondary); font-size: var(--sp-text-13); margin-top: 6px; max-width: 56ch; }
+.sp-eyebrow {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--sp-accent-text);
+}
+.sp-link { color: var(--sp-info); font-weight: 600; }
+.sp-link:hover { text-decoration: underline; }
+.sp-muted { color: var(--sp-text-muted); }
+.sp-secondary { color: var(--sp-text-secondary); }
+.sp-divider { height: 1px; background: var(--sp-border); border: 0; margin: 24px 0; }
+
+/* buttons */
+.sp-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 0 20px;
+  border-radius: var(--sp-radius-md); border: 1px solid transparent;
+  font-size: var(--sp-text-14); font-weight: 600; line-height: var(--sp-lh-control);
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
+  text-align: center; white-space: nowrap;
+}
+.sp-btn:disabled, .sp-btn[aria-disabled='true'] {
+  opacity: .45; cursor: not-allowed; box-shadow: none;
+}
+.sp-btn--primary { background: var(--sp-primary); color: #fff; }
+.sp-btn--primary:hover:not(:disabled) { background: var(--sp-primary-soft); }
+.sp-btn--accent { background: var(--sp-accent); color: var(--sp-primary); }
+.sp-btn--accent:hover:not(:disabled) { background: var(--sp-accent-strong); }
+.sp-btn--secondary { background: var(--sp-surface); color: var(--sp-primary); border-color: var(--sp-border-strong); }
+.sp-btn--secondary:hover:not(:disabled) { border-color: var(--sp-primary); }
+.sp-btn--ghost { background: transparent; color: var(--sp-primary); }
+.sp-btn--ghost:hover:not(:disabled) { background: rgba(11, 37, 69, 0.06); }
+.sp-btn--danger { background: var(--sp-danger); color: #fff; }
+.sp-btn--danger:hover:not(:disabled) { filter: brightness(.94); }
+.sp-btn--sm { min-height: 36px; padding: 0 12px; font-size: var(--sp-text-13); }
+.sp-btn--lg { min-height: 48px; padding: 0 28px; font-size: var(--sp-text-16); }
+.sp-btn--block { width: 100%; }
+.sp-btn--pill { border-radius: var(--sp-radius-pill); }
+
+/* forms */
+.sp-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.sp-label { font-size: var(--sp-text-13); font-weight: 600; color: var(--sp-text); }
+.sp-label .sp-req { color: var(--sp-danger); margin-left: 2px; }
+.sp-input, .sp-select, .sp-textarea {
+  width: 100%; min-height: 40px; padding: 8px 12px;
+  border: 1px solid var(--sp-border-strong); border-radius: var(--sp-radius-sm);
+  background: var(--sp-surface); color: var(--sp-text);
+  font-size: var(--sp-text-14); line-height: var(--sp-lh-control);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.sp-textarea { min-height: 112px; resize: vertical; }
+.sp-input:hover, .sp-select:hover, .sp-textarea:hover { border-color: var(--sp-muted); }
+.sp-input:focus, .sp-select:focus, .sp-textarea:focus {
+  outline: none; border-color: var(--sp-info);
+  box-shadow: 0 0 0 3px rgba(45, 108, 223, 0.16);
+}
+.sp-input[aria-invalid='true'], .sp-textarea[aria-invalid='true'] { border-color: var(--sp-danger); }
+.sp-hint { font-size: var(--sp-text-12); color: var(--sp-text-muted); }
+.sp-error { font-size: var(--sp-text-12); color: var(--sp-danger); font-weight: 500; }
+.sp-check { display: inline-flex; align-items: center; gap: 8px; font-size: var(--sp-text-14); cursor: pointer; }
+.sp-check input { width: 16px; height: 16px; accent-color: var(--sp-primary); }
+
+/* cards & badges */
+.sp-card {
+  background: var(--sp-surface); border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-md); box-shadow: var(--sp-shadow-card);
+}
+.sp-card--pad { padding: 24px; }
+.sp-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: var(--sp-radius-pill);
+  font-size: var(--sp-text-12); font-weight: 600; line-height: 1.5;
+  background: var(--sp-bg); color: var(--sp-text-secondary);
+}
+.sp-badge--success { background: var(--sp-success-soft); color: var(--sp-success); }
+.sp-badge--warning { background: var(--sp-warning-soft); color: var(--sp-warning); }
+.sp-badge--danger { background: var(--sp-danger-soft); color: var(--sp-danger); }
+.sp-badge--info { background: var(--sp-info-soft); color: var(--sp-info-strong); }
+.sp-badge--accent { background: #FBF0DC; color: var(--sp-accent-text); }
+
+/* alerts */
+.sp-alert {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 16px; border-radius: var(--sp-radius-md);
+  border: 1px solid var(--sp-border); background: var(--sp-surface);
+  font-size: var(--sp-text-14);
+}
+.sp-alert--error { border-color: #F2C7C1; background: var(--sp-danger-soft); color: #8E2A20; }
+.sp-alert--info { border-color: #C9DAF8; background: var(--sp-info-soft); color: #1C4C9C; }
+.sp-alert--success { border-color: #BDE0D2; background: var(--sp-success-soft); color: #145C44; }
+.sp-alert--warning { border-color: #F3D9AE; background: var(--sp-warning-soft); color: #7A460A; }
+
+/* tables */
+.sp-table { font-size: var(--sp-text-14); }
+.sp-table caption { text-align: left; padding: 0 0 12px; color: var(--sp-text-secondary); font-size: var(--sp-text-13); }
+.sp-table th {
+  position: sticky; top: 0; z-index: 1;
+  background: #F9FAFB; color: var(--sp-text-secondary);
+  font-size: var(--sp-text-12); font-weight: 700; letter-spacing: .04em;
+  text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--sp-border);
+  white-space: nowrap;
+}
+.sp-table td { padding: 14px 16px; border-bottom: 1px solid var(--sp-border); vertical-align: middle; }
+.sp-table tbody tr:nth-child(even) { background: rgba(15, 23, 32, 0.04); }
+.sp-table tbody tr:hover { background: rgba(45, 108, 223, 0.05); }
+.sp-table .sp-num, .sp-table td.sp-num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* product grid — dense retail rhythm: four rails inside the 1200px canvas */
+.sp-grid-products {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px 18px;
+}
+@media (max-width: 1279px) { .sp-grid-products { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1023px) { .sp-grid-products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
+@media (max-width: 767px) { .sp-grid-products { gap: 12px 10px; } }
+
+/* skeleton */
+.sp-skeleton {
+  background: linear-gradient(90deg, #EDE7DC 25%, #F7F4EF 37%, #EDE7DC 63%);
+  background-size: 400% 100%;
+  animation: sp-shimmer 1.4s ease infinite;
+  border-radius: var(--sp-radius-sm);
+}
+@keyframes sp-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+/* utilities */
+.sp-stack { display: flex; flex-direction: column; gap: 16px; }
+.sp-row { display: flex; align-items: center; gap: 12px; }
+.sp-row--between { justify-content: space-between; }
+.sp-wrap { flex-wrap: wrap; }
+.sp-grow { flex: 1 1 auto; min-width: 0; }
+.sp-mt-2 { margin-top: 8px; } .sp-mt-3 { margin-top: 12px; } .sp-mt-4 { margin-top: 16px; }
+.sp-mt-6 { margin-top: 24px; } .sp-mt-8 { margin-top: 32px; } .sp-mb-4 { margin-bottom: 16px; }
+.sp-text-12 { font-size: var(--sp-text-12); } .sp-text-13 { font-size: var(--sp-text-13); }
+.sp-text-16 { font-size: var(--sp-text-16); } .sp-text-18 { font-size: var(--sp-text-18); }
+.sp-bold { font-weight: 700; }
+.sp-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sp-clamp-1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* page-level helpers */
+[id] { scroll-margin-top: calc(var(--sp-header-h) + 16px); }
+.table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.sp-page-head { padding: 24px 0 8px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.sp-page-head h1 { font-size: 28px; }
+.sp-page-head p { color: var(--sp-text-secondary); margin-top: 4px; }
+
+.sp-steps { display: flex; align-items: center; gap: 8px; padding: 24px 0 8px; font-size: 13px; color: var(--sp-text-muted); }
+.sp-steps li { display: inline-flex; align-items: center; gap: 8px; }
+.sp-steps li::after { content: ''; width: 40px; height: 1px; background: var(--sp-border); margin-left: 8px; }
+.sp-steps li:last-child::after { display: none; }
+.sp-steps .dot { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--sp-border); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; background: var(--sp-surface); }
+.sp-steps li.on { color: var(--sp-primary); font-weight: 700; }
+.sp-steps li.on .dot { background: var(--sp-primary); border-color: var(--sp-primary); color: #fff; }
+
+.sp-tabbar { display: flex; gap: 4px; border-bottom: 1px solid var(--sp-border); overflow-x: auto; }
+.sp-tabbar button { border: 0; background: transparent; padding: 12px 16px; font-size: 14px; color: var(--sp-text-secondary); border-bottom: 2px solid transparent; white-space: nowrap; min-height: 44px; }
+.sp-tabbar button:hover { color: var(--sp-primary); }
+.sp-tabbar button[aria-selected='true'] { color: var(--sp-primary); font-weight: 700; border-bottom-color: var(--sp-accent); }
+
+.sp-summary { background: var(--sp-surface); border: 1px solid var(--sp-border); border-radius: 8px; padding: 20px; }
+.sp-summary dl { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.sp-summary dl > div { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; }
+.sp-summary dt { color: var(--sp-text-secondary); }
+.sp-summary dd { margin: 0; font-variant-numeric: tabular-nums; }
+.sp-summary .total { border-top: 1px solid var(--sp-border); padding-top: 12px; margin-top: 4px; font-size: 16px; font-weight: 700; }
+.sp-summary .total dd { color: var(--sp-accent-text); font-size: 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important; scroll-behavior: auto !important;
+  }
+}
+
+
+
+/* ---- Juice Shop theme mixins set a:link colors; keep StellarPick surfaces readable ---- */
+a:link,
+a:visited {
+  color: inherit;
+}
+.sp-link:link,
+.sp-link:visited {
+  color: var(--sp-info);
+}
+.site-header a:link,
+.site-header a:visited {
+  color: inherit;
+}
+/* Light paper header: the wordmark is ink, not white. */
+.site-header .wordmark strong {
+  color: var(--sp-primary);
+}
+.site-header .wordmark small {
+  color: var(--sp-text-muted);
+}
+.footer nav a:link,
+.footer nav a:visited,
+.footer .contact a:link,
+.footer .contact a:visited {
+  color: rgba(255, 255, 255, 0.72);
+}
+.footer nav a:hover,
+.footer .contact a:hover {
+  color: var(--sp-accent);
+}
+.footer .logo:link,
+.footer .logo:visited {
+  color: #fff;
+}
+
+
+
+/* Anchor buttons must keep their own foreground colour (a:link beats a class). */
+a.sp-btn--primary:link,
+a.sp-btn--primary:visited,
+a.sp-btn--danger:link,
+a.sp-btn--danger:visited {
+  color: #fff;
+}
+a.sp-btn--accent:link,
+a.sp-btn--accent:visited,
+a.sp-btn--secondary:link,
+a.sp-btn--secondary:visited,
+a.sp-btn--ghost:link,
+a.sp-btn--ghost:visited {
+  color: var(--sp-primary);
+}
+a.sp-btn:disabled,
+a.sp-btn[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+
+
+/* Mobile gutter matches header/footer (100% - 32px per design book). */
+@media (max-width: 767px) {
+  .sp-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+
+
+/* The Juice Shop theme compiles to .blue-lightblue-theme a:link (0,2,1);
+   these selectors must out-rank it so brand colours survive. */
+body.blue-lightblue-theme a:link,
+body.blue-lightblue-theme a:visited {
+  color: inherit;
+}
+body.blue-lightblue-theme a.sp-btn--primary:link,
+body.blue-lightblue-theme a.sp-btn--primary:visited,
+body.blue-lightblue-theme a.sp-btn--danger:link,
+body.blue-lightblue-theme a.sp-btn--danger:visited {
+  color: #fff;
+}
+body.blue-lightblue-theme a.sp-btn--accent:link,
+body.blue-lightblue-theme a.sp-btn--accent:visited,
+body.blue-lightblue-theme a.sp-btn--secondary:link,
+body.blue-lightblue-theme a.sp-btn--secondary:visited,
+body.blue-lightblue-theme a.sp-btn--ghost:link,
+body.blue-lightblue-theme a.sp-btn--ghost:visited {
+  color: var(--sp-primary);
+}
+body.blue-lightblue-theme a.sp-link:link,
+body.blue-lightblue-theme a.sp-link:visited {
+  color: var(--sp-info);
+}
+body.blue-lightblue-theme .site-header a:link,
+body.blue-lightblue-theme .site-header a:visited {
+  color: inherit;
+}
+body.blue-lightblue-theme .footer nav a:link,
+body.blue-lightblue-theme .footer nav a:visited,
+body.blue-lightblue-theme .footer .contact a:link,
+body.blue-lightblue-theme .footer .contact a:visited {
+  color: rgba(255, 255, 255, 0.72);
+}
+body.blue-lightblue-theme .footer nav a:hover,
+body.blue-lightblue-theme .footer .contact a:hover {
+  color: var(--sp-accent);
+}
+body.blue-lightblue-theme .footer .logo:link,
+body.blue-lightblue-theme .footer .logo:visited {
+  color: #fff;
+}
+
+
+
+/* ==========================================================================
+   ArtDirection v2 — editorial retail layer
+   Warm paper surfaces, serif display type, thin rules and studio imagery.
+   Only surfaces/typography live here; page-specific layout stays in the page.
+   ========================================================================== */
+
+/* ---------- surfaces ---------- */
+.sp-paper { background: var(--sp-bg); }
+.sp-paper-deep { background: var(--sp-paper-deep); }
+.sp-panel {
+  background: var(--sp-surface);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-lg);
+  box-shadow: var(--sp-shadow-card);
+}
+.sp-panel--flat { box-shadow: none; }
+.sp-band {
+  background: var(--sp-surface);
+  border-top: 1px solid var(--sp-border);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+/* ---------- editorial type ---------- */
+.sp-serif { font-family: var(--sp-serif); font-weight: 600; letter-spacing: .01em; }
+.sp-display {
+  font-family: var(--sp-serif);
+  font-weight: 600;
+  font-size: var(--sp-serif-display);
+  line-height: 1.18;
+  letter-spacing: .005em;
+}
+.sp-h2 {
+  font-family: var(--sp-serif);
+  font-weight: 600;
+  font-size: var(--sp-serif-h2);
+  line-height: 1.3;
+  letter-spacing: .01em;
+}
+.sp-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sp-accent-text);
+}
+.sp-kicker::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: .55;
+}
+.sp-kicker--plain::before { display: none; }
+.sp-lead { font-size: 15px; line-height: 1.75; color: var(--sp-text-secondary); }
+.sp-meta {
+  font-size: 12px;
+  letter-spacing: .02em;
+  color: var(--sp-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sp-en {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--sp-text-muted);
+}
+.sp-hairline { height: 1px; background: var(--sp-border); border: 0; margin: 0; }
+
+/* ---------- commerce details ---------- */
+.sp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-pill);
+  background: var(--sp-surface);
+  color: var(--sp-text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.sp-chip:hover { border-color: var(--sp-primary); color: var(--sp-primary); }
+.sp-chip--on {
+  background: var(--sp-primary);
+  border-color: var(--sp-primary);
+  color: #fff;
+  font-weight: 600;
+}
+.sp-chip--on:hover { color: #fff; }
+
+.sp-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--sp-accent-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+}
+.sp-price__cur { font-size: .62em; font-weight: 600; }
+.sp-price__was {
+  margin-left: 8px;
+  color: var(--sp-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
+}
+.sp-badge--sage { background: var(--sp-sage-soft); color: var(--sp-sage); }
+.sp-badge--terracotta { background: var(--sp-terracotta-soft); color: var(--sp-terracotta-ink); }
+.sp-badge--outline {
+  background: transparent;
+  border: 1px solid var(--sp-border-strong);
+  color: var(--sp-text-secondary);
+}
+.sp-badge--solid { background: var(--sp-primary); color: #fff; }
+
+/* ---------- studio media ---------- */
+.sp-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--sp-image-bg);
+  border-radius: var(--sp-radius-md);
+}
+.sp-media--4x3 { aspect-ratio: 4 / 3; }
+.sp-media--1x1 { aspect-ratio: 1 / 1; }
+.sp-media img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- link with a moving arrow ---------- */
+.sp-link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sp-primary);
+}
+.sp-link-arrow app-icon { transition: transform .18s ease; }
+.sp-link-arrow:hover { color: var(--sp-accent-text); }
+.sp-link-arrow:hover app-icon { transform: translateX(3px); }
+
+/* ---------- sticky side rails must clear the three-tier header ---------- */
+body.blue-lightblue-theme .side,
+body.blue-lightblue-theme .rail { top: calc(var(--sp-header-h) + 12px); }
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .sp-link-arrow:hover app-icon { transform: none; }
+}
+
+
+/* The Juice Shop theme compiles a:link/a:visited (0,2,2) to its tertiary
+   teal. The light paper header must stay ink-on-paper, so the logo anchor is
+   pinned with enough specificity to survive any theme rule. */
+html body.blue-lightblue-theme .site-header .logo,
+html body.blue-lightblue-theme .site-header .logo:link,
+html body.blue-lightblue-theme .site-header .logo:visited,
+html body.blue-lightblue-theme .site-header .logo:hover,
+html body.blue-lightblue-theme .site-header .logo:focus {
+  color: var(--sp-primary);
+}
+html body.blue-lightblue-theme .site-header .wordmark strong {
+  color: var(--sp-primary);
+}
+html body.blue-lightblue-theme .site-header .wordmark small {
+  color: var(--sp-text-muted);
+}
+
+
+/* When a drawer/modal is open inside a page stacking context, drop the sticky
+   header below the overlay so the drawer title is never covered. */
+body:has(.overlay) .site-header {
+  z-index: 0;
+}
+

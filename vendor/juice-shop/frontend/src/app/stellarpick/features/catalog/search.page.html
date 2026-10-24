@@ -1,0 +1,83 @@
+<div class="sp-container search-page">
+  <app-breadcrumb [items]="crumbs" />
+
+  <header class="search-head">
+    <div class="head-main">
+      <p class="sp-eyebrow">搜索结果 · SEARCH</p>
+      @if (hasQuery()) {
+        <h1 class="headline" [innerHTML]="headline()"></h1>
+        <p class="headline-hint">会员价自动显示 · 满 99 元包邮 · 7 天无理由退换</p>
+      } @else {
+        <h1 class="headline">搜索商品</h1>
+        <p class="headline-hint">输入商品名、类目或使用场景，找到你要的那一件。</p>
+      }
+    </div>
+
+    @if (hasQuery()) {
+      <dl class="head-stats">
+        <div>
+          <dt>相关商品</dt>
+          <dd class="sp-num">{{ total() }}</dd>
+        </div>
+        <div>
+          <dt>会员价</dt>
+          <dd>9 折</dd>
+        </div>
+        <div>
+          <dt>发货</dt>
+          <dd>48h</dd>
+        </div>
+      </dl>
+    }
+  </header>
+
+  <form class="search-form" role="search" (submit)="submitSearch($event)">
+    <div class="search-field">
+      <app-icon name="search" [size]="18" />
+      <input
+        class="search-input"
+        type="search"
+        name="q"
+        autocomplete="off"
+        [value]="draft()"
+        (input)="onDraftInput($event)"
+        placeholder="搜索商品，例如 保温杯、四件套"
+        aria-label="搜索关键词" />
+      @if (draft()) {
+        <button class="clear-input" type="button" (click)="clearInput()" aria-label="清空关键词">
+          <app-icon name="x" [size]="14" />
+        </button>
+      }
+    </div>
+    <button class="sp-btn sp-btn--primary" type="submit">搜索</button>
+  </form>
+
+  <div class="hot-row">
+    <span class="hot-label">热门搜索</span>
+    @for (word of hotKeywords; track word) {
+      <a class="hot-chip" [routerLink]="['/search']" [queryParams]="{ q: word }">{{ word }}</a>
+    }
+  </div>
+
+  @if (!hasQuery()) {
+    <app-empty-state
+      title="输入关键词，开始找好物"
+      description="试试上面的热门搜索，或浏览全部商品慢慢挑。"
+      image="search"
+      actionLabel="浏览全部商品"
+      (action)="goAllProducts()" />
+  } @else {
+    <app-search-filter-bar [categories]="categories()" [query]="query()" (patch)="onFilterPatch($event)" />
+
+    <app-catalog-results
+      [context]="context()"
+      [query]="query()"
+      [showSidebar]="false"
+      variant="tile"
+      [relatedSearches]="relatedSearches()"
+      emptyTitle="没有找到相关商品"
+      emptyDescription="换个关键词试试，或清除筛选看看全部商品。"
+      (queryChange)="onQueryChange($event)"
+      (stateChange)="onState($event)" />
+  }
+</div>

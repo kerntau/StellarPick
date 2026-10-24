@@ -1,0 +1,28 @@
+/* Shared layout for the legal document pages (/privacy, /terms). */
+.head { padding: 20px 0 8px; }
+.head h1 { font-size: 32px; }
+.meta { margin-top: 8px; font-size: 13px; color: var(--sp-text-secondary); }
+.doc {
+  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px;
+  align-items: start; padding: 24px 0 64px;
+}
+.side { position: sticky; top: 88px; }
+.article { max-width: 760px; font-size: 15px; line-height: 1.8; color: var(--sp-text-secondary); }
+.article .lead { font-size: 16px; line-height: 1.8; color: var(--sp-text); margin-bottom: 8px; }
+.article h2 { font-size: 20px; margin: 32px 0 12px; color: var(--sp-text); }
+.article section:first-of-type h2 { margin-top: 16px; }
+.article p { margin: 0 0 12px; }
+.article ul { list-style: disc; padding-left: 20px; margin: 0 0 12px; display: flex; flex-direction: column; gap: 6px; }
+.article li { line-height: 1.8; }
+.article strong { color: var(--sp-text); font-weight: 600; }
+.article .sp-alert { margin-top: 32px; font-size: 14px; line-height: 1.7; }
+@media (max-width: 1023px) {
+  .doc { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block-start: 8px; }
+  .side { position: static; margin-bottom: 20px; }
+  .article { max-width: 100%; }
+}
+@media (max-width: 767px) {
+  .sp-container { padding-inline: 16px; }
+  .head h1 { font-size: 28px; }
+  .article { font-size: 15px; }
+}
