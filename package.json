@@ -5,6 +5,7 @@
   "description": "星澜优选 · OWASP Juice Shop 二开靶场（127.0.0.1:8081）",
   "scripts": {
     "start": "powershell -ExecutionPolicy Bypass -File ./start.ps1",
+    "deploy": "powershell -ExecutionPolicy Bypass -File ./deploy.ps1 -Start",
     "reset": "powershell -ExecutionPolicy Bypass -File ./reset.ps1",
     "build": "npm --prefix vendor/juice-shop run build:server",
     "build:frontend": "npm --prefix vendor/juice-shop/frontend exec -- ng build --configuration production",

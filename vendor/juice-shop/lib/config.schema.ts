@@ -73,6 +73,7 @@ const GoogleOauthSchema = z.object({
 // -- Section schemas --
 
 export const ServerSchema = z.object({
+  hostname: z.string().optional(),
   port: z.number(),
   basePath: z.string(),
   baseUrl: z.string()

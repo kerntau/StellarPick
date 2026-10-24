@@ -320,7 +320,7 @@ function configureApp (app: ReturnType<typeof express>, seq: typeof sequelize) {
   }
 
   app.use('/uploads', express.static(path.resolve('uploads')))
-app.use(express.static(path.resolve('frontend/dist/frontend'), { setHeaders: setStaticFileHeaders }))
+  app.use(express.static(path.resolve('frontend/dist/frontend'), { setHeaders: setStaticFileHeaders }))
   app.use(cookieParser('kekse'))
   // vuln-code-snippet end directoryListingChallenge accessLogDisclosureChallenge
 
@@ -795,12 +795,13 @@ export async function start (readyCallback?: () => void) {
   await datacreator()
   datacreatorEnd()
   const port = process.env.PORT ?? config.get('server.port')
+  const hostname = process.env.HOST ?? (config.has('server.hostname') ? config.get<string>('server.hostname') : undefined)
   process.env.BASE_PATH = process.env.BASE_PATH ?? config.get('server.basePath')
 
   metricsUpdateLoop = Metrics.updateLoop() // vuln-code-snippet neutral-line exposedMetricsChallenge
 
-  server.listen(port, () => {
-    logger.info(colors.cyan(`Server listening on port ${colors.bold(`${port}`)}`))
+  server.listen({ port, host: hostname }, () => {
+    logger.info(colors.cyan(`Server listening on ${hostname ?? 'all interfaces'}:${colors.bold(`${port}`)}`))
     startupGauge.set({ task: 'ready' }, (Date.now() - startTime) / 1000)
     if (process.env.BASE_PATH !== '') {
       logger.info(colors.cyan(`Server using proxy base path ${colors.bold(`${process.env.BASE_PATH}`)} for redirects`))

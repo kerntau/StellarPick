@@ -1,0 +1,230 @@
+# 星澜优选 · OWASP Juice Shop 二开配置
+# 用法：NODE_ENV=stellarpick npm start
+server:
+  hostname: 127.0.0.1
+application:
+  domain: stellarpick.example
+  name: '星澜优选'
+  logo: JuiceShop_Logo.png
+  favicon: favicon_js.ico
+  theme: blue-lightblue
+  showVersionNumber: false
+  showGitHubLinks: false
+  privacyContactEmail: service@stellarpick.example
+  customMetricsPrefix: stellarpick
+  welcomeBanner:
+    showOnFirstStart: false
+    title: '欢迎来到星澜优选'
+    message: '<p>把日常，选得更好。演示环境，全部商品与订单均为虚构数据。</p>'
+  cookieConsent:
+    message: '本站使用 Cookie 记住语言与登录状态，仅用于演示。'
+    dismissText: '知道了'
+    linkText: '隐私政策'
+    linkUrl: '/#/privacy-security/privacy-policy'
+
+challenges:
+  showSolvedNotifications: false
+  showHints: false
+  showMitigations: false
+
+ctf:
+  showFlagsInNotifications: false
+  showCountryDetailsInNotifications: none
+
+products:
+  -
+    name: '星澜轻量不粘炒锅 28cm'
+    price: 269
+    deluxePrice: 242
+    limitPerUser: 10
+    description: '少油不粘，轻到单手颠勺。'
+    image: sp-1001.svg
+    quantity: 100
+    urlForProductTamperingChallenge: 'https://www.owasp.org/index.php/O-Saft'
+  -
+    name: '星澜陶瓷餐盘四件套'
+    price: 159
+    deluxePrice: 143
+    limitPerUser: 10
+    description: '高温釉下彩，微波炉洗碗机都安心。'
+    image: sp-1002.svg
+    quantity: 100
+  -
+    name: '星澜 316 不锈钢保温杯 500ml'
+    price: 129
+    deluxePrice: 116
+    limitPerUser: 10
+    description: '316 内胆，12 小时保温。'
+    image: sp-1003.svg
+    quantity: 100
+    reviews:
+      - { text: '在空间站值班时也能喝到热水，保温表现像曲速引擎一样稳定。', author: jim }
+      - { text: '<img src=x alt="" onerror="window.__v04_seed=1" style="display:none">杯身手感很好，保温也稳定。', author: alice }
+  -
+    name: '星澜手冲咖啡壶套装'
+    price: 199
+    deluxePrice: 179
+    limitPerUser: 10
+    description: '一壶一杯，三分钟入门手冲。'
+    image: sp-1004.svg
+    quantity: 100
+  -
+    name: '星澜长绒棉四件套'
+    price: 499
+    deluxePrice: 449
+    limitPerUser: 10
+    description: '60 支长绒棉，越洗越软。'
+    image: sp-1005.svg
+    quantity: 100
+    useForChristmasSpecialChallenge: true
+  -
+    name: '星澜雪松香薰蜡烛'
+    price: 89
+    deluxePrice: 80
+    limitPerUser: 10
+    description: '雪松与佛手柑，燃烧 40 小时。'
+    image: sp-1006.svg
+    quantity: 100
+  -
+    name: '星澜可折叠收纳箱'
+    price: 69
+    deluxePrice: 62
+    limitPerUser: 10
+    description: '不用时压扁收起，承重 30kg。'
+    image: sp-1007.svg
+    quantity: 100
+    reviews:
+      - { text: '收起来只有一片，展开能塞下一整个机器人的零件。', author: bender }
+  -
+    name: '星澜羊毛盖毯'
+    price: 329
+    deluxePrice: 296
+    limitPerUser: 10
+    description: '美利奴羊毛，亲肤不扎。'
+    image: sp-1008.svg
+    quantity: 100
+  -
+    name: '星澜氨基酸洁面乳'
+    price: 79
+    deluxePrice: 71
+    limitPerUser: 10
+    description: '温和清洁，洗后不紧绷。'
+    image: sp-1009.svg
+    quantity: 100
+  -
+    name: '星澜护手霜三支装'
+    price: 59
+    deluxePrice: 53
+    limitPerUser: 10
+    description: '乳木果油，洗手后也不干。'
+    image: sp-1010.svg
+    quantity: 100
+  -
+    name: '星澜声波电动牙刷'
+    price: 239
+    deluxePrice: 215
+    limitPerUser: 10
+    description: '五档模式，续航 60 天。'
+    image: sp-1011.svg
+    quantity: 100
+  -
+    name: '星澜 65W 氮化镓充电器'
+    price: 149
+    deluxePrice: 134
+    limitPerUser: 10
+    description: '一个头，手机笔电都能充。'
+    image: sp-1012.svg
+    quantity: 100
+  -
+    name: '星澜便携蓝牙音箱'
+    price: 299
+    deluxePrice: 269
+    limitPerUser: 10
+    description: '12 小时续航，IPX7 防水。'
+    image: sp-1013.svg
+    quantity: 100
+  -
+    name: '星澜静音无线鼠标'
+    price: 99
+    deluxePrice: 89
+    limitPerUser: 10
+    description: '图书馆级静音，续航一年。'
+    image: sp-1014.svg
+    quantity: 100
+  -
+    name: '星澜铝合金显示器支架'
+    price: 189
+    deluxePrice: 170
+    limitPerUser: 10
+    description: '抬高视线，桌面更清爽。'
+    image: sp-1015.svg
+    quantity: 100
+  -
+    name: '星澜 20 寸登机箱'
+    price: 459
+    deluxePrice: 413
+    limitPerUser: 10
+    description: '五五分仓，能装进经济舱。'
+    image: sp-1016.svg
+    quantity: 100
+    fileForRetrieveBlueprintChallenge: JuiceShop.stl
+    exifForBlueprintChallenge:
+      - OpenSCAD
+  -
+    name: '星澜折叠晴雨伞'
+    price: 79
+    deluxePrice: 71
+    limitPerUser: 10
+    description: '五折收纳，晴雨两用。'
+    image: sp-1017.svg
+    quantity: 100
+  -
+    name: '星澜记忆棉颈枕'
+    price: 119
+    deluxePrice: 107
+    limitPerUser: 10
+    description: '慢回弹支撑，长途不落枕。'
+    image: sp-1018.svg
+    quantity: 100
+  -
+    name: '星澜冷萃咖啡液礼盒'
+    price: 168
+    deluxePrice: 151
+    limitPerUser: 10
+    description: '10 条装，冷水一冲就是冷萃。'
+    image: sp-1019.svg
+    quantity: 100
+    keywordsForPastebinDataLeakChallenge:
+      - hueteroneel
+      - eurogium edule
+  -
+    name: '星澜坚果每日礼盒'
+    price: 138
+    deluxePrice: 124
+    limitPerUser: 10
+    description: '30 天独立小包，锁鲜不返潮。'
+    image: sp-1020.svg
+    quantity: 100
+
+  -
+    name: '星澜隐藏礼盒（注入可见）'
+    price: 0.01
+    deluxePrice: 0.01
+    limitPerUser: 1
+    description: '仅通过 SQL 注入可见的隐藏商品，用于 V01 演示。'
+    image: sp-1020.svg
+    quantity: 1
+    deletedDate: '2026-01-01T00:00:00.000Z'
+
+memories:
+  - image: 'magn(et)ificent!-1571814229653.jpg'
+    caption: '星澜选品团队的桌面一角'
+    user: bjoernGoogle
+  - image: 'favorite-hiking-place.png'
+    caption: '周末去这里走走'
+    geoStalkingMetaSecurityQuestion: 14
+    geoStalkingMetaSecurityAnswer: 'Daniel Boone National Forest'
+  - image: 'IMG_4253.jpg'
+    caption: '以前的工作台'
+    geoStalkingVisualSecurityQuestion: 10
+    geoStalkingVisualSecurityAnswer: 'ITsec'

@@ -6,6 +6,7 @@ tools/e2e/node_modules/
 
 # runtime data
 vendor/juice-shop/data/juiceshop.sqlite*
+vendor/juice-shop/data/lab-runtime.json*
 vendor/juice-shop/uploads/*
 logs/
 *.log
