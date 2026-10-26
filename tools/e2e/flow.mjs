@@ -25,7 +25,7 @@ import { join } from 'node:path';
 const BASE = (process.env.BASE_URL || 'http://127.0.0.1:8081').replace(/\/+$/, '');
 const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const SHOT_DIR = process.env.SHOT_DIR || 'shots/flow';
-const REPORT_FILE = process.env.REPORT_FILE || 'flow-report.json';
+const REPORT_FILE = process.env.REPORT_FILE || join(import.meta.dirname, 'flow-report.json');
 const HEADLESS = process.env.HEADLESS !== '0';
 
 const VIEWPORTS = [
@@ -936,11 +936,11 @@ function finalize() {
   }
 
   report.notes.push(
-    'V04 种子数据（文档/数据不一致，非功能失败）：GET /rest/products/1003/reviews 当前只返回 jim 的纯文本评价，未包含 docs/漏洞入口矩阵.md 与 docs/实现契约.md 所述的 onerror payload。复现：GET http://127.0.0.1:8081/rest/products/1003/reviews，观察 data 仅有 jim 文本；对比 docs/漏洞入口矩阵.md 第 23 行。本 E2E 通过提交带 data-e2e="v04" 的良性标记评价验证 innerHTML（不写入可执行 XSS payload），首次运行会自动补一条标记评价。',
+    'V04 种子数据：config/stellarpick.yml 为商品 1003 预置了两条评价（jim 的纯文本 + alice 的 onerror payload），打开评价 tab 会触发 window.__v04_seed=1。本 E2E 另外提交带 data-e2e="v04" 的良性标记评价验证 innerHTML（不写入可执行 XSS payload），首次运行会自动补一条标记评价。',
     '本脚本只新增数据：每个视口 1 笔结算订单、1 条工单回复、1 个注册账号；V04 标记评价仅在缺失时新增；不删除任何数据。',
   );
 
-  report.command = 'cd T:/StellarPick/tools/e2e && node flow.mjs';
+  report.command = 'node tools/e2e/flow.mjs';
   report.exitCode = failed.length > 0 ? 1 : 0;
   writeFileSync(REPORT_FILE, JSON.stringify(report, null, 2));
 

@@ -164,7 +164,11 @@ export class CatalogResultsComponent {
   }
 
   private load(context: CatalogContext, query: CatalogQuery): void {
-    const key = JSON.stringify([context, query]);
+    // The search page has no context.category; the category page pins it via
+    // context. Keying on the effective category makes search-page chips reload
+    // without making category-page filters request the same pinned category.
+    const effectiveCategory = context.category ?? query.category;
+    const key = [context.q, effectiveCategory, query.sort, query.page, query.size, query.minPrice, query.maxPrice, query.rating, query.inStock].join('|');
     if (key === this.lastKey) {
       return;
     }

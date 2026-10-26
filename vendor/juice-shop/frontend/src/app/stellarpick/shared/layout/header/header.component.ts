@@ -1,5 +1,7 @@
-import { Component, ElementRef, HostListener, effect, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, DestroyRef, ElementRef, HostListener, effect, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { CartService } from '../../../core/cart.service';
@@ -24,6 +26,7 @@ const RECENT_KEY = 'sp.recent';
 export class HeaderComponent {
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   readonly auth = inject(AuthStore);
   readonly authService = inject(AuthService);
   readonly cart = inject(CartService);
@@ -34,6 +37,8 @@ export class HeaderComponent {
   readonly mobileOpen = signal(false);
   readonly query = signal('');
   readonly recent = signal<string[]>([]);
+  /** Path cached once per navigation so template calls don't re-split router.url. */
+  readonly currentPath = signal(this.router.url.split('?')[0].split('#')[0]);
 
   /** Quick category rail under the main bar (seeded catalogue metadata). */
   readonly categories = CATEGORIES;
@@ -60,6 +65,24 @@ export class HeaderComponent {
     effect(() => {
       document.body.style.overflow = this.mobileOpen() ? 'hidden' : '';
     });
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.currentPath.set(this.router.url.split('?')[0].split('#')[0]);
+        // A route change must not leave the mobile drawer open (and the body
+        // scroll-locked) on the destination page.
+        this.closePanels();
+      });
+    if (typeof window !== 'undefined') {
+      const desktop = window.matchMedia('(min-width: 1024px)');
+      const onChange = (event: MediaQueryListEvent): void => {
+        if (event.matches) {
+          this.mobileOpen.set(false);
+        }
+      };
+      desktop.addEventListener('change', onChange);
+      this.destroyRef.onDestroy(() => desktop.removeEventListener('change', onChange));
+    }
     if (this.auth.isLoggedIn()) {
       this.cart.refresh().subscribe({ error: () => undefined });
     }
@@ -81,7 +104,7 @@ export class HeaderComponent {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    this.closePanels();
+    this.closePanels(true);
   }
 
   /** "/" focuses the search field, like most storefronts. */
@@ -96,6 +119,8 @@ export class HeaderComponent {
       return;
     }
     event.preventDefault();
+    this.mobileOpen.set(false);
+    this.accountOpen.set(false);
     if (!this.searchOpen()) {
       this.searchOpen.set(true);
     }
@@ -104,14 +129,24 @@ export class HeaderComponent {
     });
   }
 
-  closePanels(): void {
+  closePanels(refocus = false): void {
     this.searchOpen.set(false);
     this.accountOpen.set(false);
+    this.mobileOpen.set(false);
+    if (refocus) {
+      this.refocusOpener();
+    }
+  }
+
+  /** Return keyboard focus to the button that opened the panel (Escape / outside click). */
+  private refocusOpener(): void {
+    const opener = this.host.nativeElement.querySelector<HTMLElement>('[data-panel-opener].is-open');
+    opener?.focus();
   }
 
   /** Highlights the category strip for /category/:slug. */
   isCategoryActive(slug: string): boolean {
-    const path = this.router.url.split('?')[0].split('#')[0];
+    const path = this.currentPath();
     if (slug === 'all') {
       return path === '/category' || path === '/category/all';
     }
@@ -119,8 +154,7 @@ export class HeaderComponent {
   }
 
   isActive(item: NavItem): boolean {
-    const url = this.router.url;
-    const path = url.split('?')[0].split('#')[0];
+    const path = this.currentPath();
     if (item.path === '/') {
       return path === '/';
     }
@@ -128,12 +162,14 @@ export class HeaderComponent {
       return false;
     }
     if (item.fragment) {
-      return url.includes('#' + item.fragment);
+      return this.router.url.includes('#' + item.fragment);
     }
-    return !url.includes('#');
+    return !this.router.url.includes('#');
   }
 
   toggleSearch(): void {
+    this.mobileOpen.set(false);
+    this.accountOpen.set(false);
     this.searchOpen.update((open) => !open);
     if (this.searchOpen()) {
       setTimeout(() => {
@@ -166,12 +202,15 @@ export class HeaderComponent {
 
   toggleAccount(event: Event): void {
     event.stopPropagation();
+    this.mobileOpen.set(false);
+    this.searchOpen.set(false);
     this.accountOpen.update((open) => !open);
   }
 
   toggleMobile(): void {
     this.mobileOpen.update((open) => !open);
     this.searchOpen.set(false);
+    this.accountOpen.set(false);
   }
 
   logout(): void {

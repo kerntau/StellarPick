@@ -87,8 +87,7 @@
             <span class="member-chip">会员价 <strong class="sp-num">{{ memberPrice() | spMoney }}</strong></span>
           </div>
           <div class="price-sub">
-            <span class="list-price">日常价 <s class="sp-num">{{ listPrice() | spMoney }}</s></span>
-            <span class="save sp-num">立省 {{ listSaving() | spMoney }}</span>
+            <span class="save sp-num">会员立省 {{ listSaving() | spMoney }}</span>
           </div>
           <div class="promo-row">
             <span class="promo"><app-icon name="percent" [size]="13" /> 会员日 满 300 减 40</span>

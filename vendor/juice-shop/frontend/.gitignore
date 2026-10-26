@@ -7,7 +7,7 @@
 
 # dependencies
 /node_modules
-package-lock.json
+# StellarPick pins dependencies: package-lock.json is tracked for reproducible installs.
 
 # IDEs and editors
 /.idea

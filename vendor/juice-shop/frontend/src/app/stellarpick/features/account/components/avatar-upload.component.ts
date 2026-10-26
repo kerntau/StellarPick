@@ -1,5 +1,6 @@
 import { HttpClient, HttpEventType, HttpRequest } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { AuthStore } from '../../../core/auth/auth.store';
 import { errorMessage } from '../../../core/models';
 import { ToastService } from '../../../core/toast.service';
 import { IconComponent } from '../../../shared/ui/icon/icon.component';
@@ -118,6 +119,7 @@ import { DEFAULT_AVATAR } from './account-avatar';
 export class AvatarUploadComponent {
   private readonly http = inject(HttpClient);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthStore);
 
   readonly avatar = input<string | null>(null);
   readonly name = input('会员');
@@ -179,6 +181,12 @@ export class AvatarUploadComponent {
           this.preview.set(url);
           this.progress.set(100);
           this.uploading.set(false);
+          // The server persists profileImage and re-issues the JWT so the
+          // header avatar survives a reload.
+          const token = event.headers.get('X-StellarPick-Token');
+          if (token) {
+            this.auth.applyToken(token);
+          }
           this.uploaded.emit(url);
           this.toast.show('头像已更新');
         }

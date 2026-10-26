@@ -336,7 +336,8 @@ async function createQuantity () {
   return await Promise.all(
     config.get<ProductConfig[]>('products').map(async (product, index) => {
       return await QuantityModel.create({
-        ProductId: index + 1,
+        // Products are seeded with the documented 1001..1021 ids.
+        ProductId: 1001 + index,
         quantity: product.quantity ?? Math.floor(Math.random() * 70 + 30),
         limitPerUser: product.limitPerUser ?? null
       }).catch((err: unknown) => {
@@ -521,42 +522,42 @@ async function createBasketItems () {
   const basketItems = [
     {
       BasketId: 1,
-      ProductId: 1,
+      ProductId: 1001,
       quantity: 2
     },
     {
       BasketId: 1,
-      ProductId: 2,
+      ProductId: 1002,
       quantity: 3
     },
     {
       BasketId: 1,
-      ProductId: 3,
+      ProductId: 1003,
       quantity: 1
     },
     {
       BasketId: 2,
-      ProductId: 4,
+      ProductId: 1004,
       quantity: 2
     },
     {
       BasketId: 3,
-      ProductId: 4,
+      ProductId: 1004,
       quantity: 1
     },
     {
       BasketId: 4,
-      ProductId: 4,
+      ProductId: 1004,
       quantity: 2
     },
     {
       BasketId: 5,
-      ProductId: 3,
+      ProductId: 1003,
       quantity: 5
     },
     {
       BasketId: 5,
-      ProductId: 4,
+      ProductId: 1004,
       quantity: 2
     }
   ]

@@ -9,6 +9,12 @@ const login = await fetch(BASE + '/rest/user/login', {
   body: JSON.stringify({ email: 'alice@stellarpick.example', password: 'Alice@2026' }),
 });
 const token = (await login.json()).authentication.token;
+const merchantLogin = await fetch(BASE + '/rest/user/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'merchant@stellarpick.example', password: 'Merchant@2026' }),
+});
+const merchantToken = (await merchantLogin.json()).authentication.token;
 
 const routes = [
   '/',
@@ -34,10 +40,13 @@ const routes = [
 const browser = await chromium.launch({ executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 await context.addInitScript((value) => localStorage.setItem('token', value), token);
+const merchantContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+await merchantContext.addInitScript((value) => localStorage.setItem('token', value), merchantToken);
 
 let bad = 0;
 for (const route of routes) {
-  const page = await context.newPage();
+  const isMerchant = route.startsWith('/merchant');
+  const page = await (isMerchant ? merchantContext : context).newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push('PAGEERROR ' + error.message));
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text().slice(0, 120)); });

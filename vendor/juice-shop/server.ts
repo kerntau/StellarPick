@@ -297,6 +297,17 @@ function configureApp (app: ReturnType<typeof express>, seq: typeof sequelize) {
   app.use('/ftp(?!/quarantine)/:file', servePublicFiles()) // vuln-code-snippet vuln-line directoryListingChallenge
   app.use('/ftp/quarantine/:file', serveQuarantineFiles()) // vuln-code-snippet neutral-line directoryListingChallenge
 
+  /* HTTP request logging: before static files, the lab routes and the API. */
+  const accessLogStream = getStream({
+    filename: path.resolve('logs/access.log.%DATE%'),
+    date_format: 'YYYY-MM-DD',
+    audit_file: 'logs/audit.json',
+    frequency: 'daily',
+    verbose: false,
+    max_logs: '2d'
+  })
+  app.use(morgan('combined', { stream: accessLogStream }))
+
   app.use('/.well-known', serveIndexMiddleware, serveIndex('.well-known', { icons: true, view: 'details' }))
   app.use('/.well-known', express.static('.well-known'))
 
@@ -335,7 +346,9 @@ function configureApp (app: ReturnType<typeof express>, seq: typeof sequelize) {
     directory: path.resolve('i18n'),
     cookie: 'language',
     defaultLocale: 'en',
-    autoReload: process.env.NODE_ENV !== 'test'
+    // The i18n file watcher can crash on Windows with EBUSY when a translation
+    // file is briefly locked; the lab ships static translations, so don't watch.
+    autoReload: process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'stellarpick'
   })
   app.use(i18n.init)
 
@@ -372,17 +385,6 @@ function configureApp (app: ReturnType<typeof express>, seq: typeof sequelize) {
     }
     next()
   })
-
-  /* HTTP request logging */
-  const accessLogStream = getStream({
-    filename: path.resolve('logs/access.log.%DATE%'),
-    date_format: 'YYYY-MM-DD',
-    audit_file: 'logs/audit.json',
-    frequency: 'daily',
-    verbose: false,
-    max_logs: '2d'
-  })
-  app.use(morgan('combined', { stream: accessLogStream }))
 
   // vuln-code-snippet start resetPasswordMortyChallenge
   /* Rate limiting */
@@ -790,6 +792,24 @@ errorhandler.title = `${config.get<string>('application.name')} (Express ${utils
 
 export async function start (readyCallback?: () => void) {
   const datacreatorEnd = startupGauge.startTimer({ task: 'datacreator' })
+  const nodeEnv = process.env.NODE_ENV ?? ''
+  // The lab always force-syncs SQLite. Starting without the lab configuration
+  // (e.g. `npm start` in vendor/juice-shop) would silently wipe the demo data,
+  // so refuse once StellarPick runtime state or a lab database exists.
+  if (nodeEnv !== 'stellarpick' && nodeEnv !== 'test' && (fs.existsSync(path.resolve('data/lab-runtime.json')) || fs.existsSync(path.resolve('data/juiceshop.sqlite')))) {
+    throw new Error('StellarPick lab data or database detected. Refusing to start without NODE_ENV=stellarpick because startup would reset the database. Use ./start.ps1 or set NODE_ENV=stellarpick.')
+  }
+  // The service records its own PID so the start/reset scripts guard the real
+  // Node process, not just the PowerShell wrapper that launched it.
+  const lockFile = process.env.STELLARPICK_LOCK_FILE
+  if (lockFile) {
+    try {
+      fs.mkdirSync(path.dirname(lockFile), { recursive: true })
+      fs.writeFileSync(lockFile, JSON.stringify({ pid: process.pid, port: process.env.PORT ?? config.get('server.port'), startedAt: new Date().toISOString() }))
+    } catch (err) {
+      logger.warn('Could not write the StellarPick lock file: ' + String(err))
+    }
+  }
   await sequelize.sync({ force: true })
   await preconditionsReady
   await datacreator()

@@ -99,7 +99,7 @@ interface AccountNavItem {
 
       .side {
         position: sticky;
-        top: 88px;
+        top: calc(var(--sp-header-h) + 12px);
         min-width: 0;
         display: flex;
         flex-direction: column;

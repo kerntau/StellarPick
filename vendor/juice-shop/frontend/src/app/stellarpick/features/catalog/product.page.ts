@@ -13,6 +13,7 @@ import { DomSanitizer, SafeHtml, Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
 import { ProductsApi } from '../../core/api/products.api';
+import { memberPriceFor } from '../../core/catalog';
 import { ReviewsApi } from '../../core/api/reviews.api';
 import { AuthStore } from '../../core/auth/auth.store';
 import { CartService } from '../../core/cart.service';
@@ -44,8 +45,6 @@ interface ReviewView extends Review {
   likes: number;
 }
 
-/** Members pay 90% of the shelf price in this demo storefront. */
-const MEMBER_RATE = 0.9;
 const FAVORITES_KEY = 'sp.favorites';
 
 /** Styling sets shipped with the catalog; keyed by category slug. */
@@ -253,6 +252,7 @@ export class ProductPage {
   private productSub?: Subscription;
   private reviewsSub?: Subscription;
   private relatedSub?: Subscription;
+  private fillRelatedSub?: Subscription;
   private skeletonTimer?: ReturnType<typeof setTimeout>;
 
   /**
@@ -332,16 +332,16 @@ export class ProductPage {
   readonly categorySlug = computed(() => this.product()?.categoryId ?? '');
   readonly categoryName = computed(() => this.product()?.categoryName ?? '全部商品');
   readonly memberPrice = computed(() => {
-    const price = this.product()?.price ?? 0;
-    return Math.round(price * MEMBER_RATE * 100) / 100;
+    const product = this.product();
+    return product ? memberPriceFor(product) : 0;
   });
   readonly memberSaving = computed(() => {
     const price = this.product()?.price ?? 0;
     return Math.round((price - this.memberPrice()) * 100) / 100;
   });
-  readonly subtotal = computed(() => (this.product()?.price ?? 0) * this.qty());
-  /** Suggested retail price used for the struck-through reference. */
-  readonly listPrice = computed(() => Math.ceil(((this.product()?.price ?? 0) * 1.3) / 10) * 10);
+  readonly subtotal = computed(() => this.memberPrice() * this.qty());
+  /** Shelf price; the member price is the actual selling price. */
+  readonly listPrice = computed(() => this.product()?.price ?? 0);
   readonly listSaving = computed(() => Math.max(0, this.listPrice() - this.memberPrice()));
   /** Member price split into 3 interest-free instalments. */
   readonly installment = computed(() => Math.ceil((this.memberPrice() / 3) * 100) / 100);
@@ -462,6 +462,7 @@ export class ProductPage {
     this.productSub?.unsubscribe();
     this.reviewsSub?.unsubscribe();
     this.relatedSub?.unsubscribe();
+    this.fillRelatedSub?.unsubscribe();
 
     this.loading.set(true);
     this.error.set(null);
@@ -723,7 +724,7 @@ export class ProductPage {
   }
 
   memberPriceOf(product: Product): number {
-    return Math.round(product.price * MEMBER_RATE * 100) / 100;
+    return memberPriceFor(product);
   }
 
   helpfulCount(review: ReviewView): number {
@@ -842,6 +843,7 @@ export class ProductPage {
   private loadRelated(product: Product): void {
     this.relatedLoading.set(true);
     this.relatedSub?.unsubscribe();
+    this.fillRelatedSub?.unsubscribe();
     this.relatedSub = this.api
       .list({ category: product.categoryId, size: 8, sort: 'sales' })
       .subscribe({
@@ -862,11 +864,17 @@ export class ProductPage {
   }
 
   private fillRelated(product: Product, existing: Product[]): void {
-    this.api
+    this.fillRelatedSub?.unsubscribe();
+    this.fillRelatedSub = this.api
       .list({ size: 12, sort: 'sales' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
+          // A product switch may have started a newer request; never write the
+          // previous product's fallback recommendations into the new page.
+          if (this.product()?.id !== product.id) {
+            return;
+          }
           const merged = [...existing];
           const seen = new Set(merged.map((item) => item.id));
           seen.add(product.id);

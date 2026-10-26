@@ -493,7 +493,7 @@
   font-weight: 600;
   letter-spacing: .22em;
   text-transform: uppercase;
-  color: #857358;
+  color: var(--sp-text-muted);
 }
 
 .cat-text {
@@ -1211,8 +1211,6 @@
   .promise-grid li:nth-child(odd) { border-left: 0; padding-left: 0; }
   .promise-grid li:nth-child(n + 3) { border-top: 1px solid var(--sp-border); }
 
-  .cat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-
   .editorial-grid,
   .member-inner,
   .story-grid,
@@ -1225,8 +1223,6 @@
 }
 
 @media (max-width: 767px) {
-  .sp-container { padding-inline: 16px; }
-
   .stage { height: 486px; }
 
   .scrim {

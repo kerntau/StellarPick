@@ -59,7 +59,7 @@
       "V06": "Read-only; no reset required.",
       "V07": "Client-side only; remove localStorage['token'] or log in again.",
       "V08": "Changes Alice's e-mail in SQLite. Restore with POST /api/account/email {email:'alice@stellarpick.example'} (Bearer) or run the hard reset.",
-      "V09": "Creates a new order (id 2000-2899) in lab-runtime.json and clears Alice's cart. Use POST /lab/reset?confirm=1 to remove it.",
+      "V09": "Creates a new order (id max+1, starting at 2001) in lab-runtime.json and removes only the checked-out cart lines. Use POST /lab/reset?confirm=1 to remove it.",
       "V10": "Writes an .svg into uploads/. Use POST /lab/reset?confirm=1 or delete uploads/."
     }
   },
@@ -207,7 +207,7 @@
         "status": "pending_shipment",
         "items": "1003 x2 + 1012 x2"
       },
-      "note": "GET /api/orders filters by the caller's e-mail/ownerId; GET /api/orders/:id does not check ownership (V05). V09 creates new orders, so Alice's list grows until POST /lab/reset?confirm=1 restores the 10 seed orders."
+      "note": "GET /api/orders filters by the caller's e-mail only; GET /api/orders/:id does not check ownership (V05). V09 creates new orders, so Alice's list grows until POST /lab/reset?confirm=1 restores the 10 seed orders."
     },
     "labUsers": {
       "count": 8,
@@ -250,7 +250,7 @@
         "xss": false
       }
     ],
-    "reviewNote": "V04 is write-based: the seeded reviews are benign. PUT /rest/products/1003/reviews adds the HTML payload; reviews disappear on process restart."
+    "reviewNote": "Product 1003 ships with two seed reviews: jim's benign text and alice's onerror payload (window.__v04_seed=1). PUT /rest/products/1003/reviews adds the HTML payload; reviews added at runtime disappear on process restart."
   },
   "endpoints": [
     {
@@ -682,7 +682,7 @@
         "evidence": "Alice sees Bob's order and delivery address. GET /api/orders itself is filtered to Alice's 4 orders; only the detail endpoint is IDOR."
       },
       "negative": "N04",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:24-33",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:35-44",
       "reset": "Read-only."
     },
     {
@@ -710,7 +710,7 @@
         "evidence": "Alice renders the admin user table. The 8 rows are the lab directory, not the 27 SQLite users."
       },
       "negative": "N05",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:80",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:92",
       "reset": "Read-only."
     },
     {
@@ -739,7 +739,7 @@
         "evidence": "The header menu shows 平台后台 and both lab and native admin APIs accept the unsigned token."
       },
       "negative": "N06 (member without a forged token gets 403 on settings)",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:148-165 + vendor/juice-shop/lib/insecurity.ts:52",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:161-178 + vendor/juice-shop/lib/insecurity.ts:52",
       "reset": "Remove localStorage['token'] or log in again."
     },
     {
@@ -772,7 +772,7 @@
         "evidence": "Login sets sp_token (HttpOnly; Secure; SameSite=None). A page at http://localhost:8081/lab/csrf.html auto-submits the form to http://127.0.0.1:8081; Alice's e-mail changes (login with the new e-mail returns 200)."
       },
       "negative": "No cookie/Bearer → 401",
-      "codeRef": "vendor/juice-shop/routes/login.ts:28 + vendor/juice-shop/routes/stellarpick.ts:321-352",
+      "codeRef": "vendor/juice-shop/routes/login.ts:28 + vendor/juice-shop/routes/stellarpick.ts:371-416",
       "reset": "POST /api/account/email with Bearer and the original e-mail, or hard reset."
     },
     {
@@ -809,8 +809,8 @@
         "evidence": "Order is created with total 0.01 instead of 129."
       },
       "negative": "none (business logic)",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:200-231 and 265-315",
-      "reset": "Creates an order (id 2000-2899) in lab-runtime.json; POST /lab/reset?confirm=1 removes it."
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:296-369",
+      "reset": "Creates an order (id max+1, starting at 2001) in lab-runtime.json; POST /lab/reset?confirm=1 removes it."
     },
     {
       "id": "V10",
@@ -837,7 +837,7 @@
         "evidence": "The uploaded SVG is served inline from the same origin and the script runs when opened directly."
       },
       "negative": "none (upload)",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:354-373",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:421-440",
       "reset": "POST /lab/reset?confirm=1 or delete uploads/."
     }
   ],

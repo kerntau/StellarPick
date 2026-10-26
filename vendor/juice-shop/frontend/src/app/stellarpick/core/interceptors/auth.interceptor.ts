@@ -16,13 +16,21 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((err: HttpErrorResponse) => {
-      const isAuthCall = req.url.includes('/api/login') || req.url.includes('/api/register');
+      // A failed login/registration is not an expired session: let the page
+      // show its own error instead of clearing the store and redirecting.
+      // Password/reset endpoints also answer 401 for a wrong current password
+      // or security answer, which is a form error rather than session expiry.
+      const isAuthCall =
+        (req.method === 'POST' && req.url.includes('/rest/user/login')) ||
+        (req.method === 'POST' && req.url.endsWith('/api/Users')) ||
+        req.url.includes('/rest/user/change-password') ||
+        req.url.includes('/rest/user/reset-password');
       if (err.status === 401 && !isAuthCall) {
         store.clear();
         toast.show('登录已过期，请重新登录', 'error');
-        const next = router.url;
-        if (!next.startsWith('/login')) {
-          router.navigate(['/login'], { queryParams: { next } });
+        const current = router.url;
+        if (!current.startsWith('/login')) {
+          router.navigate(['/login'], { queryParams: { next: current } });
         }
       }
       return throwError(() => err);

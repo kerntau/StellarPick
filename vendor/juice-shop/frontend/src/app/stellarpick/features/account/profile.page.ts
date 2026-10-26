@@ -120,7 +120,7 @@ interface TierTarget {
       <section class="sp-card sp-card--pad profile" aria-labelledby="profile-title">
         <div class="card-head">
           <div>
-            <span class="sp-eyebrow">PROFILE</span>
+            <span class="sp-eyebrow sp-eyebrow--muted">PROFILE</span>
             <h2 id="profile-title">账户资料</h2>
           </div>
           <span class="completeness"><strong class="sp-num">{{ profileCompleteness() }}%</strong> 资料完整度</span>
@@ -195,7 +195,7 @@ interface TierTarget {
         <section class="sp-card sp-card--pad address-card" aria-labelledby="address-card-title">
           <div class="card-head">
             <div>
-              <span class="sp-eyebrow">DELIVERY</span>
+              <span class="sp-eyebrow sp-eyebrow--muted">DELIVERY</span>
               <h2 id="address-card-title">默认收货地址</h2>
             </div>
             <a class="sp-link sp-text-12" routerLink="/account/addresses">管理</a>
@@ -225,7 +225,7 @@ interface TierTarget {
         <section class="sp-card sp-card--pad score-card" aria-labelledby="score-title">
           <div class="card-head">
             <div>
-              <span class="sp-eyebrow">SECURITY</span>
+              <span class="sp-eyebrow sp-eyebrow--muted">SECURITY</span>
               <h2 id="score-title">账户安全</h2>
             </div>
             <span class="score-label">{{ securityLabel() }}</span>
@@ -258,7 +258,7 @@ interface TierTarget {
     <section class="block" id="security" aria-labelledby="security-title">
       <div class="section-head">
         <div>
-          <span class="sp-eyebrow">SECURITY</span>
+          <span class="sp-eyebrow sp-eyebrow--muted">SECURITY</span>
           <h2 id="security-title">安全设置</h2>
         </div>
         <p class="sp-text-13 sp-muted">修改后立即生效，请妥善保管账号信息。</p>
@@ -395,7 +395,7 @@ interface TierTarget {
     <section class="block" aria-labelledby="recent-orders-title">
       <div class="section-head">
         <div>
-          <span class="sp-eyebrow">ORDERS</span>
+          <span class="sp-eyebrow sp-eyebrow--muted">ORDERS</span>
           <h2 id="recent-orders-title">最近订单</h2>
         </div>
         <a class="sp-link" routerLink="/account/orders">查看全部订单（{{ ordersTotal() }}）</a>
@@ -456,7 +456,7 @@ interface TierTarget {
     <section class="block" aria-labelledby="coupons-title">
       <div class="section-head">
         <div>
-          <span class="sp-eyebrow">COUPON WALLET</span>
+          <span class="sp-eyebrow sp-eyebrow--muted">COUPON WALLET</span>
           <h2 id="coupons-title">优惠券钱包</h2>
         </div>
         <span class="sp-text-13 sp-muted">{{ availableCoupons().length }} 张可用</span>
@@ -528,7 +528,7 @@ interface TierTarget {
     <section class="block" aria-labelledby="activity-title">
       <div class="section-head">
         <div>
-          <span class="sp-eyebrow">YOUR PICKS</span>
+          <span class="sp-eyebrow sp-eyebrow--muted">YOUR PICKS</span>
           <h2 id="activity-title">最近浏览与收藏</h2>
         </div>
         <a class="sp-link sp-text-13" routerLink="/category/all">继续逛</a>
@@ -607,14 +607,6 @@ interface TierTarget {
         gap: 12px 16px;
         padding-bottom: 20px;
         flex-wrap: wrap;
-      }
-      .sp-eyebrow {
-        display: block;
-        font-size: 10.5px;
-        font-weight: 700;
-        letter-spacing: .18em;
-        color: var(--sp-text-muted);
-        margin-bottom: 4px;
       }
       .page-head h1 { font-family: var(--sp-serif); font-size: 34px; letter-spacing: .02em; }
       .page-head p { margin-top: 4px; }
@@ -1296,11 +1288,15 @@ export class ProfilePage {
     this.savingEmail.set(true);
     // V08: plain POST to /api/account/email, no CSRF token, no Origin check.
     this.accountApi.updateEmail(email).subscribe({
-      next: () => {
+      next: (token) => {
         this.savingEmail.set(false);
         this.emailTouched.set(false);
         this.profileEmail.set(email);
-        this.auth.merge({ email });
+        if (token) {
+          this.auth.applyToken(token);
+        } else {
+          this.auth.merge({ email });
+        }
         this.toast.show('邮箱已更新');
       },
       error: (err) => {

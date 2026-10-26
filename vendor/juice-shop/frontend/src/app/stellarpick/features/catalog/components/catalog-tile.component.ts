@@ -1,6 +1,7 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart.service';
+import { memberPriceFor } from '../../../core/catalog';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { Product, errorMessage } from '../../../core/models';
 import { ToastService } from '../../../core/toast.service';
@@ -63,7 +64,8 @@ import { RatingStarsComponent } from '../../../shared/ui/rating-stars/rating-sta
           <button
             class="add"
             type="button"
-            [disabled]="product().stock === 0"
+            [disabled]="product().stock === 0 || adding()"
+            [attr.aria-busy]="adding()"
             [attr.aria-label]="'加购：' + product().title"
             (click)="add()">
             <app-icon name="cart" [size]="15" /><span>加购</span>
@@ -120,8 +122,9 @@ export class CatalogTileComponent {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
-  readonly memberPrice = computed(() => Math.round(this.product().price * 0.9 * 100) / 100);
+  readonly memberPrice = computed(() => memberPriceFor(this.product()));
   readonly reviewCount = computed(() => Math.max(1, Math.round(this.product().sales / 90)));
+  readonly adding = signal(false);
 
   add(): void {
     if (!this.auth.isLoggedIn()) {
@@ -129,9 +132,19 @@ export class CatalogTileComponent {
       this.router.navigate(['/login'], { queryParams: { next: this.router.url } });
       return;
     }
+    if (this.adding()) {
+      return;
+    }
+    this.adding.set(true);
     this.cart.addProduct(this.product(), 1).subscribe({
-      next: (cart) => this.toast.show('已加入购物车 · 共 ' + cart.count + ' 件'),
-      error: (err) => this.toast.show(errorMessage(err), 'error'),
+      next: (cart) => {
+        this.adding.set(false);
+        this.toast.show('已加入购物车 · 共 ' + cart.count + ' 件');
+      },
+      error: (err) => {
+        this.adding.set(false);
+        this.toast.show(errorMessage(err), 'error');
+      },
     });
   }
 }

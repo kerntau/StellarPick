@@ -97,9 +97,12 @@ export class AccountApi {
     return this.http.delete<void>('/api/addresses/' + id);
   }
 
-  updateEmail(email: string): Observable<void> {
-    // V08: no CSRF token, no Origin check.
-    return this.http.post<void>('/api/account/email', { email });
+  updateEmail(email: string): Observable<string | null> {
+    // V08: no CSRF token, no Origin check. The server re-issues the JWT in a
+    // response header so the header/sidebar and order list stop using the old email.
+    return this.http.post<void>('/api/account/email', { email }, { observe: 'response' }).pipe(
+      map((res) => res.headers.get('X-StellarPick-Token')),
+    );
   }
 
   changePassword(current: string, next: string): Observable<void> {

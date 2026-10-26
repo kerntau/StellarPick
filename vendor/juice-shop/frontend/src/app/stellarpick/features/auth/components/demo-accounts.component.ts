@@ -57,7 +57,7 @@ export interface DemoAccount {
       border: 0; background: transparent; text-align: left;
       transition: background-color .15s ease;
     }
-    .row:hover { background: #F7F9FC; }
+    .row:hover { background: #FCFAF6; }
     .role { font-size: 11px; font-weight: 700; color: var(--sp-accent-text); letter-spacing: .04em; }
     .cred { display: flex; flex-direction: column; min-width: 0; }
     .user { font-size: 13px; font-weight: 600; color: var(--sp-text); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

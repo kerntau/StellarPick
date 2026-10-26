@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { RouterModule, type Routes, type UrlMatchResult, type UrlSegment } from '@angular/router'
 import { AccountingGuard, LoginGuard } from './app.guard'
-import { authGuard } from './stellarpick/core/auth/auth.guard'
+import { authGuard, merchantGuard } from './stellarpick/core/auth/auth.guard'
 
 const loadFaucetModule = async () => {
   const module = await import('./faucet/faucet.module')
@@ -30,11 +30,6 @@ const loadCodingChallenge = async () => {
 const loadRecycleComponent = async () => {
   const module = await import('./recycle/recycle.component')
   return module.RecycleComponent
-}
-
-const loadAboutComponent = async () => {
-  const module = await import('./about/about.component')
-  return module.AboutComponent
 }
 
 // vuln-code-snippet start adminSectionChallenge scoreBoardChallenge web3SandboxChallenge
@@ -97,7 +92,7 @@ const routes: Routes = [
   },
   {
     path: 'merchant',
-    canActivate: [authGuard],
+    canActivate: [merchantGuard],
     loadComponent: async () => (await import('./stellarpick/features/merchant/merchant.layout')).MerchantLayout,
     children: [
       { path: '', pathMatch: 'full', loadComponent: async () => (await import('./stellarpick/features/merchant/dashboard.page')).MerchantDashboardPage },
@@ -144,10 +139,6 @@ const routes: Routes = [
     path: 'accounting',
     loadComponent: async () => (await import('./accounting/accounting.component')).AccountingComponent,
     canActivate: [AccountingGuard]
-  },
-  {
-    path: 'about',
-    loadComponent: async () => await loadAboutComponent()
   },
   {
     path: 'address/select',
@@ -212,56 +203,9 @@ const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'account/orders',
-    loadComponent: async () => (await import('./stellarpick/order-list.component')).SpOrderListComponent
-  },
-  {
-    path: 'account/orders/:id',
-    loadComponent: async () => (await import('./stellarpick/order-detail.component')).SpOrderDetailComponent
-  },
-  {
-    path: 'admin/users',
-    loadComponent: async () => (await import('./stellarpick/admin-users.component')).SpAdminUsersComponent
-  },
-  {
-    path: 'cart',
-    loadComponent: async () => (await import('./stellarpick/cart.component')).SpCartComponent
-  },
-  {
-    path: 'account/profile',
-    loadComponent: async () => (await import('./stellarpick/profile.component')).SpProfileComponent
-  },
-  {
+    // Historical alias: /product/:id/reviews opens the product page's review tab.
     path: 'product/:id/reviews',
     loadComponent: async () => (await import('./stellarpick/features/catalog/product.page')).ProductPage
-  },
-  {
-    path: 'checkout',
-    loadComponent: async () => (await import('./stellarpick/checkout.component')).SpCheckoutComponent
-  },
-  {
-    path: 'product/:id',
-    loadComponent: async () => (await import('./stellarpick/product.component')).SpProductComponent
-  },
-  {
-    path: 'account/addresses',
-    loadComponent: async () => (await import('./stellarpick/addresses.component')).SpAddressesComponent
-  },
-  {
-    path: 'merchant',
-    loadComponent: async () => (await import('./stellarpick/merchant.component')).SpMerchantComponent
-  },
-  {
-    path: 'merchant/products',
-    loadComponent: async () => (await import('./stellarpick/merchant-products.component')).SpMerchantProductsComponent
-  },
-  {
-    path: 'merchant/orders',
-    loadComponent: async () => (await import('./stellarpick/merchant-orders.component')).SpMerchantOrdersComponent
-  },
-  {
-    path: 'support/tickets',
-    loadComponent: async () => (await import('./stellarpick/tickets.component')).SpTicketsComponent
   },
   {
     path: 'payment/:entity',
@@ -272,24 +216,12 @@ const routes: Routes = [
     loadComponent: async () => (await import('./wallet/wallet.component')).WalletComponent
   },
   {
-    path: 'login',
-    loadComponent: async () => (await import('./login/login.component')).LoginComponent
-  },
-  {
     path: 'forgot-password',
     loadComponent: async () => (await import('./forgot-password/forgot-password.component')).ForgotPasswordComponent
   },
   {
     path: 'recycle',
     loadComponent: async () => await loadRecycleComponent()
-  },
-  {
-    path: 'register',
-    loadComponent: async () => (await import('./register/register.component')).RegisterComponent
-  },
-  {
-    path: 'search',
-    loadComponent: async () => (await import('./search-result/search-result.component')).SearchResultComponent
   },
   {
     path: 'hacking-instructor',

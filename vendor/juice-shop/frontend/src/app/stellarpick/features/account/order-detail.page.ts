@@ -150,7 +150,7 @@ const STATUS_INDEX: Record<string, number> = {
             </div>
             <div>
               <span class="meta-label">配送方式</span>
-              <strong>{{ shippingLabel(o.shipping) }}</strong>
+              <strong>{{ shippingLabel(o.shipping, o.shippingSlot) }}</strong>
             </div>
             <div>
               <span class="meta-label">运单号</span>
@@ -183,7 +183,7 @@ const STATUS_INDEX: Record<string, number> = {
                   @if (specOf(item.productId)) {
                     <span class="item-spec">{{ specOf(item.productId) }}</span>
                   }
-                  <span class="member-chip">会员价</span>
+                  <span class="member-chip">成交价</span>
                   <span class="sp-num">{{ item.unitPrice | spMoney }}</span>
                   <span class="dot-sep">×</span>
                   {{ item.quantity }}
@@ -231,8 +231,14 @@ const STATUS_INDEX: Record<string, number> = {
               </div>
               <div>
                 <dt>发票</dt>
-                <dd>{{ invoiceLabel(o.invoice) }}</dd>
+                <dd>{{ invoiceLabel(o.invoice, o.invoiceTitle) }}</dd>
               </div>
+              @if (o.gift) {
+                <div>
+                  <dt>赠言</dt>
+                  <dd>{{ o.gift }}</dd>
+                </div>
+              }
             </dl>
             <p class="sp-hint account-hint">订单信息按订单号展示，请核对收货人与下单账号后再操作。</p>
           </section>
@@ -242,7 +248,7 @@ const STATUS_INDEX: Record<string, number> = {
             <dl class="info-list logistics-head">
               <div>
                 <dt>配送方式</dt>
-                <dd>{{ shippingLabel(o.shipping) }}</dd>
+                <dd>{{ shippingLabel(o.shipping, o.shippingSlot) }}</dd>
               </div>
               <div>
                 <dt>运单号</dt>
@@ -385,14 +391,6 @@ const STATUS_INDEX: Record<string, number> = {
         margin-bottom: 8px;
       }
       .back-link:hover { color: var(--sp-primary); }
-      .detail-head .sp-eyebrow {
-        display: block;
-        font-size: 10.5px;
-        font-weight: 700;
-        letter-spacing: .18em;
-        color: var(--sp-text-muted);
-        margin-bottom: 2px;
-      }
       .title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
       .title-row h1 { font-family: var(--sp-serif); font-size: 32px; letter-spacing: .02em; }
       .dot-sep { margin: 0 6px; color: var(--sp-text-muted); }
@@ -526,7 +524,7 @@ const STATUS_INDEX: Record<string, number> = {
       .logistics-timeline li.on .log-copy strong { color: var(--sp-text); }
       .log-copy small { font-size: 10.5px; color: var(--sp-text-muted); }
 
-      .amount-card { position: sticky; top: 88px; }
+      .amount-card { position: sticky; top: calc(var(--sp-header-h) + 12px); }
       .amount-list { display: flex; flex-direction: column; gap: 10px; margin: 0; }
       .amount-list > div { display: flex; justify-content: space-between; gap: 16px; font-size: var(--sp-text-14); }
       .amount-list dt { color: var(--sp-text-secondary); }
@@ -840,6 +838,10 @@ export class OrderDetailPage {
   }
 
   paymentLabel(order: Order): string {
+    const map: Record<string, string> = { wechat: '微信支付', alipay: '支付宝', card: '银行卡' };
+    if (order.payment && map[order.payment]) {
+      return map[order.payment];
+    }
     return order.status === 'pending_payment' ? '待支付' : '微信支付（演示）';
   }
 
@@ -880,7 +882,7 @@ export class OrderDetailPage {
     });
   }
 
-  shippingLabel(value: string | undefined): string {
+  shippingLabel(value: string | undefined, slot?: string): string {
     if (!value) {
       return '标准配送';
     }
@@ -891,10 +893,11 @@ export class OrderDetailPage {
       scheduled: '预约配送',
       pickup: '到店自提',
     };
-    return map[value] ?? value;
+    const label = map[value] ?? value;
+    return value === 'scheduled' && slot ? label + ' · ' + slot : label;
   }
 
-  invoiceLabel(value: string | undefined): string {
+  invoiceLabel(value: string | undefined, title?: string): string {
     if (!value) {
       return '不开发票';
     }
@@ -905,7 +908,8 @@ export class OrderDetailPage {
       company: '电子普通发票（单位）',
       personal: '电子普通发票（个人）',
     };
-    return map[value] ?? value;
+    const label = map[value] ?? value;
+    return value === 'personal' && title ? label + ' · ' + title : label;
   }
 
   trackingNo(order: Order): string {

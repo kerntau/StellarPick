@@ -56,6 +56,16 @@ export function categoryOf(productId: number): string {
   return CATEGORY_BY_PRODUCT.get(productId) ?? 'all';
 }
 
+/** Member price is the actual selling price used by cart/checkout. */
+export const MEMBER_RATE = 0.9;
+
+export function memberPriceFor(product: Pick<Product, 'price' | 'deluxePrice'>): number {
+  const list = Number(product.price ?? 0);
+  const deluxe = Number(product.deluxePrice ?? 0);
+  const price = deluxe > 0 && deluxe < list ? deluxe : list * MEMBER_RATE;
+  return Math.round(price * 100) / 100;
+}
+
 export function enrichProduct(raw: any): Product {
   const id = Number(raw.id);
   const meta = PRODUCT_META[id];
@@ -66,6 +76,7 @@ export function enrichProduct(raw: any): Product {
     title: String(raw.name ?? '商品'),
     subtitle: meta?.subtitle ?? String(raw.description ?? '').slice(0, 40),
     price: Number(raw.price ?? 0),
+    deluxePrice: Number(raw.deluxePrice ?? 0) || undefined,
     // Juice Shop v20 products have no stock column; treat the catalog as in stock.
     stock: Number(raw.quantity ?? raw.stock ?? 100),
     image,

@@ -1,6 +1,7 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart.service';
+import { memberPriceFor } from '../../../core/catalog';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { Product, errorMessage } from '../../../core/models';
 import { ToastService } from '../../../core/toast.service';
@@ -40,11 +41,14 @@ import { RatingStarsComponent } from '../rating-stars/rating-stars.component';
           <span class="sales">已售 {{ product().sales }}</span>
         </div>
         <div class="foot">
-          <span class="price sp-num">{{ product().price | spMoney }}</span>
+          <span class="prices">
+            <span class="price sp-num">{{ memberPrice() | spMoney }}</span>
+            <span class="was sp-num">{{ product().price | spMoney }}</span>
+          </span>
           <!-- The visible "加购" label reappears between 768px and 1023px, so the
                accessible name has to contain it. -->
-          <button class="add" type="button" (click)="add()" [disabled]="product().stock === 0"
-                  [attr.aria-label]="'加购：' + product().title">
+          <button class="add" type="button" (click)="add()" [disabled]="product().stock === 0 || adding()"
+                  [attr.aria-busy]="adding()" [attr.aria-label]="'加购：' + product().title">
             <app-icon name="cart" [size]="15" /><span>加购</span>
           </button>
         </div>
@@ -172,6 +176,14 @@ import { RatingStarsComponent } from '../rating-stars/rating-stars.component';
       white-space: nowrap;
     }
 
+    .prices { display: flex; align-items: baseline; gap: 4px; min-width: 0; }
+    .was {
+      color: var(--sp-text-muted);
+      font-size: 11px;
+      text-decoration: line-through;
+      white-space: nowrap;
+    }
+
     .add {
       display: inline-flex;
       align-items: center;
@@ -203,6 +215,11 @@ import { RatingStarsComponent } from '../rating-stars/rating-stars.component';
       .add { opacity: 1; }
     }
 
+    /* Touch devices wider than 1023px have no hover, so keep the button visible. */
+    @media (hover: none) {
+      .add { opacity: 1; }
+    }
+
     @media (max-width: 767px) {
       .body { padding: 10px 10px 12px; gap: 4px; }
       .title { font-size: 13px; min-height: 37px; }
@@ -219,6 +236,8 @@ export class ProductCardComponent {
   readonly product = input.required<Product>();
   /** True for the first screenful so its images load eagerly (LCP). */
   readonly priority = input(false);
+  readonly memberPrice = computed(() => memberPriceFor(this.product()));
+  readonly adding = signal(false);
   private readonly cart = inject(CartService);
   private readonly auth = inject(AuthStore);
   private readonly router = inject(Router);
@@ -230,9 +249,19 @@ export class ProductCardComponent {
       this.router.navigate(['/login'], { queryParams: { next: this.router.url } });
       return;
     }
+    if (this.adding()) {
+      return;
+    }
+    this.adding.set(true);
     this.cart.addProduct(this.product(), 1).subscribe({
-      next: (cart) => this.toast.show('已加入购物车 · 共 ' + cart.count + ' 件'),
-      error: (err) => this.toast.show(errorMessage(err), 'error'),
+      next: (cart) => {
+        this.adding.set(false);
+        this.toast.show('已加入购物车 · 共 ' + cart.count + ' 件');
+      },
+      error: (err) => {
+        this.adding.set(false);
+        this.toast.show(errorMessage(err), 'error');
+      },
     });
   }
 }

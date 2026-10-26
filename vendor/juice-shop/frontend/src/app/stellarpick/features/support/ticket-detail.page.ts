@@ -392,13 +392,20 @@ export class TicketDetailPage {
 
   isMine(message: TicketMessage): boolean {
     const fromAgent = message.role === 'support' || message.role === 'admin';
-    return this.agentView() ? fromAgent : !fromAgent;
+    if (this.agentView()) {
+      return fromAgent;
+    }
+    const email = this.auth.user()?.email;
+    if (message.authorEmail && email) {
+      return message.authorEmail === email;
+    }
+    return !fromAgent;
   }
 
   who(message: TicketMessage): string {
     const fromAgent = message.role === 'support' || message.role === 'admin';
     if (this.isMine(message)) {
-      return this.auth.user()?.name || (fromAgent ? '客服' : '我');
+      return message.author || this.auth.user()?.name || (fromAgent ? '客服' : '我');
     }
     if (fromAgent) {
       return message.author || '客服';

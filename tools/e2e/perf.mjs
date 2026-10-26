@@ -31,7 +31,14 @@ const login = await fetch(BASE + '/rest/user/login', {
   body: JSON.stringify({ email: 'alice@stellarpick.example', password: 'Alice@2026' })
 });
 if (!login.ok) throw new Error('login failed: ' + login.status);
-const token = (await login.json()).authentication.token;
+const userToken = (await login.json()).authentication.token;
+const merchantLogin = await fetch(BASE + '/rest/user/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'merchant@stellarpick.example', password: 'Merchant@2026' })
+});
+if (!merchantLogin.ok) throw new Error('merchant login failed: ' + merchantLogin.status);
+const merchantToken = (await merchantLogin.json()).authentication.token;
 
 // index.html 里 modulepreload + script 引用的 JS 即 Angular 认定的初始包
 const indexHtml = await (await fetch(BASE + '/')).text();
@@ -44,13 +51,14 @@ const violations = [];
 for (const route of ROUTES) {
   // 每条路由使用全新 context，避免缓存让 transferSize 变成 0
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const routeToken = route.startsWith('/merchant') ? merchantToken : userToken;
   await context.addInitScript((t) => {
     localStorage.setItem('token', t);
     window.__lcp = 0;
     new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) window.__lcp = entry.startTime;
     }).observe({ type: 'largest-contentful-paint', buffered: true });
-  }, token);
+  }, routeToken);
 
   const page = await context.newPage();
   await page.goto(BASE + route, { waitUntil: 'networkidle' });
@@ -103,7 +111,7 @@ for (const path of ['/api/Products/1003', '/rest/products/search?q=' + encodeURI
   const times = [];
   for (let i = 0; i < 5; i++) {
     const start = Date.now();
-    await fetch(BASE + path, { headers: { Authorization: 'Bearer ' + token } });
+    await fetch(BASE + path, { headers: { Authorization: 'Bearer ' + userToken } });
     times.push(Date.now() - start);
   }
   times.sort((a, b) => a - b);

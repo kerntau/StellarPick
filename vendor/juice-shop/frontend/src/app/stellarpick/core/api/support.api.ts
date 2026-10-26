@@ -12,6 +12,7 @@ import { Paged, Ticket, TicketMessage } from '../models';
 interface RawMessage {
   id?: number;
   author?: string;
+  authorEmail?: string;
   role?: string;
   body?: string;
   createdAt?: string;
@@ -26,6 +27,7 @@ interface RawTicket {
   updatedAt?: string;
   author?: string;
   userName?: string;
+  ownerEmail?: string;
   body?: string;
   lastMessage?: string;
   messageCount?: number;
@@ -47,6 +49,7 @@ function toMessage(raw: RawMessage, index: number): TicketMessage {
   return {
     id: Number(raw.id ?? index + 1),
     author: String(raw.author ?? ''),
+    authorEmail: raw.authorEmail ? String(raw.authorEmail) : undefined,
     role: String(raw.role ?? 'member'),
     body: String(raw.body ?? ''),
     createdAt: String(raw.createdAt ?? ''),
@@ -64,6 +67,7 @@ function toTicket(raw: RawTicket): Ticket {
     createdAt: String(raw.createdAt ?? ''),
     updatedAt: String(raw.updatedAt ?? last?.createdAt ?? raw.createdAt ?? ''),
     userName: String(raw.userName ?? raw.author ?? '会员'),
+    ownerEmail: raw.ownerEmail ? String(raw.ownerEmail) : undefined,
     lastMessage: String(raw.lastMessage ?? last?.body ?? raw.body ?? ''),
     // 列表接口不返回消息数，正文本身就是第一条消息，因此至少计 1 条。
     messageCount: Number(raw.messageCount ?? messages?.length ?? (raw.body ? 1 : 0)),

@@ -296,7 +296,7 @@ interface OrderStep {
         transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
       }
       .stat:hover { border-color: var(--sp-border-strong); background: #FFFDF8; }
-      .stat.is-on { border-color: var(--sp-primary); background: #F7F9FC; box-shadow: 0 0 0 2px rgba(11, 37, 69, .1); }
+      .stat.is-on { border-color: var(--sp-primary); background: #FFFDF8; box-shadow: 0 0 0 2px rgba(180, 101, 63, .12); }
       .stat-icon {
         width: 36px;
         height: 36px;

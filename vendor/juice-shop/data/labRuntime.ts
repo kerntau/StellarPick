@@ -26,6 +26,12 @@ export interface Order {
   total: number
   items: OrderItem[]
   address: { recipient: string; phone: string; region: string; detail: string }
+  shipping?: string
+  shippingSlot?: string
+  invoice?: string
+  invoiceTitle?: string
+  payment?: string
+  gift?: string
   trackingNo?: string
 }
 
@@ -35,6 +41,7 @@ export interface CartLine {
   title: string
   image: string
   unitPrice: number
+  listPrice?: number
   quantity: number
   stock: number
 }
@@ -47,11 +54,13 @@ export interface Ticket {
   statusText: string
   createdAt: string
   author: string
+  ownerEmail: string
 }
 
 export interface TicketMessage {
   id: number
   author: string
+  authorEmail?: string
   role: string
   body: string
   createdAt: string
@@ -77,8 +86,8 @@ const item = (productId: number, title: string, unitPrice: number, quantity: num
   quantity
 })
 
-// Seeded orders. ownerId values are historical seed ids, so the order list is
-// matched by owner e-mail first and ownerId second (alice/bob ids are 26/27).
+// Seeded orders. ownerId values are historical seed ids; the order list is
+// matched by owner e-mail only (alice/bob ids are 26/27).
 export const SEED_ORDERS: Order[] = [
   {
     id: 1001,
@@ -205,10 +214,25 @@ export const SEED_ORDERS: Order[] = [
 ]
 
 export const SEED_TICKETS: Ticket[] = [
-  { id: 1, subject: '发票抬头需要修改', body: '订单 1002 的发票抬头写错了，麻烦改成公司名称。', status: 'processing', statusText: '处理中', createdAt: '2026-10-20T10:00:00.000Z', author: '林晓' },
-  { id: 2, subject: '保温杯到货后杯盖有划痕', body: '杯盖边缘有一道明显划痕，想申请换货。', status: 'open', statusText: '待处理', createdAt: '2026-10-19T10:10:00.000Z', author: '林晓' },
-  { id: 3, subject: '配送时间能否改到周末', body: '工作日家里没人，希望周六送达。', status: 'closed', statusText: '已关闭', createdAt: '2026-10-12T09:00:00.000Z', author: '周远' }
+  { id: 1, subject: '发票抬头需要修改', body: '订单 1002 的发票抬头写错了，麻烦改成公司名称。', status: 'processing', statusText: '处理中', createdAt: '2026-10-20T10:00:00.000Z', author: '林晓', ownerEmail: 'alice@stellarpick.example' },
+  { id: 2, subject: '保温杯到货后杯盖有划痕', body: '杯盖边缘有一道明显划痕，想申请换货。', status: 'open', statusText: '待处理', createdAt: '2026-10-19T10:10:00.000Z', author: '林晓', ownerEmail: 'alice@stellarpick.example' },
+  { id: 3, subject: '配送时间能否改到周末', body: '工作日家里没人，希望周六送达。', status: 'closed', statusText: '已关闭', createdAt: '2026-10-12T09:00:00.000Z', author: '周远', ownerEmail: 'bob@stellarpick.example' }
 ]
+
+const TICKET_OWNER_BY_AUTHOR: Record<string, string> = {
+  '林晓': 'alice@stellarpick.example',
+  '周远': 'bob@stellarpick.example'
+}
+
+// Old lab builds stored author: '会员' on user-created tickets. Their replies
+// carry the username/e-mail, which lets the migration recover the owner.
+const TICKET_OWNER_BY_USERNAME: Record<string, string> = {
+  alice: 'alice@stellarpick.example',
+  bob: 'bob@stellarpick.example',
+  admin: 'admin@stellarpick.example',
+  merchant: 'merchant@stellarpick.example',
+  support: 'support@stellarpick.example'
+}
 
 function clone<T> (value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
@@ -233,8 +257,43 @@ function loadState (): LabState {
     const raw = JSON.parse(fs.readFileSync(runtimeFile, 'utf8'))
     if (Array.isArray(raw.orders) && raw.orders.length > 0) state.orders = raw.orders
     if (raw.carts && typeof raw.carts === 'object') state.carts = raw.carts
-    if (Array.isArray(raw.tickets) && raw.tickets.length > 0) state.tickets = raw.tickets
-    if (raw.ticketMessages && typeof raw.ticketMessages === 'object') state.ticketMessages = raw.ticketMessages
+    if (Array.isArray(raw.tickets) && raw.tickets.length > 0) {
+      state.tickets = raw.tickets.map((ticket: Ticket) => ({
+        ...ticket,
+        ownerEmail: ticket.ownerEmail ?? TICKET_OWNER_BY_AUTHOR[ticket.author] ?? ''
+      }))
+    }
+    if (raw.ticketMessages && typeof raw.ticketMessages === 'object') {
+      state.ticketMessages = raw.ticketMessages
+      // Old user-created tickets had author '会员' and no ownerEmail. Recover
+      // the owner from the first member reply (its author is username/e-mail).
+      for (const ticket of state.tickets) {
+        if (ticket.ownerEmail) continue
+        const messages = state.ticketMessages[String(ticket.id)]
+        if (!Array.isArray(messages)) continue
+        const candidate = messages.find((message: TicketMessage) =>
+          message.author && message.author !== '会员' &&
+          message.role !== 'support' && message.role !== 'admin'
+        )
+        if (!candidate) continue
+        const author = String(candidate.author)
+        ticket.ownerEmail = author.includes('@')
+          ? author
+          : (TICKET_OWNER_BY_USERNAME[author] ?? '')
+      }
+      // Older runtime files stored no authorEmail; derive it from the ticket
+      // owner so member/agent bubbles stay correct after the upgrade.
+      for (const ticket of state.tickets) {
+        const key = String(ticket.id)
+        const messages = state.ticketMessages[key]
+        if (Array.isArray(messages)) {
+          state.ticketMessages[key] = messages.map((message: TicketMessage) => ({
+            ...message,
+            authorEmail: message.authorEmail ?? (message.role === 'support' || message.role === 'admin' ? '' : ticket.ownerEmail)
+          }))
+        }
+      }
+    }
     if (raw.counters && typeof raw.counters === 'object') state.counters = { ...state.counters, ...raw.counters }
   } catch (err) {
     console.warn('lab-runtime.json could not be read, falling back to seed data: ' + String(err))

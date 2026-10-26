@@ -8,6 +8,7 @@ import { ProductModel } from '../models/product'
 import { sequelize } from '../models/index'
 import * as security from '../lib/insecurity'
 import { labState, resetRuntime, runtimeFilePath, SEED_VERSION } from '../data/labRuntime'
+import { resetStellarPickState } from './stellarpick'
 
 const router = Router()
 
@@ -74,6 +75,7 @@ router.post('/reset', (req, res) => {
     return
   }
   resetRuntime()
+  resetStellarPickState()
   const uploadsRemoved = clearUploads()
   security.authenticatedUsers.tokenMap = {}
   security.authenticatedUsers.idMap = {}
@@ -116,12 +118,12 @@ const CSRF_PAGE = `<!doctype html>
 <main>
   <span class="tag">第三方页面 · 不属于星澜优选</span>
   <h1>CSRF 演示：跨站修改受害者邮箱</h1>
-  <p>当前页面来源：<code id="origin">?</code>；目标站点：<code>http://127.0.0.1:8081</code>。</p>
+  <p>当前页面来源：<code id="origin">?</code>；目标站点：<code>{{LOOPBACK}}</code>。</p>
   <p>当受害者已在目标站点登录（浏览器持有 <code>sp_token</code> Cookie），本页会自动提交一个普通表单到
     <code>POST /api/account/email</code>。服务端不校验 CSRF token，也不校验 Origin/Referer，因此请求被接受。</p>
-  <p>提示：用 <code>http://localhost:8081/lab/csrf.html</code> 打开本页即为跨站（localhost 与 127.0.0.1 是不同站点），
-    用 <code>http://127.0.0.1:8081/lab/csrf.html</code> 打开则是同源对照演示。加 <code>?manual=1</code> 可关闭自动提交。</p>
-  <form id="csrf" method="POST" action="http://127.0.0.1:8081/api/account/email" target="sink">
+  <p>提示：用 <code>{{LOCALHOST}}/lab/csrf.html</code> 打开本页即为跨站（localhost 与 127.0.0.1 是不同站点），
+    用 <code>{{LOOPBACK}}/lab/csrf.html</code> 打开则是同源对照演示。加 <code>?manual=1</code> 可关闭自动提交。</p>
+  <form id="csrf" method="POST" action="{{LOOPBACK}}/api/account/email" target="sink">
     <label>新邮箱<input name="email" value="csrf-victim@evil.example" autocomplete="off"></label>
     <button type="submit">提交改邮箱表单</button>
   </form>
@@ -147,8 +149,15 @@ router.get('/reset', (_req, res) => {
   res.status(405).json({ ok: false, code: 'METHOD_NOT_ALLOWED', message: '请使用 POST /lab/reset?confirm=1' })
 })
 
-router.get('/csrf.html', (_req, res) => {
-  res.type('html').send(CSRF_PAGE)
+router.get('/csrf.html', (req, res) => {
+  // Always target the loopback IP so opening the page via localhost stays a
+  // real cross-site request (the sp_token cookie is host-only). The port comes
+  // from the listening socket, never from the untrusted Host header.
+  const port = String((req.socket as any)?.localPort ?? 8081)
+  const page = CSRF_PAGE
+    .replace(/\{\{LOCALHOST\}\}/g, `http://localhost:${port}`)
+    .replace(/\{\{LOOPBACK\}\}/g, `http://127.0.0.1:${port}`)
+  res.type('html').send(page)
 })
 
 router.get('/csrf', (_req, res) => {

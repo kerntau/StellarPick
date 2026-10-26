@@ -13,7 +13,7 @@ export class ToastService {
   private seq = 0;
   readonly toasts = signal<Toast[]>([]);
 
-  show(message: string, type: ToastType = 'success', duration = 3000): void {
+  show (message: string, type: ToastType = 'success', duration = type === 'error' ? 6000 : 3000): void {
     const id = ++this.seq;
     this.toasts.update((list) => [...list, { id, message, type }]);
     setTimeout(() => this.dismiss(id), duration);

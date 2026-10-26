@@ -66,8 +66,6 @@ interface ServiceItem {
 }
 
 const AUTOPLAY_MS = 6000;
-/** 会员日：每周三 00:00–23:59（与 /about 的会员日规则一致）。 */
-const MEMBER_DAY = 3;
 
 const CATEGORY_TILES: readonly CategoryTile[] = [
   { slug: 'kitchen', name: '厨房', en: 'Kitchen', icon: 'utensils', desc: '锅具 · 餐具 · 咖啡', image: '/assets/sp/img/categories/kitchen.svg' },
@@ -230,7 +228,6 @@ export class HomePage {
   readonly heroQuery = signal('');
   /** Bumped on every (re)start so the progress bar animation replays. */
   readonly cycle = signal(0);
-  readonly now = signal(Date.now());
 
   readonly featured = signal<Product[]>([]);
   readonly featuredLoading = signal(true);
@@ -240,7 +237,11 @@ export class HomePage {
 
   readonly newest = signal<Product[]>([]);
   readonly newestLoading = signal(true);
+  readonly newestError = signal<string | null>(null);
+  readonly newestRequestId = signal<string | undefined>(undefined);
   readonly picks = signal<Product[]>([]);
+  readonly picksError = signal<string | null>(null);
+  readonly picksRequestId = signal<string | undefined>(undefined);
 
   readonly categoryCounts = signal<ReadonlyMap<string, number>>(new Map());
   /** Keys of illustrations that failed to load; the tile falls back to a paper swatch. */
@@ -264,7 +265,7 @@ export class HomePage {
   /** The rail falls back to the sales list so the section never collapses. */
   readonly railProducts = computed(() => (this.newest().length > 0 ? this.newest() : this.featured()));
 
-  private readonly editorialSource = computed(() =>
+  readonly editorialSource = computed(() =>
     this.picks().length > 0 ? this.picks() : this.featured(),
   );
   readonly editorLead = computed(() => this.editorialSource()[0] ?? null);
@@ -284,21 +285,6 @@ export class HomePage {
     return this.scenes.map((scene) => ({ ...scene, count: counts.get(scene.slug) ?? null }));
   });
 
-  /** 会员日倒计时：周三当天倒计时到 24:00，其余时间倒计时到下一个周三 00:00。 */
-  readonly isMemberDay = computed(() => new Date(this.now()).getDay() === MEMBER_DAY);
-  readonly countdown = computed(() => {
-    const now = this.now();
-    const target = this.memberDayTarget(now);
-    const total = Math.max(0, Math.floor((target - now) / 1000));
-    const days = Math.floor(total / 86400);
-    const hours = String(Math.floor((total % 86400) / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
-    const seconds = String(total % 60).padStart(2, '0');
-    return {
-      days,
-      clock: (days > 0 ? days + ' 天 ' : '') + hours + ':' + minutes + ':' + seconds,
-    };
-  });
 
   private timer: ReturnType<typeof setTimeout> | null = null;
   private featuredTimer?: ReturnType<typeof setTimeout>;
@@ -306,7 +292,6 @@ export class HomePage {
   private newestSub?: Subscription;
   private picksSub?: Subscription;
   private categoriesSub?: Subscription;
-  private clock?: ReturnType<typeof setInterval>;
   private hidden = false;
 
   private readonly onVisibilityChange = (): void => {
@@ -327,8 +312,6 @@ export class HomePage {
     this.loadPicks();
     this.loadCategories();
 
-    this.clock = setInterval(() => this.now.set(Date.now()), 1000);
-
     if (typeof document !== 'undefined') {
       this.hidden = document.hidden;
       document.addEventListener('visibilitychange', this.onVisibilityChange);
@@ -338,9 +321,6 @@ export class HomePage {
       this.stopTimer();
       if (this.featuredTimer) {
         clearTimeout(this.featuredTimer);
-      }
-      if (this.clock) {
-        clearInterval(this.clock);
       }
       if (typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', this.onVisibilityChange);
@@ -470,26 +450,39 @@ export class HomePage {
     });
   }
 
-  private loadNewest(): void {
+  loadNewest(): void {
     this.newestSub?.unsubscribe();
     this.newestLoading.set(true);
+    this.newestError.set(null);
+    this.newestRequestId.set(undefined);
     this.newestSub = this.api.list({ size: 6, sort: 'newest' }).subscribe({
       next: (res) => {
         this.newest.set(res.items ?? []);
         this.newestLoading.set(false);
       },
-      error: () => {
+      error: (err) => {
         this.newest.set([]);
+        this.newestError.set(errorMessage(err));
+        this.newestRequestId.set(errorRequestId(err));
         this.newestLoading.set(false);
       },
     });
   }
 
-  private loadPicks(): void {
+  loadPicks(): void {
     this.picksSub?.unsubscribe();
+    this.picksError.set(null);
+    this.picksRequestId.set(undefined);
     this.picksSub = this.api.list({ size: 5 }).subscribe({
-      next: (res) => this.picks.set(res.items ?? []),
-      error: () => this.picks.set([]),
+      next: (res) => {
+        this.picks.set(res.items ?? []);
+        this.picksError.set(null);
+      },
+      error: (err) => {
+        this.picks.set([]);
+        this.picksError.set(errorMessage(err));
+        this.picksRequestId.set(errorRequestId(err));
+      },
     });
   }
 
@@ -534,17 +527,5 @@ export class HomePage {
       clearTimeout(this.timer);
       this.timer = null;
     }
-  }
-
-  private memberDayTarget(now: number): number {
-    const date = new Date(now);
-    const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const day = date.getDay();
-    if (day === MEMBER_DAY) {
-      return today.getTime() + 24 * 3600 * 1000;
-    }
-    const delta = (MEMBER_DAY - day + 7) % 7;
-    today.setDate(today.getDate() + delta);
-    return today.getTime();
   }
 }

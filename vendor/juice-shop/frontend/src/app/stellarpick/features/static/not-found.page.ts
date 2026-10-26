@@ -129,7 +129,6 @@ const SHORTCUTS: readonly Shortcut[] = [
     .empty-rec { padding: 56px 0; text-align: center; }
     .rec-placeholder { min-height: 320px; }
     @media (max-width: 767px) {
-      .sp-container { padding-inline: 16px; }
       .hero { padding-top: 20px; }
       .hero h1 { font-size: 26px; }
       .desc { font-size: 14px; }

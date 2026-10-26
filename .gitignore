@@ -18,7 +18,13 @@ vendor/juice-shop/frontend/dist/
 # portable node runtime (shipped separately in the delivery zip)
 tools/node22/
 
+# local tooling
+/.claude/
+
 # test artifacts
+shots/
 tools/e2e/shots/
+tools/e2e/flow-report.json
 flow-report.json
+vendor/juice-shop/data/lab.lock
 dist/

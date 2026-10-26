@@ -121,7 +121,7 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
   styles: [`
     .line {
       display: grid;
-      grid-template-columns: 24px 84px minmax(0, 1fr) 96px 124px 100px 92px;
+      grid-template-columns: 24px 84px minmax(0, 1fr) 96px 138px 100px 92px;
       grid-template-areas: 'pick thumb info unit qty sub actions';
       gap: 12px;
       align-items: center;
@@ -294,12 +294,12 @@ export class CartLineComponent {
   });
   /** Member price is the real unit price; the struck-through price is the list price. */
   readonly listPrice = computed(() => {
-    const price = Number(this.item().unitPrice ?? 0);
-    if (!Number.isFinite(price) || price <= 0) {
+    const list = Number(this.item().listPrice ?? 0);
+    const unit = Number(this.item().unitPrice ?? 0);
+    if (!Number.isFinite(list) || list <= unit) {
       return 0;
     }
-    const list = Math.round((price / 0.95) * 100) / 100;
-    return list - price >= 1 ? list : 0;
+    return Math.round(list * 100) / 100;
   });
   readonly saving = computed(() => {
     const list = this.listPrice();

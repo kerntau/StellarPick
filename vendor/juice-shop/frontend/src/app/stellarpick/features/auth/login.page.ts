@@ -117,8 +117,8 @@ interface LoginErrors {
 
               <p class="terms-note">
                 登录即表示你同意
-                <a class="sp-link" href="/#/terms">《服务条款》</a>与
-                <a class="sp-link" href="/#/privacy">《隐私政策》</a>。
+                <a class="sp-link" routerLink="/terms">《服务条款》</a>与
+                <a class="sp-link" routerLink="/privacy">《隐私政策》</a>。
               </p>
             </form>
 

@@ -1,5 +1,7 @@
 server:
   port: 3000
+  # Local-only lab: never bind the upstream default to all interfaces.
+  hostname: 127.0.0.1
   basePath: ''
   baseUrl: 'http://localhost:3000' # used for CSAF, e.g. https://example.com
 application:

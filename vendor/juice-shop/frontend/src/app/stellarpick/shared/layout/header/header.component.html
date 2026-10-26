@@ -22,7 +22,8 @@
   <div class="bar-row">
     <div class="sp-container bar">
       <button class="icon-btn menu-btn" type="button" (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen()"
-              aria-controls="mobile-nav" aria-label="打开菜单">
+              data-panel-opener [class.is-open]="mobileOpen()"
+              aria-controls="mobile-nav" [attr.aria-label]="mobileOpen() ? '关闭菜单' : '打开菜单'">
         <app-icon name="menu" [size]="22" />
       </button>
 
@@ -47,6 +48,7 @@
       <div class="actions">
         <div class="search-wrap">
           <button class="search-trigger" type="button" (click)="toggleSearch()" [attr.aria-expanded]="searchOpen()"
+                  [class.is-open]="searchOpen()" data-panel-opener
                   aria-controls="search-panel" aria-label="搜索商品">
             <app-icon name="search" [size]="17" />
           </button>
@@ -66,33 +68,34 @@
             <!-- Below 1180px the .name span is hidden, so the button needs an
                  explicit name that still contains the visible text at wide widths. -->
             <button class="account-btn" type="button" (click)="toggleAccount($event)"
+                    [class.is-open]="accountOpen()" data-panel-opener
                     [attr.aria-label]="'账户菜单：' + (auth.user()?.name || '会员')"
-                    [attr.aria-expanded]="accountOpen()" aria-haspopup="menu" aria-controls="account-menu">
+                    [attr.aria-expanded]="accountOpen()" aria-controls="account-menu">
               <img class="avatar" [src]="auth.user()?.avatar || '/assets/sp/img/avatar-default.svg'" alt="" width="28" height="28" />
               <span class="name">{{ auth.user()?.name }}</span>
               <app-icon name="chevron-down" [size]="14" />
             </button>
             @if (accountOpen()) {
-              <div class="account-menu" id="account-menu" role="menu">
+              <nav class="account-menu" id="account-menu" aria-label="账户导航">
                 <div class="who">
                   <strong>{{ auth.user()?.name }}</strong>
                   <span class="sp-badge sp-badge--accent">{{ auth.user()?.level || '会员' }}</span>
                 </div>
-                <a routerLink="/account" role="menuitem" (click)="accountOpen.set(false)">个人中心</a>
-                <a routerLink="/account/orders" role="menuitem" (click)="accountOpen.set(false)">我的订单</a>
-                <a routerLink="/account/reviews" role="menuitem" (click)="accountOpen.set(false)">我的评价</a>
-                <a routerLink="/account/addresses" role="menuitem" (click)="accountOpen.set(false)">收货地址</a>
-                <a routerLink="/support/tickets" role="menuitem" (click)="accountOpen.set(false)">客服工单</a>
+                <a routerLink="/account" (click)="accountOpen.set(false)">个人中心</a>
+                <a routerLink="/account/orders" (click)="accountOpen.set(false)">我的订单</a>
+                <a routerLink="/account/reviews" (click)="accountOpen.set(false)">我的评价</a>
+                <a routerLink="/account/addresses" (click)="accountOpen.set(false)">收货地址</a>
+                <a routerLink="/support/tickets" (click)="accountOpen.set(false)">客服工单</a>
                 @if (auth.isMerchant()) {
-                  <a routerLink="/merchant" role="menuitem" (click)="accountOpen.set(false)">商家工作台</a>
+                  <a routerLink="/merchant" (click)="accountOpen.set(false)">商家工作台</a>
                 }
                 @if (auth.isAdmin()) {
-                  <a routerLink="/admin" role="menuitem" (click)="accountOpen.set(false)">平台后台</a>
+                  <a routerLink="/admin" (click)="accountOpen.set(false)">平台后台</a>
                 }
-                <button class="logout" type="button" role="menuitem" (click)="logout()">
+                <button class="logout" type="button" (click)="logout()">
                   <app-icon name="log-out" [size]="16" /> 退出登录
                 </button>
-              </div>
+              </nav>
             }
           </div>
         } @else {

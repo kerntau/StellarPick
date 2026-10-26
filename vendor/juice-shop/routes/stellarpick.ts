@@ -3,6 +3,7 @@
  * Mounted at /api/orders on top of the real Juice Shop server.
  */
 import express, { Router } from 'express'
+import config from 'config'
 import multer from 'multer'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -13,11 +14,21 @@ import { labState, persistRuntime, nextCounter, type Order, type CartLine, type 
 
 const router = Router()
 
-// Orders list only exposes the caller's own orders (matched by e-mail first, then seed ownerId).
+// The hidden seed product is soft-deleted on purpose (V01) and must stay out of
+// the merchant console even though that console lists soft-deleted products.
+const HIDDEN_PRODUCT_IDS = new Set(
+  config.get<Array<{ deletedDate?: string | boolean }>>('products')
+    .map((product, index) => (product.deletedDate ? 1001 + index : null))
+    .filter((id): id is number => id !== null)
+)
+
+// Orders list only exposes the caller's own orders. Seed orders still carry the
+// historical ownerIds 2/3/6, which today belong to jim/bender/support, so an
+// ownerId fallback would leak other accounts' orders. Match by e-mail only; the
+// by-id detail route below keeps the intentional V05 IDOR.
 router.get('/', labAuth, (req, res) => {
   const email = String((req.user as any)?.data?.email ?? '')
-  const userId = userIdOf(req)
-  const items = labState.orders.filter((order) => (email !== '' && order.ownerEmail === email) || (userId !== 0 && order.ownerId === userId))
+  const items = email === '' ? [] : labState.orders.filter((order) => order.ownerEmail === email)
   res.json({ items, total: items.length, page: 1, size: items.length })
 })
 
@@ -73,6 +84,7 @@ const USERS = [
   { id: 7, username: 'dave', name: '何嘉', email: 'dave@stellarpick.example', role: 'member', status: 'disabled', createdAt: '2026-05-06T03:20:00.000Z' },
   { id: 8, username: 'erin', name: '许棠', email: 'erin@stellarpick.example', role: 'member', status: 'active', createdAt: '2026-06-21T09:10:00.000Z' }
 ]
+const SEED_USERS = USERS.map((user) => ({ ...user }))
 
 // V06: only the login is checked. No role guard on the server or the client.
 const adminRouter = Router()
@@ -92,10 +104,30 @@ adminRouter.patch('/users/:id', labAuth, (req, res) => {
   res.json(user)
 })
 
-adminRouter.post('/users/:id/reset-password', labAuth, (req, res) => {
-  const user = USERS.find((entry) => entry.id === Number(req.params.id))
-  if (!user) { res.status(404).json({ code: 'USER_NOT_FOUND', message: '用户不存在' }); return }
-  res.json({ password: 'Sp@' + Math.random().toString(36).slice(2, 8) })
+adminRouter.post('/users/:id/reset-password', labAuth, async (req, res, next) => {
+  try {
+    const user = USERS.find((entry) => entry.id === Number(req.params.id))
+    if (!user) { res.status(404).json({ code: 'USER_NOT_FOUND', message: '用户不存在' }); return }
+    if (user.status === 'disabled') {
+      res.status(409).json({ code: 'ACCOUNT_DISABLED', message: '该账号已禁用，请先启用账号再重置密码' })
+      return
+    }
+    // The admin directory is a lab view; only accounts that also exist in
+    // SQLite can actually log in, so only those can be reset for real.
+    const sqliteUser = await UserModel.findOne({ where: { email: user.email } })
+    if (!sqliteUser) {
+      res.status(404).json({ code: 'NOT_LOGIN_ACCOUNT', message: '该账号仅存在于演示目录，不能登录，无法重置密码' })
+      return
+    }
+    if (sqliteUser.isActive === false) {
+      res.status(409).json({ code: 'ACCOUNT_DISABLED', message: '该账号已禁用，请先启用账号再重置密码' })
+      return
+    }
+    const password = 'Sp@' + Math.random().toString(36).slice(2, 8)
+    sqliteUser.password = password // the model setter hashes it
+    await sqliteUser.save()
+    res.json({ password })
+  } catch (err) { next(err) }
 })
 
 interface MerchantRow {
@@ -119,6 +151,7 @@ const MERCHANTS: MerchantRow[] = [
   { id: 3, name: '晨野咖啡烘焙', contact: '许棠', phone: '13700000022', license: '91440300MA5F2XQ33D', category: '食品', status: 'pending', statusText: '待审核', ownerName: '许棠', ownerEmail: 'erin@stellarpick.example', appliedAt: '2026-10-19T02:10:00.000Z' },
   { id: 4, name: '北岸数码配件', contact: '何嘉', phone: '13600000033', license: '91110108MA01T9K72P', category: '数码', status: 'rejected', statusText: '已驳回', ownerName: '何嘉', ownerEmail: 'dave@stellarpick.example', appliedAt: '2026-10-02T06:20:00.000Z', reason: '营业执照与经营类目不一致，请补充品牌授权。' }
 ]
+const SEED_MERCHANTS = MERCHANTS.map((merchant) => ({ ...merchant }))
 
 adminRouter.get('/merchants', labAuth, (req, res) => {
   const status = String(req.query.status ?? '')
@@ -168,6 +201,24 @@ function userIdOf (req: any): number {
   return Number(req.user?.data?.id ?? 0)
 }
 
+function emailOf (req: any): string {
+  return String(req.user?.data?.email ?? '')
+}
+
+function roleOf (req: any): string {
+  return String(req.user?.data?.role ?? '').toLowerCase()
+}
+
+// The merchant console is not part of V01–V10, so it gets a real role check.
+function merchantOnly (req: any, res: any, next: any): void {
+  const role = roleOf(req)
+  if (role !== 'merchant' && role !== 'admin') {
+    res.status(403).json({ code: 'FORBIDDEN', message: '仅商家或管理员可访问该资源' })
+    return
+  }
+  next()
+}
+
 function cartOf (userId: number): CartLine[] {
   const key = String(userId)
   if (!Array.isArray(labState.carts[key])) labState.carts[key] = []
@@ -214,6 +265,7 @@ cartRouter.post('/items', async (req, res, next) => {
     if (existing) {
       existing.quantity = Math.min(999, existing.quantity + quantity)
       existing.unitPrice = unitPrice
+      existing.listPrice = Number(product.price)
     } else {
       lines.push({
         id: nextCounter('lineId'),
@@ -221,6 +273,7 @@ cartRouter.post('/items', async (req, res, next) => {
         title: product.name,
         image: product.image,
         unitPrice,
+        listPrice: Number(product.price),
         quantity,
         stock: 100
       })
@@ -295,8 +348,9 @@ checkoutRouter.post('/', (req, res, next) => {
           detail: String(body.address.detail ?? '')
         }
       : { recipient: fallbackName, phone: '', region: '', detail: '' }
+    const nextOrderId = labState.orders.reduce((max, entry) => Math.max(max, entry.id), 2000) + 1
     const order: Order = {
-      id: 2000 + Math.floor(Math.random() * 900),
+      id: nextOrderId,
       ownerId: userId,
       ownerName: String(user.username || fallbackName),
       ownerEmail: email,
@@ -305,10 +359,32 @@ checkoutRouter.post('/', (req, res, next) => {
       createdAt: new Date().toISOString(),
       total,
       items,
+      shipping: body.shipping == null ? undefined : String(body.shipping),
+      shippingSlot: body.shippingSlot == null ? undefined : String(body.shippingSlot),
+      invoice: body.invoice == null ? undefined : String(body.invoice),
+      invoiceTitle: body.invoiceTitle == null ? undefined : String(body.invoiceTitle),
+      payment: body.payment == null ? undefined : String(body.payment),
+      gift: body.gift == null ? undefined : String(body.gift),
       address
     }
     labState.orders.unshift(order)
-    labState.carts[String(userId)] = []
+    // Only remove the lines that were actually checked out; unselected cart
+    // lines must survive a partial checkout.
+    const purchased = new Map<number, number>()
+    for (const item of items) {
+      purchased.set(item.productId, (purchased.get(item.productId) ?? 0) + item.quantity)
+    }
+    const cartKey = String(userId)
+    const remaining: CartLine[] = []
+    for (const line of labState.carts[cartKey] ?? []) {
+      const bought = purchased.get(line.productId) ?? 0
+      if (bought <= 0) {
+        remaining.push(line)
+      } else if (line.quantity > bought) {
+        remaining.push({ ...line, quantity: line.quantity - bought })
+      }
+    }
+    labState.carts[cartKey] = remaining
     persistRuntime()
     res.json(order)
   } catch (err) { next(err) }
@@ -338,6 +414,31 @@ function emailAuth (req: any, res: any, next: any): void {
   labAuth(req, res, next)
 }
 
+function currentToken (req: any): string | undefined {
+  const header = req.headers.authorization
+  if (typeof header === 'string' && header.startsWith('Bearer ')) return header.slice(7)
+  const cookie = req.cookies?.sp_token
+  return typeof cookie === 'string' ? cookie : undefined
+}
+
+/** Re-issue a signed token after a profile change, preserving the basket id. */
+function refreshedToken (req: any, user: Record<string, any>): string | undefined {
+  const token = currentToken(req)
+  // Never turn a forged (alg=none) token into a correctly signed one.
+  if (!token || !security.verify(token)) return undefined
+  const payload = security.decode(token) as { bid?: number } | undefined
+  const authenticatedUser: any = payload?.bid != null ? { data: user, bid: payload.bid } : { data: user }
+  const next = security.authorize(authenticatedUser)
+  security.authenticatedUsers.put(next, authenticatedUser)
+  return next
+}
+
+function tokenUser (user: any): Record<string, any> {
+  // Keep the same shape as the login token, including the password hash:
+  // routes/changePassword.ts compares the current password against it.
+  return user?.get ? user.get({ plain: true }) : { ...(user ?? {}) }
+}
+
 emailRouter.use(emailAuth)
 emailRouter.post('/', async (req, res, next) => {
   try {
@@ -346,7 +447,13 @@ emailRouter.post('/', async (req, res, next) => {
       res.status(400).json({ code: 'BAD_REQUEST', message: '请输入新邮箱' })
       return
     }
-    await UserModel.update({ email }, { where: { id: userIdOf(req) } })
+    const userId = userIdOf(req)
+    await UserModel.update({ email }, { where: { id: userId } })
+    const updated = await UserModel.findByPk(userId)
+    if (updated) {
+      const token = refreshedToken(req, tokenUser(updated))
+      if (token) res.setHeader('X-StellarPick-Token', token)
+    }
     res.status(204).end()
   } catch (err) { next(err) }
 })
@@ -364,23 +471,41 @@ const upload = multer({ storage })
 const avatarRouter = Router()
 avatarRouter.use(labAuth)
 // V10: no extension / MIME validation, original extension preserved.
-avatarRouter.post('/', upload.single('file'), (req: any, res) => {
-  if (!req.file) {
-    res.status(400).json({ code: 'NO_FILE', message: '请选择要上传的头像文件' })
-    return
-  }
-  res.json({ url: '/uploads/' + req.file.filename, filename: req.file.filename, originalName: req.file.originalname, mimetype: req.file.mimetype, size: req.file.size })
+avatarRouter.post('/', upload.single('file'), async (req: any, res, next) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ code: 'NO_FILE', message: '请选择要上传的头像文件' })
+      return
+    }
+    const url = '/uploads/' + req.file.filename
+    const userId = userIdOf(req)
+    if (userId) {
+      await UserModel.update({ profileImage: url }, { where: { id: userId } })
+      const updated = await UserModel.findByPk(userId)
+      if (updated) {
+        const token = refreshedToken(req, tokenUser(updated))
+        if (token) res.setHeader('X-StellarPick-Token', token)
+      }
+    }
+    res.json({ url, filename: req.file.filename, originalName: req.file.originalname, mimetype: req.file.mimetype, size: req.file.size })
+  } catch (err) { next(err) }
 })
 
 interface Address { id: number; name: string; phone: string; region: string; detail: string; isDefault: boolean }
 const addressBook = new Map<number, Address[]>()
 let nextAddressId = 1
 
-function addressesOf (userId: number): Address[] {
+// Each demo account starts with its own address; other accounts start empty
+// instead of inheriting 林晓's Shanghai address.
+const ADDRESS_SEEDS: Record<string, Omit<Address, 'id'>> = {
+  'alice@stellarpick.example': { name: '林晓', phone: '13800000002', region: '上海市 / 上海市 / 星澜区', detail: '示例路 88 号 3 栋 1201', isDefault: true },
+  'bob@stellarpick.example': { name: '周远', phone: '13800000003', region: '北京市 / 北京市 / 朝阳区', detail: '示例街 12 号 2 单元 901', isDefault: true }
+}
+
+function addressesOf (userId: number, email = ''): Address[] {
   if (!addressBook.has(userId)) {
-    addressBook.set(userId, [
-      { id: nextAddressId++, name: '林晓', phone: '13800000002', region: '上海市 / 上海市 / 星澜区', detail: '示例路 88 号 3 栋 1201', isDefault: true }
-    ])
+    const seed = ADDRESS_SEEDS[email]
+    addressBook.set(userId, seed ? [{ id: nextAddressId++, ...seed }] : [])
   }
   return addressBook.get(userId) as Address[]
 }
@@ -388,7 +513,7 @@ function addressesOf (userId: number): Address[] {
 const addressRouter = Router()
 addressRouter.use(express.json())
 addressRouter.use(labAuth)
-addressRouter.get('/', (req, res) => { res.json({ items: addressesOf(userIdOf(req)) }) })
+addressRouter.get('/', (req, res) => { res.json({ items: addressesOf(userIdOf(req), emailOf(req)) }) })
 addressRouter.post('/', (req, res) => {
   const userId = userIdOf(req)
   const body = req.body ?? {}
@@ -396,14 +521,14 @@ addressRouter.post('/', (req, res) => {
     res.status(400).json({ code: 'BAD_REQUEST', message: '请填写收件人、手机号和详细地址' })
     return
   }
-  const list = addressesOf(userId)
+  const list = addressesOf(userId, emailOf(req))
   if (body.isDefault) list.forEach((entry) => { entry.isDefault = false })
   const address: Address = { id: nextAddressId++, name: String(body.name), phone: String(body.phone), region: String(body.region ?? ''), detail: String(body.detail), isDefault: !!body.isDefault || list.length === 0 }
   list.push(address)
   res.json(address)
 })
 addressRouter.patch('/:id', (req, res) => {
-  const list = addressesOf(userIdOf(req))
+  const list = addressesOf(userIdOf(req), emailOf(req))
   const address = list.find((entry) => entry.id === Number(req.params.id))
   if (!address) { res.status(404).json({ code: 'ADDRESS_NOT_FOUND', message: '地址不存在' }); return }
   const body = req.body ?? {}
@@ -412,7 +537,7 @@ addressRouter.patch('/:id', (req, res) => {
   res.json(address)
 })
 addressRouter.delete('/:id', (req, res) => {
-  const list = addressesOf(userIdOf(req))
+  const list = addressesOf(userIdOf(req), emailOf(req))
   const index = list.findIndex((entry) => entry.id === Number(req.params.id))
   if (index === -1) { res.status(404).json({ code: 'ADDRESS_NOT_FOUND', message: '地址不存在' }); return }
   list.splice(index, 1)
@@ -422,19 +547,22 @@ addressRouter.delete('/:id', (req, res) => {
 const merchantRouter = Router()
 merchantRouter.use(express.json())
 merchantRouter.use(labAuth)
+merchantRouter.use(merchantOnly)
 merchantRouter.get('/products', async (_req, res, next) => {
   try {
-    const rows = await ProductModel.findAll({ order: [['id', 'ASC']] })
+    const rows = await ProductModel.findAll({ order: [['id', 'ASC']], paranoid: false })
     res.json({
-      items: rows.map((product: any) => ({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        stock: 100,
-        image: product.image,
-        status: product.deletedAt ? 'off_sale' : 'on_sale',
-        statusText: product.deletedAt ? '已下架' : '在售'
-      }))
+      items: rows
+        .filter((product: any) => !HIDDEN_PRODUCT_IDS.has(product.id))
+        .map((product: any) => ({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          stock: 100,
+          image: product.image,
+          status: product.deletedAt ? 'off_sale' : 'on_sale',
+          statusText: product.deletedAt ? '已下架' : '在售'
+        }))
     })
   } catch (err) { next(err) }
 })
@@ -465,15 +593,23 @@ merchantRouter.post('/products', async (req, res, next) => {
 
 merchantRouter.patch('/products/:id', async (req, res, next) => {
   try {
-    const product: any = await ProductModel.findByPk(Number(req.params.id))
+    // The hidden seed product is V01-only; never let the merchant console
+    // restore it into the public catalogue.
+    if (HIDDEN_PRODUCT_IDS.has(Number(req.params.id))) {
+      res.status(404).json({ code: 'PRODUCT_NOT_FOUND', message: '商品不存在' })
+      return
+    }
+    const product: any = await ProductModel.findByPk(Number(req.params.id), { paranoid: false })
     if (!product) { res.status(404).json({ code: 'PRODUCT_NOT_FOUND', message: '商品不存在' }); return }
     const body = req.body ?? {}
     if (body.title != null || body.name != null) product.name = String(body.title ?? body.name)
     if (body.price != null) product.price = Number(body.price)
     if (body.stock != null) { /* stock is not persisted in this Juice Shop version */ }
-    if (body.status === 'off_sale') product.deletedAt = new Date()
-    if (body.status === 'on_sale') product.deletedAt = null
     await product.save()
+    // Sequelize ignores direct writes to the paranoid timestamp on save();
+    // destroy()/restore() are the supported delist/re-list operations.
+    if (body.status === 'off_sale' && !product.deletedAt) await product.destroy()
+    if (body.status === 'on_sale' && product.deletedAt) await product.restore()
     res.json({
       id: product.id,
       title: product.name,
@@ -507,11 +643,36 @@ merchantRouter.get('/summary', (_req, res) => {
   res.json({ todayOrders: 3, todaySales: 1299, pendingShipment: 1, productCount: 21, merchant: { name: '星澜自营旗舰店', status: 'approved' } })
 })
 
+function isTicketAgent (req: any): boolean {
+  const role = roleOf(req)
+  return role === 'support' || role === 'admin'
+}
+
+function displayNameOf (req: any): string {
+  const email = emailOf(req)
+  const user = (req.user as any)?.data ?? {}
+  return USERS.find((entry) => entry.email === email)?.name ?? String(user.username ?? email.split('@')[0] ?? '会员')
+}
+
+// Ticket detail/reply/close: owners and support/admin only.
+function ticketFor (req: any, res: any): Ticket | undefined {
+  const ticket = labState.tickets.find((entry) => entry.id === Number(req.params.id))
+  if (!ticket) {
+    res.status(404).json({ code: 'TICKET_NOT_FOUND', message: '工单不存在' })
+    return undefined
+  }
+  if (!isTicketAgent(req) && ticket.ownerEmail !== emailOf(req)) {
+    res.status(403).json({ code: 'FORBIDDEN', message: '无权访问该工单' })
+    return undefined
+  }
+  return ticket
+}
+
 function messagesOf (ticket: Ticket): TicketMessage[] {
   const key = String(ticket.id)
   if (!Array.isArray(labState.ticketMessages[key])) {
     labState.ticketMessages[key] = [
-      { id: nextCounter('messageId'), author: ticket.author, role: 'member', body: ticket.body, createdAt: ticket.createdAt }
+      { id: nextCounter('messageId'), author: ticket.author, authorEmail: ticket.ownerEmail, role: 'member', body: ticket.body, createdAt: ticket.createdAt }
     ]
     persistRuntime()
   }
@@ -523,25 +684,29 @@ ticketRouter.use(express.json())
 ticketRouter.use(labAuth)
 ticketRouter.get('/', (req, res) => {
   const status = String(req.query.status ?? '')
-  const items = status ? labState.tickets.filter((ticket) => ticket.status === status) : labState.tickets
+  const visible = isTicketAgent(req)
+    ? labState.tickets
+    : labState.tickets.filter((ticket) => ticket.ownerEmail === emailOf(req))
+  const items = status ? visible.filter((ticket) => ticket.status === status) : visible
   res.json({ items, total: items.length, page: 1, size: items.length })
 })
 
 ticketRouter.get('/:id', (req, res) => {
-  const ticket = labState.tickets.find((entry) => entry.id === Number(req.params.id))
-  if (!ticket) { res.status(404).json({ code: 'TICKET_NOT_FOUND', message: '工单不存在' }); return }
+  const ticket = ticketFor(req, res)
+  if (!ticket) return
   res.json({ ...ticket, messages: messagesOf(ticket) })
 })
 
 ticketRouter.post('/:id/messages', (req, res) => {
-  const ticket = labState.tickets.find((entry) => entry.id === Number(req.params.id))
-  if (!ticket) { res.status(404).json({ code: 'TICKET_NOT_FOUND', message: '工单不存在' }); return }
+  const ticket = ticketFor(req, res)
+  if (!ticket) return
   const body = String((req.body ?? {}).body ?? '').trim()
   if (!body) { res.status(400).json({ code: 'BAD_REQUEST', message: '请输入回复内容' }); return }
   const user = (req.user as any)?.data ?? {}
   messagesOf(ticket).push({
     id: nextCounter('messageId'),
-    author: String(user.username ?? user.email ?? '会员'),
+    author: displayNameOf(req),
+    authorEmail: emailOf(req),
     role: String(user.role ?? 'member'),
     body,
     createdAt: new Date().toISOString()
@@ -553,8 +718,8 @@ ticketRouter.post('/:id/messages', (req, res) => {
 })
 
 ticketRouter.post('/:id/close', (req, res) => {
-  const ticket = labState.tickets.find((entry) => entry.id === Number(req.params.id))
-  if (!ticket) { res.status(404).json({ code: 'TICKET_NOT_FOUND', message: '工单不存在' }); return }
+  const ticket = ticketFor(req, res)
+  if (!ticket) return
   ticket.status = 'closed'
   ticket.statusText = '已关闭'
   persistRuntime()
@@ -573,7 +738,8 @@ ticketRouter.post('/', (req, res) => {
     status: 'open',
     statusText: '待处理',
     createdAt: new Date().toISOString(),
-    author: '会员'
+    author: displayNameOf(req),
+    ownerEmail: emailOf(req)
   }
   labState.tickets.unshift(ticket)
   persistRuntime()
@@ -588,5 +754,13 @@ adminRouter.get('/settings', labAuth, (req, res) => {
   }
   res.json({ siteName: '星澜优选', demoMode: true })
 })
+
+/** Reset in-memory state not covered by labRuntime (address book, admin directory, merchant applications). */
+export function resetStellarPickState (): void {
+  addressBook.clear()
+  nextAddressId = 1
+  USERS.splice(0, USERS.length, ...SEED_USERS.map((user) => ({ ...user })))
+  MERCHANTS.splice(0, MERCHANTS.length, ...SEED_MERCHANTS.map((merchant) => ({ ...merchant })))
+}
 
 export { router, adminRouter, cartRouter, checkoutRouter, emailRouter, avatarRouter, addressRouter, merchantRouter, ticketRouter }

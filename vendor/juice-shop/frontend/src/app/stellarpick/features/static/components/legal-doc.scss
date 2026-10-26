@@ -6,7 +6,7 @@
   display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px;
   align-items: start; padding: 24px 0 64px;
 }
-.side { position: sticky; top: 88px; }
+.side { position: sticky; top: calc(var(--sp-header-h) + 12px); }
 .article { max-width: 760px; font-size: 15px; line-height: 1.8; color: var(--sp-text-secondary); }
 .article .lead { font-size: 16px; line-height: 1.8; color: var(--sp-text); margin-bottom: 8px; }
 .article h2 { font-size: 20px; margin: 32px 0 12px; color: var(--sp-text); }
@@ -22,7 +22,6 @@
   .article { max-width: 100%; }
 }
 @media (max-width: 767px) {
-  .sp-container { padding-inline: 16px; }
   .head h1 { font-size: 28px; }
   .article { font-size: 15px; }
 }

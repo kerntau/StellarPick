@@ -252,14 +252,6 @@ const EMPTY_FORM: AddressForm = { name: '', phone: '', region: '', detail: '', i
         padding-bottom: 20px;
         flex-wrap: wrap;
       }
-      .sp-eyebrow {
-        display: block;
-        font-size: 10.5px;
-        font-weight: 700;
-        letter-spacing: .18em;
-        color: var(--sp-text-muted);
-        margin-bottom: 4px;
-      }
       .page-head h1 { font-family: var(--sp-serif); font-size: 32px; letter-spacing: .02em; }
       .page-head p { margin-top: 4px; }
       .addr-note {

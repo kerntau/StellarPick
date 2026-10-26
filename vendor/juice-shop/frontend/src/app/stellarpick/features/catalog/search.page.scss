@@ -212,18 +212,6 @@ app-catalog-results {
   }
 }
 
-/* The global `a:link { color: inherit }` outranks .sp-btn--primary, so anchor
-   buttons rendered in this page need an explicit colour. */
-a.sp-btn--primary:link,
-a.sp-btn--primary:visited {
-  color: #fff;
-}
-
-a.sp-btn--secondary:link,
-a.sp-btn--secondary:visited {
-  color: var(--sp-primary);
-}
-
 a.hot-chip:link,
 a.hot-chip:visited {
   color: var(--sp-text-secondary);

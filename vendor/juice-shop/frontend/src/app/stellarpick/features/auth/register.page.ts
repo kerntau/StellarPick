@@ -171,8 +171,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 />
                 <label for="reg-agree" class="agree-label">
                   我已阅读并同意
-                  <a href="/#/terms" target="_blank" rel="noopener" (click)="$event.stopPropagation()">《服务条款》</a>
-                  <span class="agree-tail">与 <a href="/#/privacy" target="_blank" rel="noopener" (click)="$event.stopPropagation()">《隐私政策》</a></span>
+                  <a routerLink="/terms" (click)="$event.stopPropagation()">《服务条款》</a>
+                  <span class="agree-tail">与 <a routerLink="/privacy" (click)="$event.stopPropagation()">《隐私政策》</a></span>
                 </label>
               </div>
               @if (fieldErrors().agree) {
@@ -398,13 +398,23 @@ export class RegisterPage implements AfterViewInit {
   }
 
   private handleError(err: unknown): void {
-    const status = (err as { status?: number } | null)?.status;
     const body = (err as { error?: unknown } | null)?.error;
 
-    if (status === 400 && body && typeof body === 'object') {
-      const fields = (body as { errors?: { field?: string; message?: string }[] }).errors ?? [];
-      if (fields.some((entry) => entry.field === 'email')) {
-        this.fieldErrors.set({ email: '该邮箱已注册，请直接登录或换一个邮箱' });
+    if (body && typeof body === 'object') {
+      const fields = (body as {
+        errors?: { field?: string; path?: string; message?: string; type?: string }[];
+      }).errors ?? [];
+      const emailIssue = fields.find((entry) => entry.field === 'email' || entry.path === 'email');
+      if (emailIssue) {
+        const type = String(emailIssue.type ?? '');
+        const text = String(emailIssue.message ?? '');
+        const unique = /unique/i.test(type) || /unique|已存在|already/i.test(text);
+        const message = unique
+          ? '该邮箱已注册，请直接登录或换一个邮箱'
+          : /validation error/i.test(text) || !text
+            ? '邮箱格式不正确，例如 name@example.com'
+            : text;
+        this.fieldErrors.set({ email: message });
         this.focusField('reg-email');
         return;
       }

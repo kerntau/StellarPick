@@ -9,6 +9,7 @@
 - 优先使用可选的 `tools/node22/node.exe`，否则使用系统 Node；**Node 必须 ≥22.22.3**。
 - 依赖、构建产物、数据库、上传和运行状态均不提交到 Git；首次克隆后需联网安装依赖。
 - 服务通过 `vendor/juice-shop/config/stellarpick.yml` 绑定 **127.0.0.1**，默认端口 8081。
+- 直接 `npm start`/`node build/app.js`（未设置 `NODE_ENV=stellarpick`）在检测到 SQLite 数据库或 lab-runtime 数据时会拒绝启动，避免误清库；请统一使用 `start.ps1`。
 
 ## 快速开始
 
@@ -35,7 +36,7 @@ Invoke-RestMethod http://127.0.0.1:8081/healthz
 
 - 配置：`vendor/juice-shop/config/stellarpick.yml`（`NODE_ENV=stellarpick`）。
 - 数据库：`vendor/juice-shop/data/juiceshop.sqlite`；运行时状态：`vendor/juice-shop/data/lab-runtime.json`；上传：`vendor/juice-shop/uploads/`。
-- **同一时间只允许一个 Node 进程访问 SQLite**；脚本检测端口占用并拒绝重复启动。停止服务请在该终端按 Ctrl+C，不要结束其他 Node 进程。
+- **同一时间只允许一个 Node 进程访问 SQLite**；`start.ps1` 检测端口占用并写入 `data/lab.lock`，换端口启动也会被拒绝；异常退出后下一次启动会自动清理陈旧锁。如确认锁已陈旧（例如强制结束进程后），用 `.\start.ps1 -Force` 清理。停止服务请在该终端按 Ctrl+C，不要结束其他 Node 进程。
 
 ### 重置
 
@@ -46,10 +47,11 @@ Invoke-RestMethod -Method Post 'http://127.0.0.1:8081/lab/reset?confirm=1'
 # 硬重置：先在本服务终端按 Ctrl+C，再执行；会删除数据库与上传文件
 .\reset.ps1                    # 显示确认提示
 .\reset.ps1 -Force            # 已确认备份与影响时使用
+.\reset.ps1 -Port 8082        # 服务不是用 8081 启动时指定端口
 .\start.ps1
 ```
 
-`reset.ps1` 删除 `data/juiceshop.sqlite*`、`data/lab-runtime.json*` 与 `uploads/` 内容。重启后 datacreator 重建 20 个可见商品 + 1 个隐藏商品。
+`reset.ps1` 删除 `data/juiceshop.sqlite*`、`data/lab-runtime.json*` 与 `uploads/` 内容。重启后 datacreator 重建 20 个可见商品 + 1 个隐藏商品。每次正常启动都会执行 `sequelize.sync({force:true})` 重建 SQLite 用户/商品/邮箱/注册数据；`lab-runtime.json` 中的订单/购物车/工单会保留。需要彻底恢复基线请先停止服务再执行 `reset.ps1`。
 
 ## 测试账号
 

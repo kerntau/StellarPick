@@ -18,7 +18,8 @@ import { BrowserModule, bootstrapApplication } from '@angular/platform-browser'
 import { AdminGuard, LoginGuard, AccountingGuard, DeluxeGuard } from './app/app.guard'
 import { CookieService, CookieModule } from 'ngy-cookie'
 import { RequestInterceptor } from './app/Services/request.interceptor'
-import { HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient } from '@angular/common/http'
+import { HTTP_INTERCEPTORS, withInterceptors, withInterceptorsFromDi, provideHttpClient } from '@angular/common/http'
+import { authInterceptor } from './app/stellarpick/core/interceptors/auth.interceptor'
 
 if (environment.production) {
     enableProdMode()
@@ -43,7 +44,7 @@ bootstrapApplication(AppComponent, {
         LoginGuard,
         AccountingGuard,
         DeluxeGuard,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor])),
         provideTranslateService({
           loader: provideTranslateHttpLoader({
             prefix: '/assets/i18n/',

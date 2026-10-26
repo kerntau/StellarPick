@@ -94,10 +94,12 @@
       </div>
 
       <p class="counter sp-num" aria-hidden="true">{{ slide() + 1 }} / {{ slides.length }}</p>
+      <span class="sp-sr-only" aria-live="polite">第 {{ slide() + 1 }} 张：{{ slides[slide()].title }}</span>
 
       <button
         class="ctrl"
         type="button"
+        [attr.aria-pressed]="autoplay()"
         (click)="toggleAutoplay()">
         {{ autoplay() ? '暂停轮播' : '播放轮播' }}
       </button>
@@ -202,8 +204,10 @@
       </a>
     </div>
 
-    @if (featuredError()) {
+    @if (featuredError() && railProducts().length === 0) {
       <app-error-state [message]="featuredError() ?? ''" [requestId]="featuredRequestId()" (retry)="loadFeatured()" />
+    } @else if (newestError() && railProducts().length === 0) {
+      <app-error-state [message]="newestError() ?? ''" [requestId]="newestRequestId()" (retry)="loadNewest()" />
     } @else if (newestLoading() && railProducts().length === 0) {
       <div class="rail" aria-hidden="true">
         @for (item of railSkeletons; track item) {
@@ -290,6 +294,8 @@
           }
         </div>
       </div>
+    } @else if (picksError() && editorialSource().length === 0) {
+      <app-error-state [message]="picksError() ?? ''" [requestId]="picksRequestId()" (retry)="loadPicks()" />
     }
   </div>
 </section>

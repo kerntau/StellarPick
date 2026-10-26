@@ -28,6 +28,9 @@ function normalizeAvatarPath(value: unknown): string | undefined {
   if (raw.startsWith('/assets/')) {
     return raw;
   }
+  if (raw.startsWith('/uploads/')) {
+    return raw;
+  }
   if (raw.startsWith('assets/')) {
     return '/' + raw;
   }
@@ -94,6 +97,18 @@ export class AuthStore {
     const payload = decodePayload(token);
     const merged = payload ? { ...user, ...this.userFromPayload(payload) } : user;
     this._user.set(merged);
+  }
+
+  /** Replace the stored JWT after the server re-issues it (email/avatar change). */
+  applyToken(token: string): void {
+    const payload = decodePayload(token);
+    if (!payload) {
+      return;
+    }
+    localStorage.setItem(TOKEN_KEY, token);
+    this._token.set(token);
+    const user = this.userFromPayload(payload);
+    this._user.set({ ...(this._user() ?? user), ...user });
   }
 
   merge(user: Partial<User>): void {

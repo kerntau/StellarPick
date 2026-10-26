@@ -191,14 +191,6 @@ const EMPTY_PAGE: Paged<Review> = { items: [], total: 0, page: 1, size: 50 };
         padding-bottom: 20px;
         flex-wrap: wrap;
       }
-      .sp-eyebrow {
-        display: block;
-        font-size: 10.5px;
-        font-weight: 700;
-        letter-spacing: .18em;
-        color: var(--sp-text-muted);
-        margin-bottom: 4px;
-      }
       .page-head h1 { font-family: var(--sp-serif); font-size: 32px; letter-spacing: .02em; }
       .page-head p { margin-top: 4px; }
       .review-stats { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

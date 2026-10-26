@@ -50,7 +50,11 @@ export interface CreateOrderPayload {
   addressId?: number;
   address?: CreateOrderAddress;
   shipping?: string;
+  shippingSlot?: string;
   invoice?: string;
+  invoiceTitle?: string;
+  payment?: string;
+  gift?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -64,7 +68,11 @@ export class OrdersApi {
       addressId: payload.addressId,
       address: payload.address,
       shipping: payload.shipping,
+      shippingSlot: payload.shippingSlot,
       invoice: payload.invoice,
+      invoiceTitle: payload.invoiceTitle,
+      payment: payload.payment,
+      gift: payload.gift,
     });
   }
 

@@ -49,11 +49,29 @@ export class AppComponent {
   private readonly router = inject(Router)
   private readonly title = inject(Title)
   private readonly destroyRef = inject(DestroyRef)
+  private lastPath = ''
 
   constructor () {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.title.setTitle(this.titleFor(this.router.url)))
+      .subscribe(() => {
+        this.title.setTitle(this.titleFor(this.router.url))
+        // Only a path change is a new page. Query/fragment-only navigations
+        // (filters, sorting, pagination, anchors) must keep the user's focus
+        // on the control they just used.
+        const path = this.router.url.split('?')[0].split('#')[0]
+        if (path === this.lastPath) {
+          return
+        }
+        this.lastPath = path
+        // Move keyboard/screen-reader focus to the new page's main landmark so
+        // narration follows the route instead of the destroyed previous view.
+        const main = document.getElementById('main-content')
+        if (main) {
+          main.setAttribute('tabindex', '-1')
+          main.focus({ preventScroll: true })
+        }
+      })
   }
 
   private titleFor (url: string): string {

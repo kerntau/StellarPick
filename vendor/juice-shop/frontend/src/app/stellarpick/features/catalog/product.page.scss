@@ -340,7 +340,7 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
 }
 
 .save {
-  color: var(--sp-terracotta);
+  color: var(--sp-terracotta-ink);
   font-weight: 700;
 }
 
@@ -1601,25 +1601,4 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
     padding: 0 12px;
     font-size: 13px;
   }
-}
-
-/* The global `a:link { color: inherit }` outranks .sp-btn--primary, so anchor
-   buttons rendered in this page need an explicit colour. */
-a.sp-btn--primary:link,
-a.sp-btn--primary:visited {
-  color: #fff;
-}
-
-a.sp-btn--secondary:link,
-a.sp-btn--secondary:visited {
-  color: var(--sp-primary);
-}
-
-a.hot-chip:link,
-a.hot-chip:visited {
-  color: var(--sp-text-secondary);
-}
-
-a.hot-chip:hover {
-  color: var(--sp-primary);
 }

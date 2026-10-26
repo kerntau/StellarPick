@@ -1,4 +1,6 @@
-import { Component, afterNextRender, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
@@ -267,7 +269,7 @@ const FAQ_TABS: FaqTab[] = [
     .help { padding-bottom: 64px; }
     .body { display: grid; grid-template-columns: minmax(0, 760px) 280px; gap: 48px; align-items: start; justify-content: space-between; }
     .main { min-width: 0; }
-    .rail { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+    .rail { position: sticky; top: calc(var(--sp-header-h) + 12px); display: flex; flex-direction: column; gap: 16px; }
     .rail h2 { font-size: 15px; margin-bottom: 8px; }
     .rail-links li + li { border-top: 1px solid var(--sp-border); }
     .rail-links a { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; font-size: 14px; color: var(--sp-text-secondary); }
@@ -300,7 +302,7 @@ const FAQ_TABS: FaqTab[] = [
     .count { margin: 16px 0 20px; font-size: 13px; color: var(--sp-text-secondary); }
     .panel:focus-visible { outline: 2px solid var(--sp-focus); outline-offset: 4px; border-radius: 8px; }
 
-    .group { margin-bottom: 40px; scroll-margin-top: 88px; }
+    .group { margin-bottom: 40px; scroll-margin-top: calc(var(--sp-header-h) + 16px); }
     .group h2 {
       font-size: 20px; margin-bottom: 14px; padding-bottom: 10px;
       border-bottom: 1px solid var(--sp-border);
@@ -335,7 +337,6 @@ const FAQ_TABS: FaqTab[] = [
       .rail { position: static; }
     }
     @media (max-width: 767px) {
-      .sp-container { padding-inline: 16px; }
       .head h1 { font-size: 28px; }
       .cta { flex-direction: column; align-items: flex-start; }
       .cta .sp-btn { width: 100%; }
@@ -346,6 +347,7 @@ const FAQ_TABS: FaqTab[] = [
 export class HelpPage {
   private readonly route = inject(ActivatedRoute);
   private readonly title = inject(Title);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly tabs = FAQ_TABS;
   readonly query = signal('');
@@ -380,16 +382,22 @@ export class HelpPage {
 
   constructor() {
     this.title.setTitle('帮助中心 · 星澜优选');
-    const fragment = this.route.snapshot.fragment;
+    // React to same-page footer links (/help#shipping etc.), not just the
+    // fragment present when the component is first created.
+    this.route.fragment
+      .pipe(startWith(this.route.snapshot.fragment), takeUntilDestroyed(this.destroyRef))
+      .subscribe((fragment) => this.scrollToFragment(fragment));
+  }
+
+  private scrollToFragment(fragment: string | null): void {
+    if (!fragment) {
+      return;
+    }
     const matched = FAQ_GROUPS.find((group) => group.id === fragment);
     if (matched) {
       this.active.set(matched.key);
     }
-    afterNextRender(() => {
-      if (fragment) {
-        setTimeout(() => document.getElementById(fragment)?.scrollIntoView({ block: 'start' }), 0);
-      }
-    });
+    setTimeout(() => document.getElementById(fragment)?.scrollIntoView({ block: 'start' }), 0);
   }
 
   isOpen(id: string): boolean {

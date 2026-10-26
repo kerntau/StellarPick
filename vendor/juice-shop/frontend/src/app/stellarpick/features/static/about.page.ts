@@ -195,7 +195,7 @@ interface FeatureItem {
       display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px;
       align-items: start; padding-block: 40px 64px;
     }
-    .side { position: sticky; top: 88px; }
+    .side { position: sticky; top: calc(var(--sp-header-h) + 12px); }
     .block { max-width: 760px; padding-bottom: 40px; margin-bottom: 40px; border-bottom: 1px solid var(--sp-border); }
     .block h2 { font-size: 26px; margin: 6px 0 16px; }
     .block-lede { color: var(--sp-text-secondary); font-size: 15px; line-height: 1.8; margin-bottom: 20px; max-width: 720px; }
@@ -274,7 +274,6 @@ interface FeatureItem {
       .contact-grid { grid-template-columns: minmax(0, 1fr); }
     }
     @media (max-width: 767px) {
-      .sp-container { padding-inline: 16px; }
       .hero { padding: 40px 0 36px; }
       .hero h1 { font-size: 32px; margin-top: 20px; }
       .hero-actions { flex-direction: column; align-items: stretch; }

@@ -86,7 +86,7 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
         <section class="sp-card guest-card">
           <div class="guest-grid">
             <div class="guest-copy">
-              <span class="sp-eyebrow">MEMBER BENEFITS</span>
+              <span class="sp-eyebrow sp-eyebrow--muted">MEMBER BENEFITS</span>
               <h2>登录后继续你的购物袋</h2>
               <p>登录后可同步购物车、使用优惠券并继续结算。会员订单全年包邮，积分可抵现。</p>
               <div class="guest-actions">
@@ -145,7 +145,7 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
           <section class="sp-card addon-card empty-addon" aria-labelledby="empty-addon-title">
             <div class="addon-head">
               <div>
-                <span class="sp-eyebrow">POPULAR NOW</span>
+                <span class="sp-eyebrow sp-eyebrow--muted">POPULAR NOW</span>
                 <h2 id="empty-addon-title">本周热销</h2>
                 <p>会员复购率最高的几件日常好物。</p>
               </div>
@@ -302,7 +302,7 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
             <section class="sp-card extras-card" aria-labelledby="extras-title">
               <div class="extras-head">
                 <div>
-                  <span class="sp-eyebrow">GIFT &amp; INVOICE</span>
+                  <span class="sp-eyebrow sp-eyebrow--muted">GIFT &amp; INVOICE</span>
                   <h2 id="extras-title">赠言与发票</h2>
                   <p>选填，结算时随订单一起确认。</p>
                 </div>
@@ -353,7 +353,7 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
               <section class="sp-card addon-card" aria-labelledby="addon-title">
                 <div class="addon-head">
                   <div>
-                    <span class="sp-eyebrow">PAIR IT WITH</span>
+                    <span class="sp-eyebrow sp-eyebrow--muted">PAIR IT WITH</span>
                     <h2 id="addon-title">{{ shippingReached() ? '搭配推荐' : '凑单推荐' }}</h2>
                     <p>{{ shippingReached() ? '和已选商品一起用，刚刚好。' : '再选一件，轻松满 ' + (freeShippingThreshold | spMoney) + ' 包邮。' }}</p>
                   </div>
@@ -501,14 +501,6 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
     .crumbs a { color: var(--sp-text-secondary); min-height: 32px; display: inline-flex; align-items: center; }
     .crumbs a:hover { color: var(--sp-primary); }
     .crumb-sep { color: var(--sp-border-strong); }
-    .sp-eyebrow {
-      display: block;
-      font-size: 10.5px;
-      font-weight: 700;
-      letter-spacing: .18em;
-      color: var(--sp-text-muted);
-      margin-bottom: 4px;
-    }
     .sp-page-head { align-items: flex-end; padding-top: 8px; }
     .sp-page-head h1 {
       font-family: var(--sp-serif);
@@ -724,7 +716,7 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
       font-size: 13px;
       border-radius: 6px;
     }
-    .tool-action:hover:not(:disabled) { color: var(--sp-terracotta); background: #FBEFE9; }
+    .tool-action:hover:not(:disabled) { color: var(--sp-terracotta-ink); background: #FBEFE9; }
     .remove-selected:hover:not(:disabled) { color: var(--sp-danger); background: var(--sp-danger-soft); }
     .tool-action:disabled, .remove-selected:disabled { opacity: .4; cursor: not-allowed; }
     .list-toolbar .sp-btn { min-height: 40px; }
@@ -853,19 +845,20 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
     .empty-addon { margin-top: 20px; }
 
     .sp-page-head .sp-btn, .continue, .mobile-bar .sp-btn { min-height: 44px; }
-    a.sp-btn { color: var(--sp-primary); }
-    a.sp-btn--primary { color: #fff; }
-    a.sp-link { color: var(--sp-info); }
     .mobile-bar { display: none; }
 
     @media (max-width: 1180px) {
       .cart-layout { grid-template-columns: minmax(0, 1fr) 320px; }
       .addon-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
-    @media (max-width: 1023px) {
+    /* The seven cart columns plus the 320px summary need ~1200px; below that
+       the product-info column collapses to 0 and its title disappears. */
+    @media (max-width: 1199px) {
       .cart-layout { grid-template-columns: 1fr; gap: 16px; }
       .list-head { display: none; }
       .sticky { position: static; }
+    }
+    @media (max-width: 1023px) {
       .guest-grid { grid-template-columns: 1fr; gap: 20px; }
       .extras-grid { grid-template-columns: 1fr; gap: 16px; }
       .invoice { padding-left: 0; border-left: 0; padding-top: 14px; border-top: 1px dashed var(--sp-border); }

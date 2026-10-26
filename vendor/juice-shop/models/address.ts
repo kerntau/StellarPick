@@ -46,7 +46,8 @@ const AddressModelInit = (sequelize: Sequelize) => {
         validate: {
           isInt: true,
           min: 1000000,
-          max: 9999999999
+          // CN mobile numbers have 11 digits (e.g. 13800000002).
+          max: 99999999999
         }
       },
       zipCode: {

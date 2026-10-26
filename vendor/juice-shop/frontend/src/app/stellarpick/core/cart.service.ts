@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { CartApi } from './api/cart.api';
 import { AuthStore } from './auth/auth.store';
+import { memberPriceFor } from './catalog';
 import { Cart, CartItem, Product } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -22,7 +23,7 @@ export class CartService {
   }
 
   addProduct(product: Product, quantity = 1): Observable<Cart> {
-    return this.add(product.id, quantity, product.price);
+    return this.add(product.id, quantity, memberPriceFor(product));
   }
 
   update(itemId: number, quantity: number): Observable<Cart> {

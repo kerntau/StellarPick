@@ -41,6 +41,7 @@ export interface Product {
   title: string;
   subtitle: string;
   price: number;
+  deluxePrice?: number;
   stock: number;
   image: string;
   images?: string[];
@@ -70,6 +71,7 @@ export interface CartItem {
   title: string;
   image: string;
   unitPrice: number;
+  listPrice?: number;
   quantity: number;
   stock: number;
   subtotal: number;
@@ -121,7 +123,11 @@ export interface Order {
   cover?: string | null;
   address?: OrderAddress;
   shipping?: string;
+  shippingSlot?: string;
   invoice?: string;
+  invoiceTitle?: string;
+  payment?: string;
+  gift?: string;
   trackingNo?: string;
   timeline?: { status: string; label: string; at: string | null }[];
   paidAt?: string | null;
@@ -200,6 +206,7 @@ export interface Ticket {
   createdAt: string;
   updatedAt: string;
   userName: string;
+  ownerEmail?: string;
   lastMessage: string;
   messageCount?: number;
   userId?: number;
@@ -209,6 +216,7 @@ export interface Ticket {
 export interface TicketMessage {
   id: number;
   author: string;
+  authorEmail?: string;
   role: string;
   body: string;
   createdAt: string;

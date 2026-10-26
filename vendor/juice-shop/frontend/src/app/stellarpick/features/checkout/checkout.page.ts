@@ -582,14 +582,6 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
     .crumbs a { color: var(--sp-text-secondary); min-height: 32px; display: inline-flex; align-items: center; }
     .crumbs a:hover { color: var(--sp-primary); }
     .crumb-sep { color: var(--sp-border-strong); }
-    .sp-eyebrow {
-      display: block;
-      font-size: 10.5px;
-      font-weight: 700;
-      letter-spacing: .18em;
-      color: var(--sp-text-muted);
-      margin-bottom: 4px;
-    }
     .sp-steps li { white-space: nowrap; }
     .sp-steps li.done .dot { background: var(--sp-success-soft); border-color: #BDE0D2; color: var(--sp-success); }
     .sp-page-head { align-items: flex-end; padding-top: 8px; }
@@ -658,7 +650,7 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
     }
     .addr-card:hover { border-color: var(--sp-border-strong); }
     .addr-card.is-default { background: #FFFBF3; border-color: #F3D9AE; }
-    .addr-card.is-selected { border-color: var(--sp-primary); background: #F7F9FC; box-shadow: 0 0 0 2px rgba(11, 37, 69, .12); }
+    .addr-card.is-selected { border-color: var(--sp-primary); background: #FFFDF8; box-shadow: 0 0 0 2px rgba(180, 101, 63, .14); }
     .addr-pick {
       display: flex;
       align-items: flex-start;
@@ -741,7 +733,7 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
       min-width: 0;
     }
     .option:hover { border-color: var(--sp-border-strong); }
-    .option.is-selected { border-color: var(--sp-primary); background: #F7F9FC; box-shadow: 0 0 0 2px rgba(11, 37, 69, .08); }
+    .option.is-selected { border-color: var(--sp-primary); background: #FFFDF8; box-shadow: 0 0 0 2px rgba(180, 101, 63, .12); }
     .option input { width: 16px; height: 16px; margin-top: 3px; accent-color: var(--sp-primary); flex: 0 0 auto; }
     .option-icon { width: 28px; height: 28px; color: var(--sp-accent-text); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
     .option-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
@@ -875,9 +867,6 @@ const FALLBACK_IMAGE = '/assets/sp/img/products/1001.svg';
     .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
     .modal-actions .sp-btn { min-height: 44px; }
     .sp-page-head .sp-btn { min-height: 44px; }
-    a.sp-btn { color: var(--sp-primary); }
-    a.sp-btn--primary { color: #fff; }
-    a.sp-link { color: var(--sp-info); }
     .addr-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
     .addr-form .sp-alert { margin-bottom: 16px; align-items: center; }
     .default-check { margin: 4px 0 0; min-height: 32px; }
@@ -1287,14 +1276,20 @@ export class CheckoutPage implements OnInit, OnDestroy {
           }
         : undefined,
       shipping: this.shipping(),
+      shippingSlot: this.shipping() === 'scheduled' ? this.scheduleSlot() : undefined,
       invoice: this.invoice(),
+      invoiceTitle: this.invoice() === 'personal' ? this.invoiceTitle().trim() : undefined,
+      payment: this.payment(),
+      gift: this.gift() || undefined,
     };
     const recipient = selected?.name ?? '会员';
     const count = this.count();
 
     this.orders.create(payload).subscribe({
       next: (order) => {
-        this.cart.clear();
+        // The backend removes only the checked-out lines; reload the cart so
+        // unselected items stay visible and the header count stays accurate.
+        this.cart.refresh().subscribe({ error: () => undefined });
         clearCartSelection();
         this.submitting.set(false);
         this.successOrder.set({
