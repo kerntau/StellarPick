@@ -375,8 +375,8 @@ a:visited {
 .sp-link:visited {
   color: var(--sp-info-strong);
 }
-.site-header a:link,
-.site-header a:visited {
+.site-header a:not(.sp-btn):link,
+.site-header a:not(.sp-btn):visited {
   color: inherit;
 }
 /* Light paper header: the wordmark is ink, not white. */
@@ -459,8 +459,8 @@ body.blue-lightblue-theme a.sp-link:link,
 body.blue-lightblue-theme a.sp-link:visited {
   color: var(--sp-info-strong);
 }
-body.blue-lightblue-theme .site-header a:link,
-body.blue-lightblue-theme .site-header a:visited {
+body.blue-lightblue-theme .site-header a:not(.sp-btn):link,
+body.blue-lightblue-theme .site-header a:not(.sp-btn):visited {
   color: inherit;
 }
 body.blue-lightblue-theme .footer nav a:link,
