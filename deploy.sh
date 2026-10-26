@@ -252,18 +252,31 @@ install_nginx() {
   [ -f "$conf_src" ] || die "缺少 $conf_src"
 
   if [ -d /etc/nginx/sites-available ]; then
-    if [ -e /etc/nginx/sites-enabled/default ]; then
-      warn "检测到 nginx 默认站点，已重命名为 default.disabled-by-stellarpick，避免抢占 80 端口。"
-      mv /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default.disabled-by-stellarpick
-    fi
+    for stale in default default.disabled-by-stellarpick; do
+      if [ -e "/etc/nginx/sites-enabled/$stale" ]; then
+        warn "禁用 nginx 默认站点 $stale（移动到 sites-available）"
+        mv "/etc/nginx/sites-enabled/$stale" "/etc/nginx/sites-available/default.disabled-by-stellarpick"
+      fi
+    done
     sed "s|@PORT@|$PORT|g" "$conf_src" > /etc/nginx/sites-available/stellarpick.conf
     ln -sfn /etc/nginx/sites-available/stellarpick.conf /etc/nginx/sites-enabled/stellarpick.conf
   else
+    if [ -e /etc/nginx/conf.d/default.conf ]; then
+      warn "禁用 nginx 默认站点 conf.d/default.conf"
+      mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.disabled
+    fi
     sed "s|@PORT@|$PORT|g" "$conf_src" > /etc/nginx/conf.d/stellarpick.conf
   fi
 
   nginx -t
   systemctl reload nginx 2>/dev/null || systemctl restart nginx
+  if command -v curl >/dev/null 2>&1; then
+    if curl -fsS http://127.0.0.1/healthz >/dev/null 2>&1; then
+      log "nginx 80 端口已代理到 StellarPick"
+    else
+      warn "nginx 80 端口未返回 StellarPick，请检查 /etc/nginx/sites-enabled/ 是否还有 default 站点"
+    fi
+  fi
   if command -v getenforce >/dev/null 2>&1 && [ "$(getenforce)" = "Enforcing" ]; then
     warn "SELinux 处于 Enforcing，若 502 请执行: setsebool -P httpd_can_network_connect 1"
   fi
