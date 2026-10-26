@@ -15,7 +15,6 @@
   box-shadow: 0 10px 30px -22px rgba(23, 21, 18, 0.55);
 }
 
-/* ---------- utility bar ---------- */
 .utility {
   height: var(--sp-header-utility);
   background: var(--sp-primary-deep);
@@ -69,7 +68,6 @@
 .u-app { color: var(--sp-accent); }
 .u-app:hover { color: var(--sp-accent-strong); }
 
-/* ---------- main bar ---------- */
 .bar-row { position: relative; }
 
 .bar {
@@ -161,7 +159,6 @@
   background: var(--sp-accent);
 }
 
-/* ---------- search trigger styled as a field ---------- */
 .actions {
   margin-left: auto;
   display: flex;
@@ -238,7 +235,6 @@
   pointer-events: none;
 }
 
-/* ---------- icon buttons ---------- */
 .icon-btn {
   position: relative;
   width: 40px;
@@ -369,7 +365,6 @@
   margin-top: 4px;
 }
 
-/* ---------- category rail ---------- */
 .cat-strip {
   border-top: 1px solid var(--sp-border);
   background: rgba(255, 255, 255, 0.55);
@@ -443,7 +438,6 @@
   box-shadow: 0 0 0 3px rgba(180, 101, 63, 0.16);
 }
 
-/* ---------- search panel ---------- */
 .search-panel {
   position: absolute;
   top: var(--sp-header-main);
@@ -525,7 +519,6 @@
 
 .hint { margin: 0; }
 
-/* ---------- mobile sheet ---------- */
 .mobile-nav { display: none; }
 
 @media (max-width: 1180px) {

@@ -106,7 +106,6 @@ import { IconComponent } from '../../ui/icon/icon.component';
       margin-top: 48px;
     }
 
-    /* ---------- subscribe band ---------- */
     .letter {
       display: grid;
       grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
@@ -184,7 +183,6 @@ import { IconComponent } from '../../ui/icon/icon.component';
 
     .letter-note.is-done { color: var(--sp-accent); }
 
-    /* ---------- link columns ---------- */
     .cols {
       display: grid;
       grid-template-columns: 1.6fr 1fr 1fr 1fr;
@@ -244,7 +242,6 @@ import { IconComponent } from '../../ui/icon/icon.component';
     nav a { color: rgba(255, 255, 255, 0.72); min-height: 22px; }
     nav a:hover { color: var(--sp-accent); }
 
-    /* ---------- trust / payment ---------- */
     .trust {
       display: flex;
       flex-wrap: wrap;

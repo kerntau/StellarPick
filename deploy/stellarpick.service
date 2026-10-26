@@ -1,6 +1,6 @@
 [Unit]
 Description=StellarPick intentionally vulnerable lab
-Documentation=file://@APP_DIR@/docs/Linux部署.md
+Documentation=file://@APP_DIR@/START.md
 After=network-online.target
 Wants=network-online.target
 

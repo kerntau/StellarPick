@@ -3,7 +3,6 @@
   padding-bottom: 24px;
 }
 
-/* ---------- banner ---------- */
 .banner {
   position: relative;
   display: grid;
@@ -121,7 +120,6 @@
   color: #857358;
 }
 
-/* ---------- tile switcher ---------- */
 .cat-nav {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -204,7 +202,6 @@
 .cat-tile.on .tile-name { color: #fff; }
 .cat-tile.on .tile-count { color: rgba(255, 255, 255, .76); }
 
-/* ---------- responsive ---------- */
 @media (max-width: 1279px) {
   .cat-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }

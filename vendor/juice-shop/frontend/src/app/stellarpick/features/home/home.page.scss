@@ -1,10 +1,3 @@
-/* ==========================================================================
-   Home — editorial retail rhythm
-   Hero → promises → categories → new arrivals → editor's picks → scenes
-   → member band → reviews → brand story → service & letter
-   ========================================================================== */
-
-/* ---------- hero ---------- */
 .hero {
   position: relative;
   background: var(--sp-primary-deep);
@@ -251,7 +244,6 @@
   color: rgba(255, 255, 255, .72);
 }
 
-/* ---------- hero controls ---------- */
 .controls {
   position: absolute;
   left: 0;
@@ -354,7 +346,6 @@
 @keyframes sp-progress-a { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes sp-progress-b { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-/* ---------- promises ---------- */
 .promises {
   background: var(--sp-surface);
   border-bottom: 1px solid var(--sp-border);
@@ -391,7 +382,6 @@
 .p-text strong { font-size: 13px; color: var(--sp-text); }
 .p-text span { font-size: 11.5px; line-height: 1.55; color: var(--sp-text-secondary); }
 
-/* ---------- categories ---------- */
 .categories { padding-bottom: 36px; }
 
 .cat-grid {
@@ -528,7 +518,6 @@
   color: var(--sp-text-secondary);
 }
 
-/* ---------- new arrivals ---------- */
 .arrivals {
   background: var(--sp-surface);
   border-top: 1px solid var(--sp-border);
@@ -571,7 +560,6 @@
   letter-spacing: .14em;
 }
 
-/* ---------- editor's picks ---------- */
 .editorial { background: var(--sp-bg); }
 
 .editorial-sign {
@@ -731,7 +719,6 @@
 .sk-lead { aspect-ratio: 4 / 3; border-radius: 14px; }
 .sk-row { height: 104px; border-radius: 12px; }
 
-/* ---------- scenes ---------- */
 .scenes {
   background: var(--sp-surface);
   border-top: 1px solid var(--sp-border);
@@ -815,7 +802,6 @@
 
 .scene:hover .scene-link { color: var(--sp-accent); }
 
-/* ---------- member band ---------- */
 .member-band {
   position: relative;
   background: var(--sp-primary);
@@ -921,7 +907,6 @@
 .benefits h3 { color: #fff; font-size: 14px; }
 .benefits p { margin-top: 4px; color: rgba(255, 255, 255, .72); font-size: 11.5px; line-height: 1.6; }
 
-/* ---------- reviews ---------- */
 .reviews { background: var(--sp-bg); }
 
 .review-score {
@@ -1019,7 +1004,6 @@
 
 .review-product:hover .rp-title { color: var(--sp-primary); }
 
-/* ---------- brand story ---------- */
 .story { background: var(--sp-surface); border-top: 1px solid var(--sp-border); }
 
 .story-grid {
@@ -1105,7 +1089,6 @@
 
 .story-copy .sp-link-arrow { margin-top: 16px; }
 
-/* ---------- service & letter ---------- */
 .service-band {
   padding: 44px 0 52px;
   background: var(--sp-paper-deep);
@@ -1193,7 +1176,6 @@
 
 .letter-note { font-size: 11.5px !important; color: rgba(255, 255, 255, .66) !important; }
 
-/* ---------- responsive ---------- */
 @media (max-width: 1279px) {
   .cat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

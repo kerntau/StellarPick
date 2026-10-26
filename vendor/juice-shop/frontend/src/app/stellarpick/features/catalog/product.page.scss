@@ -16,7 +16,6 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
   min-height: 480px;
 }
 
-/* ---------- not found ---------- */
 .missing {
   display: flex;
   flex-direction: column;
@@ -48,7 +47,6 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
   margin-top: 16px;
 }
 
-/* ---------- gallery + buy box ---------- */
 .detail {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
@@ -667,7 +665,6 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
   white-space: nowrap;
 }
 
-/* ---------- tabs ---------- */
 .tabs-section {
   margin-top: 52px;
   scroll-margin-top: calc(var(--sp-header-h) + 8px);
@@ -870,7 +867,6 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
   background: var(--sp-border-strong);
 }
 
-/* ---------- reviews ---------- */
 .reviews-summary {
   display: grid;
   grid-template-columns: auto minmax(220px, 320px) 1fr;
@@ -1153,7 +1149,6 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
   font-size: 13px;
 }
 
-/* ---------- Q&A ---------- */
 .qa {
   margin-top: 48px;
 }
@@ -1224,7 +1219,6 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
   color: var(--sp-text-secondary);
 }
 
-/* ---------- bundle ---------- */
 .bundle {
   margin-top: 48px;
 }
@@ -1361,12 +1355,10 @@ $paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' 
   gap: 10px;
 }
 
-/* ---------- related ---------- */
 .related {
   margin-top: 52px;
 }
 
-/* ---------- mobile sticky buy bar ---------- */
 .buybar {
   display: none;
 }
