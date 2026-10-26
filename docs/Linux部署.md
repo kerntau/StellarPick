@@ -55,7 +55,7 @@ sudo git clone https://github.com/kerntau/StellarPick.git /opt/stellarpick
 cd /opt/stellarpick
 ```
 
-私有仓库请先配置 GitHub PAT、SSH deploy key 或使用 `git clone git@github.com:kerntau/StellarPick.git`。
+仓库是公开的，可直接 clone；如果以后改回私有仓库，再配置 GitHub PAT 或 SSH deploy key。
 仓库不包含 `node_modules`、`build/`、`frontend/dist/`、SQLite、上传和运行状态；`deploy.sh` 会安装依赖并构建。
 
 也可以从本机 rsync 上传：

@@ -38,7 +38,7 @@ Invoke-RestMethod http://127.0.0.1:8081/healthz
 ### Linux 服务器
 
 ```bash
-# Ubuntu/Debian 从零部署；私有仓库需先配置 PAT 或 SSH deploy key
+# Ubuntu/Debian 从零部署（公开仓库可直接 clone）
 sudo apt-get update
 sudo apt-get install -y git
 sudo git clone https://github.com/kerntau/StellarPick.git /opt/stellarpick
