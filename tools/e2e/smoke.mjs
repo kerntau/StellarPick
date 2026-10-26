@@ -1,4 +1,5 @@
 import { chromium } from 'playwright-core';
+import { CHROME } from './browser.mjs';
 
 const BASE = 'http://127.0.0.1:8081';
 const PRODUCT_ID = 1003;
@@ -37,7 +38,7 @@ const routes = [
   '/#/nope',
 ];
 
-const browser = await chromium.launch({ executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
+const browser = await chromium.launch({ executablePath: CHROME, headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 await context.addInitScript((value) => localStorage.setItem('token', value), token);
 const merchantContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });

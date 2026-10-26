@@ -38,7 +38,6 @@
               "node_modules/font-mfizz/dist/font-mfizz.css"
             ],
             "allowedCommonJsDependencies": [
-
               "socket.io-client",
               "socket.io-parser",
               "debug",
@@ -104,23 +103,6 @@
           "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "frontend:build"
-          }
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "src/tsconfig.spec.json",
-            "setupFiles": ["src/test-setup.ts"],
-            "runnerConfig": true,
-            "watch": false,
-            "coverage": false,
-            "coverageExclude": ["src/hacking-instructor/**/*"]
-          },
-          "configurations": {
-            "coverage": {
-              "coverage": true,
-              "coverageReporters": ["lcovonly", "html"]
-            }
           }
         },
         "lint": {

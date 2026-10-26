@@ -1,5 +1,6 @@
 import { chromium } from 'playwright-core';
-const BASE = process.env.BASE_URL || 'http://127.0.0.1:8098';
+import { CHROME } from './browser.mjs';
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:8081';
 const login = async (email, password) => {
   const r = await fetch(BASE + '/rest/user/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
   if (!r.ok) throw new Error('login failed ' + email);
@@ -9,7 +10,7 @@ const tokens = {
   alice: await login('alice@stellarpick.example', 'Alice@2026'),
   merchant: await login('merchant@stellarpick.example', 'Merchant@2026')
 };
-const b = await chromium.launch({ executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
+const b = await chromium.launch({ executablePath: CHROME, headless: true });
 const results = [];
 const check = (ok, label, detail = '') => { results.push(ok); console.log((ok ? 'PASS ' : 'FAIL ') + label + (detail ? ' :: ' + detail : '')); };
 

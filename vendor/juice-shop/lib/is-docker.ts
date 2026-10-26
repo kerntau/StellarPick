@@ -1,5 +1,5 @@
 // from https://github.com/sindresorhus/is-docker/tree/main MIT Licensed
-// inlined to avoid import problems in cypress
+// inlined to keep this module dependency-free
 
 import fs from 'node:fs'
 

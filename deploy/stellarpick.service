@@ -1,0 +1,46 @@
+[Unit]
+Description=StellarPick intentionally vulnerable lab
+Documentation=file://@APP_DIR@/docs/Linux部署.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@APP_USER@
+Group=@APP_USER@
+WorkingDirectory=@APP_DIR@/vendor/juice-shop
+Environment=NODE_ENV=stellarpick
+Environment=HOST=127.0.0.1
+Environment=PORT=@PORT@
+Environment=STELLARPICK_LOCK_FILE=@APP_DIR@/vendor/juice-shop/data/lab.lock
+ExecStart=@APP_DIR@/start.sh --port @PORT@
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+KillMode=control-group
+UMask=0027
+SyslogIdentifier=stellarpick
+StandardOutput=journal
+StandardError=journal
+
+# 只允许写入运行期目录，代码与构建产物保持只读。
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ReadWritePaths=-@APP_DIR@/vendor/juice-shop/data
+ReadWritePaths=-@APP_DIR@/vendor/juice-shop/uploads
+ReadWritePaths=-@APP_DIR@/vendor/juice-shop/logs
+ReadWritePaths=-@APP_DIR@/vendor/juice-shop/i18n
+ReadWritePaths=-@APP_DIR@/vendor/juice-shop/ftp
+ReadWritePaths=-@APP_DIR@/vendor/juice-shop/.well-known
+# 启动时的品牌/标题注入会改写 index.html，头像与照片墙也写入该目录。
+ReadWritePaths=-@APP_DIR@/vendor/juice-shop/frontend/dist/frontend
+
+[Install]
+WantedBy=multi-user.target

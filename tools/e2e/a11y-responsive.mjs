@@ -6,12 +6,12 @@
  * 3. Modal traps focus, closes on Escape and returns focus to its trigger.
  *
  *   node a11y-responsive.mjs
- *   BASE_URL=http://127.0.0.1:8098 node a11y-responsive.mjs
+ *   BASE_URL=http://127.0.0.1:8081 node a11y-responsive.mjs
  */
 import { chromium } from 'playwright-core';
+import { CHROME } from './browser.mjs';
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:8081';
-const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const WIDTHS = (process.env.A11Y_WIDTHS || '360,390,768,1024,1440').split(',').map(Number);
 
 const ACCOUNTS = {

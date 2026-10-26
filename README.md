@@ -5,7 +5,8 @@
 
 ## 交付说明
 
-- 提供 `deploy.ps1`（依赖安装与构建）、`start.ps1`（本机启动）和 `reset.ps1`（完整重置）。
+- Windows：`deploy.ps1`（依赖安装与构建）、`start.ps1`（本机启动）、`reset.ps1`（完整重置）。
+- Linux：`deploy.sh`（依赖安装、构建、systemd/nginx）、`start.sh`（单实例启动）、`reset.sh`（硬重置）；详见 [Linux 部署指南](docs/Linux部署.md)。
 - 优先使用可选的 `tools/node22/node.exe`，否则使用系统 Node；**Node 必须 ≥22.22.3**。
 - 依赖、构建产物、数据库、上传和运行状态均不提交到 Git；首次克隆后需联网安装依赖。
 - 服务通过 `vendor/juice-shop/config/stellarpick.yml` 绑定 **127.0.0.1**，默认端口 8081。
@@ -33,6 +34,20 @@ Invoke-RestMethod http://127.0.0.1:8081/healthz
 ```
 
 首次安装需要访问 npm registry；若未提供预编译 SQLite 模块，还需要本机 C/C++ 构建工具。不要随意终止依赖安装或构建过程。
+
+### Linux 服务器
+
+```bash
+# Ubuntu/Debian；新服务器直接 clone
+sudo apt-get update
+sudo apt-get install -y git curl ca-certificates build-essential python3 nginx
+sudo git clone https://github.com/kerntau/StellarPick.git /opt/stellarpick
+cd /opt/stellarpick
+sudo ./deploy.sh --service --nginx        # 安装依赖、构建、systemd 服务与 nginx
+sudo ./deploy.sh --install-node --service --nginx   # 系统 Node 版本不足时
+```
+
+应用只监听 `127.0.0.1:8081`，由 nginx 反向代理；完整步骤、HTTPS、白名单、备份与排障见 [docs/Linux部署.md](docs/Linux部署.md)。
 
 - 配置：`vendor/juice-shop/config/stellarpick.yml`（`NODE_ENV=stellarpick`）。
 - 数据库：`vendor/juice-shop/data/juiceshop.sqlite`；运行时状态：`vendor/juice-shop/data/lab-runtime.json`；上传：`vendor/juice-shop/uploads/`。
@@ -78,6 +93,7 @@ Invoke-RestMethod -Method Post 'http://127.0.0.1:8081/lab/reset?confirm=1'
 - 公共：`/#/about`、`/#/help`、`/#/privacy`、`/#/terms`、`/#/404`
 
 交付文档只保留使用说明：
+- [Linux部署.md](docs/Linux部署.md)：Linux 服务器部署、systemd/nginx、HTTPS、备份与排障。
 - [漏洞入口矩阵.md](docs/漏洞入口矩阵.md)：V01–V10 的 UI 入口、请求、payload、负样本与复现命令。
 - [演示脚本.md](docs/演示脚本.md)：15 分钟演示流程与话术。
 - [ground-truth.json](docs/ground-truth.json)：机器可读的漏洞/负样本/账号/端点契约。
@@ -114,7 +130,14 @@ npm run verify   # 10/10 + 7/7 + 18/18
 npm run audit    # verify + a11y + perf + mobile，失败即非 0
 ```
 
-2026-10-22 复核：`npm run audit` **6/6 通过**——verify 10/10 + 7/7 + 18/18，a11y 54 次扫描 0 failures，perf max LCP 668ms / 初始 JS transfer 203.3KB（300KB 预算 PASS；encoded body 199.8KB），mobile 36 检查 0 overflow；`node tools/e2e/flow.mjs` **58/58**（29 流程 × 1440/390，0 console error / 0 横溢）。
+Linux：
+
+```bash
+cd tools/e2e && npm ci && cd ../..
+node tools/e2e/audit.mjs
+```
+
+2026-10-26 复核：`npm run audit` **6/6 通过**——verify 10/10 + 7/7 + 18/18，a11y 54 次扫描 0 failures，perf max LCP 624ms / 初始 JS transfer 201KB（300KB 预算 PASS），mobile 36 检查 0 overflow；`node tools/e2e/flow.mjs` **58/58**（29 流程 × 1440/390，0 console error / 0 横溢）。
 
 - `tools/e2e/verify-v.mjs`：V01–V10 十条正向（10/10），退出码非 0 表示失败。
 - `tools/e2e/verify-negative.mjs`：N01–N06 + N06-admin 七条负样本（7/7），退出码非 0 表示失败。
@@ -122,6 +145,7 @@ npm run audit    # verify + a11y + perf + mobile，失败即非 0
 - `tools/e2e/audit.mjs`：依次跑 verify、a11y、perf、mobile；解析各脚本输出，失败即非 0。`npm run audit:strict-a11y` 会把任何 serious axe 违规也判失败。
 - `tools/e2e/flow.mjs`：58 项端到端流程（游客/会员/管理员/商家/注册 × 1440/390），失败非 0，报告写入 `tools/e2e/flow-report.json`。
 - 其他脚本：`a11y.mjs`（axe，27 路由 × 390/1440）、`perf.mjs`（LCP/初始 JS 预算）、`mobile-qa.mjs`（360/768 横溢）。
+- 手动专项：`a11y-responsive.mjs`（响应式/键盘焦点/模态焦点陷阱）、`a11y-modal-check.mjs`（筛选抽屉/商家弹窗）。
 
 ## 目录
 
@@ -132,17 +156,19 @@ vendor/juice-shop/                 # 真实基座
   routes/lab.ts                    # /healthz、/lab/reset、/lab/csrf.html
   data/labRuntime.ts               # lab 订单/购物车/工单持久化
   frontend/src/app/stellarpick/    # 星澜自建页面
-deploy.ps1                         # 依赖安装、原生模块与前后端构建
-start.ps1 / reset.ps1              # 本机启动 / 完整数据重置
-docs/                              # 漏洞入口矩阵、演示脚本、ground truth
-tools/NodeEnv.ps1                  # Node 环境预检
+deploy.ps1                         # Windows：依赖安装、原生模块与前后端构建
+start.ps1 / reset.ps1              # Windows：本机启动 / 完整数据重置
+deploy.sh / start.sh / reset.sh    # Linux：构建/启动/重置
+deploy/                            # systemd 与 nginx 模板
+docs/                              # 漏洞入口矩阵、演示脚本、Linux 部署、ground truth
+tools/NodeEnv.ps1                  # Windows Node 环境预检
 tools/e2e/                         # Playwright 校验与 audit
-tools/node22/                      # 可选便携 Node（Git 忽略）
+tools/node22/                      # 可选 Windows 便携 Node（Git 忽略）
 ```
 
 ## 安全声明与已知边界
 
-- 仅本机演示，不部署公网；全部数据虚构。
+- 仅本机或受控内网演示，不部署公网；全部数据虚构。
 - 10 条缺陷为设计保留，不是 bug；不要“修复”。
 - V08 是**真正的 Cookie CSRF**：登录同时下发 `sp_token` Cookie，`/api/account/email` 接受该 Cookie 且不校验 CSRF token/Origin；前端 API 仍主要用 `localStorage['token']` 的 Bearer。
 - V07 不只影响 lab 路由：基座的 `express-jwt 0.1.3 + jsonwebtoken 0.4.0` 对 `alg=none` 也放行，原生 `/api/Users` 同样返回 200。

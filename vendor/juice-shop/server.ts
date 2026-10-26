@@ -54,7 +54,6 @@ import logger from './lib/logger'
 import * as utils from './lib/utils'
 import * as antiCheat from './lib/antiCheat'
 import * as security from './lib/insecurity'
-import { customizeTerraformContent } from './lib/terraformCustomization'
 import validateConfig from './lib/startup/validateConfig'
 import cleanupFtpFolder from './lib/startup/cleanupFtpFolder'
 import customizeEasterEgg from './lib/startup/customizeEasterEgg' // vuln-code-snippet hide-line
@@ -270,26 +269,6 @@ function configureApp (app: ReturnType<typeof express>, seq: typeof sequelize) {
     }
     next()
   }
-
-  /* /infrastructure directory browsing */
-  app.use('/infrastructure', serveIndexMiddleware, serveIndex('infrastructure', { icons: true, view: 'details', filter: (filename) => filename !== 'README.md' }))
-  app.use('/infrastructure', verify.accessControlChallenges())
-  app.use('/infrastructure', (req: Request, res: Response, next: NextFunction) => {
-    const filePath = path.resolve('infrastructure', path.normalize(req.path).replace(/^[\\/]+/, ''))
-    if (!filePath.startsWith(path.resolve('infrastructure')) || filePath.endsWith('README.md')) {
-      return res.status(403).end()
-    }
-    if (filePath.endsWith('.tf') || filePath.endsWith('.yml') || filePath.endsWith('Dockerfile')) {
-      fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) return next()
-        const cleaned = data.split('\n').filter(line => !line.trim().match(/^#\s*vuln-code-snippet\s/)).map(line => line.replace(/\s*#\s*vuln-code-snippet\s.*$/, '')).join('\n')
-        const content = filePath.endsWith('.tf') ? customizeTerraformContent(cleaned) : cleaned
-        res.type('text/plain').send(content)
-      })
-    } else {
-      express.static('infrastructure')(req, res, next)
-    }
-  })
 
   // vuln-code-snippet start directoryListingChallenge accessLogDisclosureChallenge
   /* /ftp directory browsing and file download */ // vuln-code-snippet neutral-line directoryListingChallenge

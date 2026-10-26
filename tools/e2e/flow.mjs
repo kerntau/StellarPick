@@ -19,11 +19,11 @@
  * 说明：本脚本只新增数据（订单、工单回复、标记评价、注册账号），不删除任何数据。
  */
 import { chromium } from 'playwright-core';
+import { CHROME } from './browser.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const BASE = (process.env.BASE_URL || 'http://127.0.0.1:8081').replace(/\/+$/, '');
-const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const SHOT_DIR = process.env.SHOT_DIR || 'shots/flow';
 const REPORT_FILE = process.env.REPORT_FILE || join(import.meta.dirname, 'flow-report.json');
 const HEADLESS = process.env.HEADLESS !== '0';

@@ -2,9 +2,9 @@
 // 运行：node tools/e2e/perf.mjs
 // 退出码：0 = 全部预算通过；1 = 初始 JS 传输或 LCP 超预算
 import { chromium } from 'playwright-core';
+import { CHROME } from './browser.mjs';
 
 const BASE = process.env.PERF_BASE || 'http://127.0.0.1:8081';
-const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
 // 预算（1KB = 1024B）
 const INITIAL_JS_BUDGET = 300 * 1024; // 初始 JS transferSize 合计 ≤ 300KB
@@ -45,6 +45,13 @@ const indexHtml = await (await fetch(BASE + '/')).text();
 const initialJs = [...new Set([...indexHtml.matchAll(/(?:modulepreload" href|src)="([^"]+\.js)"/g)].map((m) => m[1]))];
 
 const browser = await chromium.launch({ executablePath: CHROME, headless: true });
+// Warm up Chrome and the server before measuring; the first navigation would
+// otherwise pay for the browser cold start and the app's first lazy chunk.
+const warmContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const warmPage = await warmContext.newPage();
+await warmPage.goto(BASE + '/', { waitUntil: 'networkidle' });
+await warmContext.close();
+
 const pages = [];
 const violations = [];
 

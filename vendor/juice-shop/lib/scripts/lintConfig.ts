@@ -4,7 +4,7 @@
  */
 
 // CLI script to validate all customization config files against the config schema.
-// Example: npm run lint:config
+// Example: npx tsx lib/scripts/lintConfig.ts
 
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'

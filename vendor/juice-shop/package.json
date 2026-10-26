@@ -51,44 +51,7 @@
     "build": "npm run build:frontend && npm run build:server",
     "build:frontend": "cd frontend && npm run build",
     "build:server": "tsc",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
-    "postinstall": "cd frontend && npm install && cd .. && npm run build:frontend && (npm run --silent build:server || cd .)",
-    "lint": "eslint *.ts data lib models routes test/**/*.ts views && npm run lint:config && cd frontend && npm run lint && npm run lint:scss && cd ..",
-    "lint:config": "tsx lib/scripts/lintConfig.ts",
-    "lint:fix": "eslint *.ts data lib models routes test/**/*.ts views rsn --fix && cd frontend && npm run lint:fix && cd ..",
-    "package": "node scripts/package.mjs",
-    "package:ci": "npm prune --production && npm dedupe && cd frontend && npm prune --production && cd .. && npm run --silent sbom && node scripts/package.mjs",
-    "serve": "concurrently --kill-others \"tsx app.ts\" \"cd frontend && npm run start\"",
-    "serve:dev": "concurrently --kill-others \"tsx watch app.ts\" \"cd frontend && npm run start\"",
-    "start": "node build/app",
-    "test": "npm run test:frontend && npm run test:server && npm run test:api",
-    "test:coverage": "npm run test:frontend:coverage && npm run test:server:coverage && npm run test:api:coverage",
-    "test:frontend": "cd frontend && npm run test",
-    "test:frontend:coverage": "cd frontend && npm run test:coverage",
-    "test:server": "node --import ./test/server/helpers/test-env.mjs --import tsx --test --test-force-exit \"test/server/**/*.unit.test.ts\"",
-    "test:server:coverage": "nyc --report-dir=./coverage/server-tests npm run test:server",
-    "test:api": "node --import ./test/api/helpers/test-env.mjs --import tsx --test --test-force-exit \"test/api/**/*.test.ts\"",
-    "test:api:coverage": "nyc --report-dir=./coverage/api-tests npm run test:api",
-    "test:e2e": "npm run cypress:run",
-    "rsn": "node --import tsx rsn/rsn.ts",
-    "rsn:update": "node --import tsx rsn/rsn-update.ts",
-    "vagrant": "cd vagrant && vagrant up",
-    "sbom": "cyclonedx-npm --omit=dev --output-format=JSON --output-file=bom.json"
-  },
-  "nyc": {
-    "extends": "@istanbuljs/nyc-config-typescript",
-    "all": true,
-    "include": [
-      "lib/*.ts",
-      "models/*.ts",
-      "routes/*.ts",
-      "server.ts"
-    ],
-    "reporter": [
-      "lcov",
-      "text-summary"
-    ]
+    "start": "node build/app"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.35",

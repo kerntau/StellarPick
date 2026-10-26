@@ -13,6 +13,7 @@ i18n/*.invalid
 !frontend/src/assets/i18n/*.json
 !data/static/i18n/*.json
 /data/juiceshop.sqlite-journal
+/data/lab.lock
 
 # Build
 .nyc_output/
@@ -22,7 +23,6 @@ cache/
 coverage/
 dist/
 logs/
-vagrant/.vagrant/
 *.orig
 *.out
 *.log
@@ -40,9 +40,6 @@ out/
 *.iml
 *.iws
 *.swp
-.ai/mcp/mcp.json
-.junie/memory/
-.junie/plans/
 
 # Branch ghpages
 assets/
@@ -70,4 +67,3 @@ config/*.yml
 
 # Misc
 .playwright-mcp/
-cypress/screenshots/

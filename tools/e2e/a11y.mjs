@@ -5,11 +5,11 @@
  * non-zero as soon as a serious or moderate violation is found.
  *
  *   node a11y.mjs                       # 390 + 1440 against http://127.0.0.1:8081
- *   BASE_URL=http://127.0.0.1:8098 node a11y.mjs
  *   A11Y_WIDTHS=1440 node a11y.mjs      # single width
  *   A11Y_ROUTES=home,product node a11y.mjs
  */
 import { chromium } from 'playwright-core';
+import { CHROME } from './browser.mjs';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -20,7 +20,6 @@ const WIDTHS = (process.env.A11Y_WIDTHS || '390,1440')
   .split(',')
   .map((value) => Number(value.trim()))
   .filter((value) => Number.isFinite(value) && value > 0);
-const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
 /** Account fixtures used by the seeded demo data. */
 const ACCOUNTS = {

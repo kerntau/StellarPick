@@ -1,4 +1,5 @@
 import { chromium } from 'playwright-core';
+import { CHROME } from './browser.mjs';
 
 const BASE = 'http://127.0.0.1:8081';
 const PRODUCT_ID = 1003;          // canonical demo product (seeded review + V04/V09 target)
@@ -162,7 +163,7 @@ rec('V10', upload.status === 200 && uploadedFile.t.includes('<script>') && Strin
 });
 
 // V03 / V04 need a real DOM.
-const browser = await chromium.launch({ executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
+const browser = await chromium.launch({ executablePath: CHROME, headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 await context.addInitScript((token) => localStorage.setItem('token', token), alice);
 const page = await context.newPage();
