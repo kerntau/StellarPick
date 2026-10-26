@@ -117,10 +117,12 @@ h4 { font-size: var(--sp-text-16); }
 h1, h2 { text-wrap: balance; }
 
 p { margin: 0; }
-/* Links are never underlined anywhere in the storefront: the affordance is
-   colour and weight. `!important` is needed because the Juice Shop theme
-   underlines every anchor on hover/focus/active (0,2,1) and a few Angular
-   component styles add their own underline rules. */
+/* Links are not underlined by default: the affordance is colour and weight.
+   Inline links inside text blocks opt in with an underline where colour
+   contrast alone is insufficient (for example .member-note on the home page).
+   `!important` is needed because the Juice Shop theme underlines every anchor
+   on hover/focus/active (0,2,1) and a few Angular component styles add their
+   own underline rules. */
 a,
 a:link,
 a:visited,

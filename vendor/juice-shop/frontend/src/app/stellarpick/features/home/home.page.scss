@@ -875,7 +875,16 @@
 
 .member-note { font-size: 12px !important; color: rgba(255, 255, 255, .66) !important; }
 
-.member-note a { color: var(--sp-accent); text-decoration: none; }
+.member-note a {
+  color: var(--sp-accent);
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+}
+
+.member-note a:hover,
+.member-note a:focus {
+  text-decoration: underline !important;
+}
 
 .benefits {
   display: grid;
