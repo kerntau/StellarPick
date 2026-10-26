@@ -134,6 +134,9 @@ if [ "$SKIP_INSTALL" -eq 0 ]; then
   log "安装前端依赖（跳过依赖安装脚本）"
   ( cd "$FRONTEND_DIR" && "$NPM_BIN" ci --ignore-scripts )
 
+  log "补齐当前平台的原生可选依赖"
+  ( cd "$FRONTEND_DIR" && "$NODE_BIN" "$APP_ROOT/tools/repair-native-bindings.mjs" "$NPM_BIN" )
+
   log "重建原生模块 sqlite3"
   if ! ( cd "$APP_DIR" && "$NPM_BIN" rebuild sqlite3 ); then
     warn "sqlite3 预编译包安装失败，尝试从源码构建。"

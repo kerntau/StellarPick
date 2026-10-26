@@ -232,6 +232,7 @@ sudo systemctl start stellarpick
 | --- | --- |
 | `Node.js >= 22.22.3 未安装` | 使用 `--install-node`，或手动安装 NodeSource 22 |
 | `sqlite3 原生模块未生成` | 安装 `build-essential python3`，再执行 `npm rebuild sqlite3 --build-from-source` |
+| 前端构建报 `Cannot find native binding` | `deploy.sh` 会自动补齐平台原生包；手动修复：在 `vendor/juice-shop/frontend` 执行 `node ../../../tools/repair-native-bindings.mjs "$(command -v npm)"` |
 | `端口 8081 已被占用` | `ss -ltnp | grep 8081` 找到进程；不要同时启动两个实例 |
 | `StellarPick 已在运行` | 锁文件 `data/lab.lock` 指向存活进程；先停止，或确认陈旧后删除 |
 | 服务启动失败 | `journalctl -u stellarpick -n 80 --no-pager` |
