@@ -24,7 +24,7 @@
 | 磁盘 | 约 2 GB（含依赖与构建产物；`--prune` 后可显著减小） |
 | 内存 | 建议 >= 1 GB |
 
-Ubuntu/Debian 安装基础依赖：
+Ubuntu/Debian 安装基础依赖（`deploy.sh` 可自动安装 Node/nginx/构建工具；下面用于离线或自定义环境）：
 
 ```bash
 sudo apt-get update
@@ -77,19 +77,30 @@ cd /opt/stellarpick
 
 ## 3. 一键部署
 
+从一台全新的 Ubuntu/Debian 服务器（已安装 `git` 并完成 clone）开始，最短路径：
+
+```bash
+cd /opt/stellarpick
+sudo ./deploy.sh --install-node --service --nginx
+```
+
+已有 Node.js >= 22.22.3 时：
+
 ```bash
 cd /opt/stellarpick
 sudo ./deploy.sh --service --nginx
 ```
 
+`--nginx` 在未安装 nginx 时会通过 apt/dnf/yum 自动安装；`--install-node` 通过 NodeSource 安装 Node 22；sqlite3 需要源码构建时会自动安装 `build-essential python3`。
+
 脚本会依次执行：
 
-1. 检查 Node.js 版本；
+1. 检查 Node.js 版本（`--install-node` 时自动安装）；
 2. 在 `vendor/juice-shop` 与 `vendor/juice-shop/frontend` 执行 `npm ci --ignore-scripts`；
 3. 执行 `npm rebuild sqlite3`（必要时从源码构建）；
 4. 构建前端（Angular production）与服务端（`tsc`）；
 5. 创建系统用户 `stellarpick`，安装并启动 `stellarpick.service`；
-6. 写入 nginx 配置并 reload；
+6. 安装 nginx（如缺失）、写入配置并 reload；
 7. 轮询 `/healthz` 做健康检查。
 
 常用选项：

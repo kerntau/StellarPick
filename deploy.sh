@@ -231,7 +231,20 @@ EOF
 install_nginx() {
   require_root
   log "安装 nginx 反向代理配置"
-  command -v nginx >/dev/null 2>&1 || die "未安装 nginx。请先执行 apt-get install -y nginx（或 dnf install -y nginx）。"
+  if ! command -v nginx >/dev/null 2>&1; then
+    log "未检测到 nginx，尝试自动安装"
+    if command -v apt-get >/dev/null 2>&1; then
+      apt-get update -y
+      DEBIAN_FRONTEND=noninteractive apt-get install -y nginx
+    elif command -v dnf >/dev/null 2>&1; then
+      dnf install -y nginx
+    elif command -v yum >/dev/null 2>&1; then
+      yum install -y nginx
+    else
+      die "未安装 nginx，且无法自动安装；请手动安装后重试。"
+    fi
+  fi
+  command -v nginx >/dev/null 2>&1 || die "nginx 安装失败，请手动安装后重试。"
   local conf_src="$APP_ROOT/deploy/nginx-stellarpick.conf"
   [ -f "$conf_src" ] || die "缺少 $conf_src"
 

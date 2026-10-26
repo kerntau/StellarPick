@@ -38,16 +38,15 @@ Invoke-RestMethod http://127.0.0.1:8081/healthz
 ### Linux 服务器
 
 ```bash
-# Ubuntu/Debian；新服务器直接 clone
+# Ubuntu/Debian 从零部署；私有仓库需先配置 PAT 或 SSH deploy key
 sudo apt-get update
-sudo apt-get install -y git curl ca-certificates build-essential python3 nginx
+sudo apt-get install -y git
 sudo git clone https://github.com/kerntau/StellarPick.git /opt/stellarpick
 cd /opt/stellarpick
-sudo ./deploy.sh --service --nginx        # 安装依赖、构建、systemd 服务与 nginx
-sudo ./deploy.sh --install-node --service --nginx   # 系统 Node 版本不足时
+sudo ./deploy.sh --install-node --service --nginx
 ```
 
-应用只监听 `127.0.0.1:8081`，由 nginx 反向代理；完整步骤、HTTPS、白名单、备份与排障见 [docs/Linux部署.md](docs/Linux部署.md)。
+应用只监听 `127.0.0.1:8081`，由 nginx 反向代理。`deploy.sh` 会在 apt 系统自动安装 Node.js 22、nginx 与构建期依赖；已有 Node ≥22.22.3 时可去掉 `--install-node`。完整步骤、HTTPS、白名单、备份与排障见 [docs/Linux部署.md](docs/Linux部署.md)。
 
 - 配置：`vendor/juice-shop/config/stellarpick.yml`（`NODE_ENV=stellarpick`）。
 - 数据库：`vendor/juice-shop/data/juiceshop.sqlite`；运行时状态：`vendor/juice-shop/data/lab-runtime.json`；上传：`vendor/juice-shop/uploads/`。
