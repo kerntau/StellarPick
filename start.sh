@@ -63,7 +63,7 @@ if [ -z "$NODE_BIN" ] || [ ! -x "$NODE_BIN" ]; then
   exit 1
 fi
 NODE_VERSION="$("$NODE_BIN" -v 2>/dev/null | sed 's/^v//')"
-if [ -z "$NODE_VERSION" ] || ! printf '%s\n%s\n' "$NODE_VERSION" "$MIN_NODE" | sort -V -C; then
+if [ -z "$NODE_VERSION" ] || ! printf '%s\n%s\n' "$MIN_NODE" "$NODE_VERSION" | sort -V -C; then
   echo "Node.js 版本过低: ${NODE_VERSION:-unknown}（需要 >= $MIN_NODE）" >&2
   exit 1
 fi

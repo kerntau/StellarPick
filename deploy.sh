@@ -91,7 +91,7 @@ node_ok() {
   [ -n "$bin" ] || return 1
   version="$("$bin" -v 2>/dev/null | sed 's/^v//')"
   [ -n "$version" ] || return 1
-  printf '%s\n%s\n' "$version" "$MIN_NODE" | sort -V -C
+  printf '%s\n%s\n' "$MIN_NODE" "$version" | sort -V -C
 }
 
 install_node_apt() {
