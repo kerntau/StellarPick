@@ -379,10 +379,9 @@ export class ProductPage {
   readonly editorial = computed(() => EDITORIAL_BY_CATEGORY[this.product()?.categoryId ?? ''] ?? '');
   readonly questions = computed(() => QA_BY_CATEGORY[this.product()?.categoryId ?? ''] ?? QA_BY_CATEGORY['home']);
 
-  /** 5→1 star distribution derived from the average, filled to the review total. */
+  /** 5→1 star distribution using fixed weights; the average shown above is separate. */
   readonly reviewStats = computed(() => {
     const total = this.reviewTotal();
-    const average = this.reviewAvg() || this.product()?.rating || 4.8;
     const weights = [0.74, 0.17, 0.05, 0.02, 0.02];
     const counts = weights.map((weight) => Math.round(total * weight));
     counts[0] += total - counts.reduce((sum, value) => sum + value, 0);

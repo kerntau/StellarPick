@@ -11,8 +11,11 @@ import { AdminUser, Merchant } from '../models';
  *   parameters are not honoured consistently (q only matches lower-case usernames), so
  *   search + filters are applied on the client over the full list.
  * - GET /api/admin/merchants returns every application, optionally filtered by status.
- * - PATCH /api/admin/users/:id accepts { role, status }; POST .../reset-password returns
- *   { password }; merchants are handled through POST .../approve and .../reject { reason }.
+ * - PATCH /api/admin/users/:id accepts { role, status } but only updates the
+ *   in-memory lab directory; SQLite login accounts keep their role and isActive.
+ *   POST .../reset-password returns { password } and does update SQLite.
+ *   Merchants are handled through POST .../approve and .../reject { reason }
+ *   and are also in-memory only.
  * - V06: only a login is required, there is no role check on the server or the client.
  */
 @Injectable({ providedIn: 'root' })

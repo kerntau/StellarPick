@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-10-22T14:55:00+08:00",
+  "generatedAt": "2026-10-27T14:21:00+08:00",
   "target": {
     "name": "星澜优选 / StellarPick",
     "baseUrl": "http://127.0.0.1:8081",
@@ -39,16 +39,17 @@
     "hard": {
       "commands": [
         "Stop the 8081 Node process first.",
-        "npm run reset   # deletes vendor/juice-shop/data/juiceshop.sqlite* and vendor/juice-shop/uploads/*",
-        "Remove-Item vendor/juice-shop/data/lab-runtime.json -Force -ErrorAction SilentlyContinue",
-        "npm start       # datacreator recreates SQLite and the 20 visible + 1 hidden products"
+        "Windows: .\\reset.ps1   # deletes data/juiceshop.sqlite*, data/lab-runtime.json* and uploads/*",
+        "Linux:   ./reset.sh     # same cleanup",
+        "Windows: .\\start.ps1    # datacreator recreates SQLite and the 20 visible + 1 hidden products",
+        "Linux:   ./start.sh      # same startup"
       ],
       "clears": [
-        "SQLite database (products/users/orders-in-DB)",
+        "SQLite database (products/users)",
         "uploads",
         "lab runtime orders/carts/tickets"
       ],
-      "note": "reset.ps1 alone does not delete data/lab-runtime.json, so persisted lab orders would survive a restart."
+      "note": "reset.ps1 and reset.sh already delete data/lab-runtime.json; there is no extra step."
     },
     "perVulnerability": {
       "V01": "Read-only; no reset required.",
@@ -216,10 +217,10 @@
       "note": "Hard-coded demo directory, not the SQLite Users table."
     },
     "dbUsers": {
-      "seedApprox": 27,
-      "observed": 35,
+      "seedApprox": 28,
+      "observed": 28,
       "endpoint": "GET /api/Users (any logged-in user)",
-      "note": "Mutable: seeded from data/static/users.yml (ids are sparse, 14/chris.pike is absent) and grows when tests register accounts. Do not assert an exact DB count; V06 asserts the 8-row lab directory."
+      "note": "Seeded from data/static/users.yml as ids 1-28 and grows when tests register accounts. Do not assert an exact DB count; V06 asserts the 8-row lab directory."
     },
     "tickets": {
       "count": 3,
@@ -325,7 +326,8 @@
       "path": "/api/admin/users/:id",
       "auth": "Bearer (any logged-in user)",
       "purpose": "Change role/status",
-      "body": "{role?,status?}"
+      "body": "{role?,status?}",
+      "note": "Updates the in-memory lab directory only; SQLite login accounts, roles and isActive are not changed."
     },
     {
       "method": "POST",
@@ -343,14 +345,16 @@
       "method": "POST",
       "path": "/api/admin/merchants/:id/approve",
       "auth": "Bearer (any logged-in user)",
-      "purpose": "Approve merchant"
+      "purpose": "Approve merchant",
+      "note": "Updates the in-memory application row only; does not create or enable a login account."
     },
     {
       "method": "POST",
       "path": "/api/admin/merchants/:id/reject",
       "auth": "Bearer (any logged-in user)",
       "purpose": "Reject merchant",
-      "body": "{reason}"
+      "body": "{reason}",
+      "note": "Updates the in-memory application row only."
     },
     {
       "method": "GET",
@@ -437,7 +441,8 @@
       "method": "GET",
       "path": "/api/merchant/summary",
       "auth": "Bearer",
-      "purpose": "Merchant dashboard stats"
+      "purpose": "Merchant dashboard stats",
+      "note": "Returns fixed demo numbers; the merchant dashboard computes its own stats from the orders and products endpoints."
     },
     {
       "method": "GET",
@@ -564,7 +569,7 @@
         "note": "A lone quote q=' returns 200 with an empty array; use q=') for the error-based evidence."
       },
       "negative": "N01",
-      "codeRef": "vendor/juice-shop/routes/search.ts:23",
+      "codeRef": "vendor/juice-shop/routes/search.ts:68",
       "reset": "Read-only."
     },
     {
@@ -623,7 +628,7 @@
         "evidence": "The headline 关于「<img ...>」的 N 件商品 renders the raw payload and the handler runs."
       },
       "negative": "N02",
-      "codeRef": "vendor/juice-shop/frontend/src/app/stellarpick/features/catalog/search.page.ts:49",
+      "codeRef": "vendor/juice-shop/frontend/src/app/stellarpick/features/catalog/search.page.ts:82",
       "reset": "Read-only."
     },
     {
@@ -652,7 +657,7 @@
         "evidence": "Review body is stored and rendered through bypassSecurityTrustHtml; the onerror handler executes."
       },
       "negative": "N02 (plain search does not execute)",
-      "codeRef": "vendor/juice-shop/frontend/src/app/stellarpick/features/catalog/product.page.ts:466 + product.page.html:279",
+      "codeRef": "vendor/juice-shop/frontend/src/app/stellarpick/features/catalog/product.page.ts:692 + product.page.html:439",
       "reset": "Reviews are in-memory; restart the process. /lab/reset does not clear reviews."
     },
     {
@@ -682,7 +687,7 @@
         "evidence": "Alice sees Bob's order and delivery address. GET /api/orders itself is filtered to Alice's 4 orders; only the detail endpoint is IDOR."
       },
       "negative": "N04",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:35-44",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:36-45",
       "reset": "Read-only."
     },
     {
@@ -710,7 +715,7 @@
         "evidence": "Alice renders the admin user table. The 8 rows are the lab directory, not the 27 SQLite users."
       },
       "negative": "N05",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:92",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:93",
       "reset": "Read-only."
     },
     {
@@ -739,7 +744,7 @@
         "evidence": "The header menu shows 平台后台 and both lab and native admin APIs accept the unsigned token."
       },
       "negative": "N06 (member without a forged token gets 403 on settings)",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:161-178 + vendor/juice-shop/lib/insecurity.ts:52",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:182-199 + vendor/juice-shop/lib/insecurity.ts:52",
       "reset": "Remove localStorage['token'] or log in again."
     },
     {
@@ -772,7 +777,7 @@
         "evidence": "Login sets sp_token (HttpOnly; Secure; SameSite=None). A page at http://localhost:8081/lab/csrf.html auto-submits the form to http://127.0.0.1:8081; Alice's e-mail changes (login with the new e-mail returns 200)."
       },
       "negative": "No cookie/Bearer → 401",
-      "codeRef": "vendor/juice-shop/routes/login.ts:28 + vendor/juice-shop/routes/stellarpick.ts:371-416",
+      "codeRef": "vendor/juice-shop/routes/login.ts:28 + vendor/juice-shop/routes/stellarpick.ts:401-460",
       "reset": "POST /api/account/email with Bearer and the original e-mail, or hard reset."
     },
     {
@@ -809,7 +814,7 @@
         "evidence": "Order is created with total 0.01 instead of 129."
       },
       "negative": "none (business logic)",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:296-369",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:319-391",
       "reset": "Creates an order (id max+1, starting at 2001) in lab-runtime.json; POST /lab/reset?confirm=1 removes it."
     },
     {
@@ -837,7 +842,7 @@
         "evidence": "The uploaded SVG is served inline from the same origin and the script runs when opened directly."
       },
       "negative": "none (upload)",
-      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:421-440",
+      "codeRef": "vendor/juice-shop/routes/stellarpick.ts:475-493",
       "reset": "POST /lab/reset?confirm=1 or delete uploads/."
     }
   ],
@@ -853,12 +858,12 @@
     },
     {
       "id": "N02",
-      "request": "GET /#/search?q=hello",
+      "request": "GET /rest/products/search?q=hello",
       "expected": {
         "status": 200,
         "dataLength": 0
       },
-      "why": "Plain text does not execute; V03 requires an HTML payload."
+      "why": "Plain text returns an empty result set and does not execute; V03 requires an HTML payload in the UI search route."
     },
     {
       "id": "N03",
@@ -905,25 +910,39 @@
       "why": "Positive control for N06."
     }
   ],
+  "limitations": [
+    "UI-only: coupon wallet and discount amounts are computed client-side; POST /api/checkout ignores coupons.",
+    "UI-only: points, membership tiers, member-day promotions and growth values are display estimates.",
+    "UI-only: invoice type/title is stored on the lab order; no invoice file is generated or downloadable.",
+    "UI-only: after-sales/return/refund has no dedicated flow; the order page links to support tickets.",
+    "UI-only: payment timeout, stock release and logistics events are static copy or generated demo data.",
+    "In-memory only: lab user directory, merchant applications, address book and reviews; a restart resets them.",
+    "Admin PATCH /api/admin/users/:id changes the in-memory directory only; it does not disable or re-role the SQLite login account (verified: a 'disabled' bob can still log in).",
+    "Merchant approve/reject changes the in-memory application row only; it does not create a login account or grant the merchant role.",
+    "Changing an account e-mail does not rewrite ownerEmail on existing lab orders; the refreshed token then sees an empty order list until the old address is restored.",
+    "Review star ratings are collected in the UI but the native review API stores only message/author; ratings are not persisted."
+  ],
   "verification": {
     "commands": [
-      "cd T:\\StellarPick",
-      "$env:PATH='T:\\StellarPick\\tools\\node22;'+$env:PATH",
+      "cd <repo>",
+      "Windows only: $env:PATH='<repo>\\tools\\node22;'+$env:PATH   # if the portable Node runtime is present",
       "npm run verify   # 10/10 + 7/7 + 18/18",
       "npm run audit    # verify + a11y + perf + mobile; non-zero on failure",
-      "npm run audit:strict-a11y   # additionally fails on any serious axe finding"
+      "npm run audit:strict-a11y   # alias of audit; a11y already blocks serious/moderate findings"
     ],
     "expected": {
       "verifyV": "SUMMARY 10 checks 0 failed",
       "verifyNegative": "SUMMARY 7 checks 0 failed",
       "smoke": "SUMMARY routes 18 bad 0",
       "a11y": "scanned=54 failures=0 (27 routes x 2 widths)",
-      "perf": "PERF BUDGET OK; max LCP 548ms (budget 800ms); initial JS transfer 196.4KB (goal 200KB, budget 300KB); API p95 2-33ms",
-      "mobile": "26 checks (13 routes x 2 widths), 0 overflow, 0 console errors"
+      "perf": "PERF BUDGET OK; max LCP 600ms (budget 800ms); initial JS transfer 201.1KB (goal 200KB, budget 300KB); API p95 2-27ms",
+      "mobile": "36 checks (18 routes x 2 widths), 0 overflow, 0 console errors"
     },
     "notes": [
       "verify-v mutates state: V08 changes and restores Alice's e-mail; V09 creates an order; V10 writes an upload. Use /lab/reset?confirm=1 for lab state and the hard reset for SQLite.",
-      "The service must be running on 127.0.0.1:8081 and be the only process using vendor/juice-shop/data/juiceshop.sqlite."
+      "The service must be running on 127.0.0.1:8081 and be the only process using vendor/juice-shop/data/juiceshop.sqlite.",
+      "a11y.mjs blocks serious and moderate findings by default, so audit:strict-a11y currently behaves the same as audit.",
+      "The perf values above are from the 2026-10-27 run on the project machine; LCP and bundle size vary by build and hardware. Treat the budget thresholds, not the exact numbers, as the contract."
     ]
   }
 }

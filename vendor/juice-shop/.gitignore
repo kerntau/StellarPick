@@ -60,6 +60,7 @@ config/*.yml
 !config/unsafe.yml
 !config/tutorial.yml
 !config/oss.yml
+!config/stellarpick.yml
 !config/defcon33.yml
 
 # System Files

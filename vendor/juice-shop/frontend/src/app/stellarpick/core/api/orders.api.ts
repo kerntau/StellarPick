@@ -83,7 +83,8 @@ export class OrdersApi {
     }
     return this.http.get<Paged<Order>>('/api/orders', { params }).pipe(
       map((res) => {
-        // The lab endpoint returns every seeded order; filter and paginate here.
+        // The endpoint returns the caller's orders; status filtering and
+        // pagination are applied here so the UI can page in-memory results.
         const filtered = (res.items ?? [])
           .map((order) => normalizeOrder(order))
           .filter((order) => !status || order.status === status);

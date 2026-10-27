@@ -45,12 +45,12 @@ application:
   welcomeBanner:
     showOnFirstStart: false
     title: '欢迎来到星澜优选'
-    message: "<p>星澜优选演示环境。, the <strong>OWASP Juice Shop</strong> is supposed to be the opposite of a best practice or template application for web developers: It is an awareness, training, demonstration and exercise tool for security risks in modern web applications. The <strong>OWASP Juice Shop</strong> is an open-source project hosted by the non-profit <a href='https://owasp.org' target='_blank'>Open Worldwide Application Security Project (OWASP)</a> and is developed and maintained by volunteers. Check out the link below for more information and documentation on the project.</p><h1><a href='https://owasp-juice.shop' target='_blank'>https://owasp-juice.shop</a></h1>"
+    message: '<p>欢迎来到星澜优选。演示环境，全部商品、订单与账号均为虚构数据。</p>'
   cookieConsent:
     message: '本站使用 Cookie 记住语言与登录状态，仅用于演示。'
-    dismissText: 'Me want it!'
-    linkText: 'But me wait!'
-    linkUrl: 'https://www.youtube.com/watch?v=9PnbKL3wuH4'
+    dismissText: '知道了'
+    linkText: '隐私政策'
+    linkUrl: '/#/privacy-security/privacy-policy'
   securityTxt:
     contact: 'mailto:donotreply@owasp-juice.shop'
     encryption: 'https://keybase.io/bkimminich/pgp_keys.asc?fingerprint=19c01cb7157e4645e9e2c863062a85a8cbfbdcda'

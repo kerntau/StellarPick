@@ -1,6 +1,7 @@
 /*
- * 星澜优选 lab routes (V05 IDOR entry).
- * Mounted at /api/orders on top of the real Juice Shop server.
+ * 星澜优选 lab API routes: orders, admin directory, cart, checkout, account,
+ * address book, merchant console and support tickets. Mounted under /api/* by
+ * server.ts. GET /api/orders/:id intentionally keeps the V05 IDOR.
  */
 import express, { Router } from 'express'
 import config from 'config'
@@ -495,7 +496,7 @@ interface Address { id: number; name: string; phone: string; region: string; det
 const addressBook = new Map<number, Address[]>()
 let nextAddressId = 1
 
-// Each demo account starts with its own address; other accounts start empty
+// Alice and Bob each start with an address; all other accounts start empty
 // instead of inheriting 林晓's Shanghai address.
 const ADDRESS_SEEDS: Record<string, Omit<Address, 'id'>> = {
   'alice@stellarpick.example': { name: '林晓', phone: '13800000002', region: '上海市 / 上海市 / 星澜区', detail: '示例路 88 号 3 栋 1201', isDefault: true },

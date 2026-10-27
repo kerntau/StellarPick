@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * StarPick lab audit runner.
+ * StellarPick lab audit runner.
  *
  * Runs, in order:
  *   1. verify   -> verify-v.mjs (V01-V10), verify-negative.mjs (N01-N06 + control), smoke.mjs (18 routes)
@@ -10,6 +10,7 @@
  *
  * Exits non-zero when a script fails or when a script reports a blocking finding.
  * Scripts that only print (a11y/perf/mobile) are parsed so they cannot silently pass.
+ * a11y.mjs already blocks serious and moderate findings, so --strict-a11y is an alias.
  */
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';

@@ -8,7 +8,7 @@ const BASE = process.env.PERF_BASE || 'http://127.0.0.1:8081';
 
 // 预算（1KB = 1024B）
 const INITIAL_JS_BUDGET = 300 * 1024; // 初始 JS transferSize 合计 ≤ 300KB
-const INITIAL_JS_GOAL = 200 * 1024;   // 任务书目标 ≤ 200KB（未达标只提示，不判失败）
+const INITIAL_JS_GOAL = 200 * 1024;   // 项目目标 ≤ 200KB（未达标只提示，不判失败）
 const LCP_BUDGET = 800;               // 每条路由 LCP ≤ 800ms
 
 const ROUTES = [
@@ -152,7 +152,7 @@ console.log(`initial JS raw   : ${kib(pages[0].initialDecoded)}KB`);
 console.log(`initial JS encoded: ${kib(initialJsEncoded)}KB (brotli/gzip body)`);
 console.log(`initial JS transfer: ${kib(initialJsTransfer)}KB / ${(initialJsTransfer / 1000).toFixed(1)}kB (${initialJsTransfer}B, 含响应头, budget ${kib(INITIAL_JS_BUDGET)}KB)`);
 console.log(`max LCP          : ${maxLcp}ms (budget ${LCP_BUDGET}ms)`);
-console.log(`goal 200KB       : ${initialJsTransfer <= INITIAL_JS_GOAL ? 'PASS' : 'MISS (见 docs/性能基线.md 基座约束)'} (1KB=1024B; 十进制 ${(initialJsTransfer / 1000).toFixed(1)}kB)`);
+console.log(`goal 200KB       : ${initialJsTransfer <= INITIAL_JS_GOAL ? 'PASS' : 'MISS (见 tools/e2e/perf.mjs 的 INITIAL_JS_* 常量)'} (1KB=1024B; 十进制 ${(initialJsTransfer / 1000).toFixed(1)}kB)`);
 
 console.log('');
 console.log('API latency:');

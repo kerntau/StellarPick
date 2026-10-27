@@ -44,7 +44,7 @@ export class SearchPage {
   readonly hotKeywords = HOT_KEYWORDS;
   readonly categories = this.categoriesStore.categories;
 
-  /** Blank keywords never trigger a request (任务书 §2 搜索). */
+  /** Blank keywords never trigger a request. */
   readonly hasQuery = computed(() => this.q().trim().length > 0);
   readonly context = computed(() => ({ q: this.q() }));
 
