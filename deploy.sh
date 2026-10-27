@@ -75,6 +75,17 @@ if [ "$DO_SERVICE" -eq 1 ] || [ "$DO_NGINX" -eq 1 ] || [ "$DO_INSTALL_NODE" -eq 
   require_root
 fi
 
+# systemd 以 APP_USER 运行，WorkingDirectory 是 $APP_ROOT。
+# /root 默认 700，放在这里服务无法启动；提前给出明确报错而不是 CHDIR 失败。
+case "$APP_ROOT" in
+  /root/*|/root)
+    if [ "$DO_SERVICE" -eq 1 ]; then
+      die "项目位于 $APP_ROOT（/root 下），systemd 服务用户将无权进入。请把项目移动到 /opt/StellarPick 后重新运行本脚本。"
+    fi
+    warn "项目位于 /root 下，手动 ./start.sh 可用，但无法安装 systemd 服务。"
+    ;;
+esac
+
 log "检查系统"
 if [ -r /etc/os-release ]; then
   # shellcheck disable=SC1091
@@ -193,6 +204,21 @@ install_service() {
     useradd --system --home-dir "$APP_ROOT" --shell /usr/sbin/nologin "$APP_USER"
     log "已创建系统用户 $APP_USER"
   fi
+
+  # systemd 在 CHDIR 前就按 APP_USER 检查路径；任何一个父目录对运行用户不可
+  # 进入，服务都会在启动阶段失败。逐级验证并给出可操作的提示。
+  local dir
+  dir="$APP_ROOT"
+  while [ "$dir" != "/" ]; do
+    if ! sudo -u "$APP_USER" test -x "$dir" 2>/dev/null; then
+      local mode owner
+      mode="$(stat -c '%a' "$dir" 2>/dev/null || echo '?')"
+      owner="$(stat -c '%U' "$dir" 2>/dev/null || echo '?')"
+      die "目录 $dir（权限 $mode，属主 $owner）对运行用户 $APP_USER 不可进入。请把项目移出 /root 等受限目录（如 mv $APP_ROOT /opt/StellarPick），或对该目录执行 chmod o+x。"
+    fi
+    dir="$(dirname "$dir")"
+  done
+
   chown -R "$APP_USER:$APP_USER" "$APP_ROOT"
 
   local unit_src="$APP_ROOT/deploy/stellarpick.service"
@@ -224,6 +250,10 @@ EOF
     if curl -fsS "http://127.0.0.1:$PORT/healthz" >/dev/null 2>&1; then
       log "健康检查通过: http://127.0.0.1:$PORT/healthz"
       return 0
+    fi
+    # 服务处于失败循环时不要干等 40 秒，立刻给出日志位置。
+    if ! systemctl is-active --quiet stellarpick; then
+      die "stellarpick 服务启动失败。查看日志: journalctl -u stellarpick -n 80 --no-pager"
     fi
     sleep 1
   done
